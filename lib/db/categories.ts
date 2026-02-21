@@ -51,6 +51,22 @@ export async function getTopCategories(limit: number = 12): Promise<Category[]> 
     return (data as Category[]) || [];
 }
 
+// ─── Trending Categories ───
+export async function getTrendingCategories(limit: number = 10): Promise<Category[]> {
+    const { data, error } = await supabase
+        .from("trending_categories")
+        .select("categories(*)")
+        .order("display_order", { ascending: true })
+        .limit(limit);
+
+    if (error) {
+        console.error("Error fetching trending categories:", error);
+        return [];
+    }
+
+    return (data || []).map((r: any) => r.categories).filter(Boolean) as Category[];
+}
+
 // ─── All Category Slugs (for static generation) ───
 export async function getAllCategorySlugs(): Promise<string[]> {
     const { data, error } = await supabase

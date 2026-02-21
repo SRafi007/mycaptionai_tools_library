@@ -124,10 +124,9 @@ export async function getToolsByCategory(
 // ─── Featured Tools ───
 export async function getFeaturedTools(limit: number = 6): Promise<Tool[]> {
     const { data, error } = await supabase
-        .from("tools")
-        .select("*")
-        .eq("is_featured", true)
-        .order("rating_score", { ascending: false })
+        .from("featured_tools")
+        .select("tools(*)")
+        .order("display_order", { ascending: true })
         .limit(limit);
 
     if (error) {
@@ -135,15 +134,15 @@ export async function getFeaturedTools(limit: number = 6): Promise<Tool[]> {
         return [];
     }
 
-    return (data as Tool[]) || [];
+    return (data || []).map((r: any) => r.tools).filter(Boolean) as Tool[];
 }
 
-// ─── Trending Tools (by upvotes) ───
+// ─── Trending Tools (by display_order) ───
 export async function getTrendingTools(limit: number = 6): Promise<Tool[]> {
     const { data, error } = await supabase
-        .from("tools")
-        .select("*")
-        .order("upvotes", { ascending: false })
+        .from("trending_tools")
+        .select("tools(*)")
+        .order("display_order", { ascending: true })
         .limit(limit);
 
     if (error) {
@@ -151,7 +150,7 @@ export async function getTrendingTools(limit: number = 6): Promise<Tool[]> {
         return [];
     }
 
-    return (data as Tool[]) || [];
+    return (data || []).map((r: any) => r.tools).filter(Boolean) as Tool[];
 }
 
 // ─── Top Rated Tools ───

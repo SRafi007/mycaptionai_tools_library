@@ -1,5 +1,5 @@
 import { getFeaturedTools, getTrendingTools, getToolCount } from "@/lib/db/tools";
-import { getTopCategories } from "@/lib/db/categories";
+import { getTopCategories, getTrendingCategories } from "@/lib/db/categories";
 import { getSettings } from "@/lib/db/settings";
 import ToolCard from "@/components/tool-card";
 import CategoryCard from "@/components/category-card";
@@ -16,9 +16,10 @@ export default async function HomePage() {
   const featuredCount = (settings.featured_count as number) || 6;
   const trendingCount = (settings.trending_count as number) || 6;
 
-  const [featuredTools, trendingTools, categories, toolCount] = await Promise.all([
+  const [featuredTools, trendingTools, trendingCategories, categories, toolCount] = await Promise.all([
     getFeaturedTools(featuredCount),
     getTrendingTools(trendingCount),
+    getTrendingCategories(10),
     getTopCategories(12),
     getToolCount(),
   ]);
@@ -65,7 +66,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="trending-scroll">
-            {categories.slice(0, 10).map((cat) => (
+            {trendingCategories.map((cat) => (
               <Link key={cat.id} href={`/category/${cat.slug}`} className="trending-pill">
                 <span className="trending-pill-icon">📂</span>
                 {cat.name}
