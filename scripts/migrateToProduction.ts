@@ -1,17 +1,7 @@
 /**
- * Migration Script: scraped_tools → production schema
+ * Migration Script: scraped_tools -> production schema
  *
  * Usage: npx tsx scripts/migrateToProduction.ts
- *
- * Prerequisites:
- *   1. Run the SQL in lib/supabase/schema.sql via Supabase Dashboard
- *   2. Run npx tsx scripts/seedScrapedTools.ts (to populate scraped_tools)
- *
- * This script:
- *   1. Reads all rows from scraped_tools
- *   2. Extracts unique categories → inserts into categories table
- *   3. Maps each tool into the production tools table
- *   4. Creates tool_categories relationships
  */
 
 import { createClient } from "@supabase/supabase-js";
@@ -24,7 +14,7 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-    console.error("❌ Missing env vars");
+    console.error("Missing env vars");
     process.exit(1);
 }
 
@@ -32,32 +22,135 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const BATCH_SIZE = 500;
 
+type PricingType = "Free" | "Freemium" | "Paid" | "Free-Trial" | "Contact";
+
+interface ScrapedToolRow {
+    id?: string;
+    slug: string;
+    name: string;
+    short_description: string | null;
+    long_description: string | null;
+    official_url: string | null;
+    canonical_url?: string | null;
+    image_url: string | null;
+    pricing_label: string | null;
+    categories: string[] | null;
+    upvotes: number | null;
+    is_featured: boolean | null;
+    scraped_at: string | null;
+    source_name?: string | null;
+}
+
 function slugify(text: string): string {
     return text
         .toLowerCase()
+        .trim()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
 }
 
-/**
- * Map scraped pricing_label → our pricing_enum
- */
-function mapPricing(label: string | null): string {
-    if (!label) return "Free";
-    const mapping: Record<string, string> = {
-        Free: "Free",
-        Freemium: "Freemium",
-        Paid: "Paid",
-        "Free-Trial": "Free-Trial",
-        Contact: "Contact",
-        // edge cases
-        Trial: "Free-Trial",
+function normalizeCategoryName(name: string): string {
+    return name.replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function canonicalizeUrl(rawUrl: string | null | undefined): string | null {
+    if (!rawUrl) return null;
+    try {
+        const url = new URL(rawUrl);
+        const blocked = new Set([
+            "utm_source",
+            "utm_medium",
+            "utm_campaign",
+            "utm_term",
+            "utm_content",
+            "fbclid",
+            "gclid",
+            "ref",
+            "via",
+        ]);
+        Array.from(url.searchParams.keys()).forEach((key) => {
+            if (blocked.has(key.toLowerCase())) {
+                url.searchParams.delete(key);
+            }
+        });
+        return url.toString();
+    } catch {
+        return rawUrl;
+    }
+}
+
+function parsePricing(pricingLabel: string | null): {
+    pricing_type: PricingType;
+    pricing_label_raw: string | null;
+    starting_price_text: string | null;
+    currency_code: string | null;
+} {
+    if (!pricingLabel) {
+        return {
+            pricing_type: "Free",
+            pricing_label_raw: null,
+            starting_price_text: null,
+            currency_code: null,
+        };
+    }
+
+    const label = pricingLabel.trim();
+    const lower = label.toLowerCase();
+
+    let pricing_type: PricingType = "Free";
+    if (lower.includes("contact")) pricing_type = "Contact";
+    else if (lower.includes("trial")) pricing_type = "Free-Trial";
+    else if (lower.includes("freemium")) pricing_type = "Freemium";
+    else if (lower.includes("paid")) pricing_type = "Paid";
+    else if (lower.includes("free")) pricing_type = "Free";
+
+    const priceMatch = label.match(/([$€£]\s?\d+(?:[.,]\d+)?(?:\s*\/\s*[a-zA-Z]+)?)/);
+    const starting_price_text = priceMatch ? priceMatch[1].replace(/\s+/g, "") : null;
+
+    let currency_code: string | null = null;
+    if (starting_price_text?.includes("$")) currency_code = "USD";
+    if (starting_price_text?.includes("€")) currency_code = "EUR";
+    if (starting_price_text?.includes("£")) currency_code = "GBP";
+
+    return {
+        pricing_type,
+        pricing_label_raw: label,
+        starting_price_text,
+        currency_code,
     };
-    return mapping[label] || "Free";
+}
+
+function isNoisyDescription(value: string | null | undefined): boolean {
+    if (!value) return false;
+    const text = value.trim();
+    const urlCount = (text.match(/https?:\/\//gi) || []).length;
+    const hashtagCount = (text.match(/#[a-z0-9_]+/gi) || []).length;
+    const lines = text.split(/\r?\n/).length;
+
+    if (text.length > 2000) return true;
+    if (urlCount >= 5) return true;
+    if (hashtagCount >= 5) return true;
+    if (lines >= 30) return true;
+
+    return false;
+}
+
+function computeQualityScore(tool: ScrapedToolRow): number {
+    let score = 100;
+
+    if (!tool.short_description || tool.short_description.trim().length < 20) score -= 15;
+    if (!tool.official_url) score -= 20;
+    if (!tool.image_url) score -= 10;
+    if (!tool.categories || tool.categories.length === 0) score -= 20;
+    if (isNoisyDescription(tool.long_description)) score -= 20;
+
+    if (score < 0) score = 0;
+    if (score > 100) score = 100;
+    return score;
 }
 
 async function fetchAllScrapedTools() {
-    const all: any[] = [];
+    const all: ScrapedToolRow[] = [];
     let from = 0;
     const pageSize = 1000;
 
@@ -68,14 +161,13 @@ async function fetchAllScrapedTools() {
             .range(from, from + pageSize - 1);
 
         if (error) {
-            console.error("❌ Error fetching scraped_tools:", error.message);
+            console.error(`Error fetching scraped_tools: ${error.message}`);
             break;
         }
         if (!data || data.length === 0) break;
 
-        all.push(...data);
+        all.push(...(data as ScrapedToolRow[]));
         from += pageSize;
-
         if (data.length < pageSize) break;
     }
 
@@ -83,186 +175,157 @@ async function fetchAllScrapedTools() {
 }
 
 async function main() {
-    console.log("🚀 Starting migration: scraped_tools → production schema\n");
+    console.log("Starting migration: scraped_tools -> production schema");
 
-    // Step 1: Fetch all scraped tools
-    console.log("📥 Fetching all scraped_tools...");
     const scrapedTools = await fetchAllScrapedTools();
-    console.log(`   Found ${scrapedTools.length} tools\n`);
+    console.log(`Found ${scrapedTools.length} scraped tools`);
 
     if (scrapedTools.length === 0) {
-        console.error("❌ No scraped tools found. Run seedScrapedTools.ts first.");
+        console.error("No scraped tools found. Run seedScrapedTools.ts first.");
         process.exit(1);
     }
 
-    // Step 2: Extract unique categories
-    console.log("📂 Extracting unique categories...");
     const categorySet = new Set<string>();
     for (const tool of scrapedTools) {
-        const cats = tool.categories as string[] | null;
-        if (cats && Array.isArray(cats)) {
-            cats.forEach((c: string) => categorySet.add(c.trim()));
+        if (!tool.categories || !Array.isArray(tool.categories)) continue;
+        for (const rawCat of tool.categories) {
+            const normalized = normalizeCategoryName(rawCat || "");
+            if (normalized) categorySet.add(normalized);
         }
     }
+
     const uniqueCategories = Array.from(categorySet).sort();
-    console.log(`   Found ${uniqueCategories.length} unique categories\n`);
+    console.log(`Found ${uniqueCategories.length} unique categories`);
 
-    // Step 3: Insert categories
-    console.log("📦 Inserting categories...");
-    const categoryMap = new Map<string, string>(); // name → UUID
-
+    const categoryMap = new Map<string, string>();
     for (let i = 0; i < uniqueCategories.length; i += BATCH_SIZE) {
         const batch = uniqueCategories.slice(i, i + BATCH_SIZE).map((name) => ({
             name,
             slug: slugify(name),
             description: `AI tools for ${name}`,
             seo_title: `Best ${name} AI Tools`,
-            seo_description: `Discover the best AI tools for ${name}. Compare features, pricing, and ratings.`,
+            seo_description: `Discover the best AI tools for ${name}. Compare features and pricing.`,
         }));
 
         const { data, error } = await supabase
             .from("categories")
-            .upsert(batch, { onConflict: "name" })
-            .select("id, name");
+            .upsert(batch, { onConflict: "slug" })
+            .select("id,name");
 
         if (error) {
-            console.error(`   ❌ Category batch failed:`, error.message);
-        } else if (data) {
-            data.forEach((cat: any) => categoryMap.set(cat.name, cat.id));
-            console.log(`   ✅ ${data.length} categories inserted/updated`);
+            console.error(`Category batch failed: ${error.message}`);
+        } else {
+            (data || []).forEach((cat: any) => categoryMap.set(cat.name, cat.id));
         }
     }
 
-    // Fetch all categories to ensure we have full map
-    const { data: allCats } = await supabase.from("categories").select("id, name");
-    if (allCats) {
-        allCats.forEach((cat: any) => categoryMap.set(cat.name, cat.id));
-    }
-    console.log(`   📊 Category map has ${categoryMap.size} entries\n`);
+    const { data: allCats } = await supabase.from("categories").select("id,name");
+    (allCats || []).forEach((cat: any) => categoryMap.set(cat.name, cat.id));
+    console.log(`Category map size: ${categoryMap.size}`);
 
-    // Step 4: Insert tools
-    console.log("🔧 Migrating tools...");
     let toolsInserted = 0;
     let toolsFailed = 0;
-
-    // Track slug → tool_id for category mapping
     const toolIdMap = new Map<string, string>();
 
     for (let i = 0; i < scrapedTools.length; i += BATCH_SIZE) {
         const batch = scrapedTools.slice(i, i + BATCH_SIZE);
+        const rows = batch.map((st) => {
+            const pricing = parsePricing(st.pricing_label);
+            const noisy = isNoisyDescription(st.long_description);
+            const canonical = st.canonical_url || canonicalizeUrl(st.official_url);
 
-        const rows = batch.map((st: any) => ({
-            name: st.name,
-            slug: st.slug,
-            short_description: st.short_description,
-            url: st.official_url || "https://unknown.com",
-            affiliate_url: st.official_url,
-            image_url: st.image_url,
-            icon_url: st.icon_url,
-            pricing_type: mapPricing(st.pricing_label),
-            is_verified: st.is_verified || false,
-            is_featured: st.is_featured || false,
-            upvotes: st.upvotes || 0,
-            rating_score: st.rating_score || 0,
-            rating_count: st.rating_count || 0,
-            publisher: st.publisher,
-            source: "aixploria",
-            source_scraped_at: st.scraped_at,
-        }));
+            return {
+                name: st.name,
+                slug: st.slug,
+                short_description: st.short_description,
+                long_description: st.long_description,
+                url: st.official_url || canonical || "https://example.com",
+                canonical_url: canonical,
+                affiliate_url: st.official_url,
+                image_url: st.image_url,
+                icon_url: null,
+                pricing_type: pricing.pricing_type,
+                pricing_label_raw: pricing.pricing_label_raw,
+                starting_price_text: pricing.starting_price_text,
+                currency_code: pricing.currency_code,
+                is_verified: false,
+                is_featured: st.is_featured || false,
+                upvotes: st.upvotes || 0,
+                rating_score: 0,
+                rating_count: 0,
+                publisher: null,
+                source: st.source_name || "futurepedia",
+                source_scraped_at: st.scraped_at,
+                last_seen_at: st.scraped_at,
+                is_description_noisy: noisy,
+                quality_score: computeQualityScore(st),
+            };
+        });
 
         const { data, error } = await supabase
             .from("tools")
             .upsert(rows, { onConflict: "slug" })
-            .select("id, slug");
+            .select("id,slug");
 
         if (error) {
-            console.error(
-                `   ❌ Tool batch ${Math.floor(i / BATCH_SIZE) + 1} failed:`,
-                error.message
-            );
             toolsFailed += batch.length;
-        } else if (data) {
-            data.forEach((t: any) => toolIdMap.set(t.slug, t.id));
-            toolsInserted += data.length;
-            const progress = (((i + batch.length) / scrapedTools.length) * 100).toFixed(1);
-            console.log(
-                `   ✅ Batch ${Math.floor(i / BATCH_SIZE) + 1} — ${toolsInserted} tools (${progress}%)`
-            );
+            console.error(`Tool batch ${Math.floor(i / BATCH_SIZE) + 1} failed: ${error.message}`);
+        } else {
+            toolsInserted += (data || []).length;
+            (data || []).forEach((t: any) => toolIdMap.set(t.slug, t.id));
         }
     }
 
-    console.log(`\n   📊 Tools inserted: ${toolsInserted}, failed: ${toolsFailed}\n`);
+    console.log(`Tools upserted: ${toolsInserted}. Failed: ${toolsFailed}`);
 
-    // If we don't have IDs from upsert, fetch them
     if (toolIdMap.size < toolsInserted) {
-        console.log("   📥 Fetching tool IDs...");
-        const allTools = [];
+        const allTools: any[] = [];
         let from = 0;
         while (true) {
             const { data } = await supabase
                 .from("tools")
-                .select("id, slug")
+                .select("id,slug")
                 .range(from, from + 999);
             if (!data || data.length === 0) break;
             allTools.push(...data);
             from += 1000;
             if (data.length < 1000) break;
         }
-        allTools.forEach((t: any) => toolIdMap.set(t.slug, t.id));
-        console.log(`   📊 Tool ID map has ${toolIdMap.size} entries\n`);
+        allTools.forEach((t) => toolIdMap.set(t.slug, t.id));
     }
-
-    // Step 5: Create tool_categories relationships
-    console.log("🔗 Creating tool_categories relationships...");
-    let relationsInserted = 0;
-    let relationsFailed = 0;
 
     const allRelations: Array<{ tool_id: string; category_id: string }> = [];
 
     for (const st of scrapedTools) {
         const toolId = toolIdMap.get(st.slug);
-        if (!toolId) continue;
+        if (!toolId || !st.categories || !Array.isArray(st.categories)) continue;
 
-        const cats = st.categories as string[] | null;
-        if (!cats || !Array.isArray(cats)) continue;
+        for (const rawCat of st.categories) {
+            const normalized = normalizeCategoryName(rawCat || "");
+            if (!normalized) continue;
 
-        for (const catName of cats) {
-            const categoryId = categoryMap.get(catName.trim());
-            if (categoryId) {
-                allRelations.push({ tool_id: toolId, category_id: categoryId });
-            }
+            const categoryId = categoryMap.get(normalized);
+            if (categoryId) allRelations.push({ tool_id: toolId, category_id: categoryId });
         }
     }
 
-    console.log(`   📊 Total relations to insert: ${allRelations.length}`);
+    let relationsInserted = 0;
+    let relationsFailed = 0;
 
     for (let i = 0; i < allRelations.length; i += BATCH_SIZE) {
         const batch = allRelations.slice(i, i + BATCH_SIZE);
-
         const { error } = await supabase
             .from("tool_categories")
             .upsert(batch, { onConflict: "tool_id,category_id" });
 
         if (error) {
-            console.error(
-                `   ❌ Relation batch ${Math.floor(i / BATCH_SIZE) + 1} failed:`,
-                error.message
-            );
             relationsFailed += batch.length;
+            console.error(`Relation batch ${Math.floor(i / BATCH_SIZE) + 1} failed: ${error.message}`);
         } else {
             relationsInserted += batch.length;
-            const progress = (
-                ((i + batch.length) / allRelations.length) *
-                100
-            ).toFixed(1);
-            console.log(
-                `   ✅ Batch ${Math.floor(i / BATCH_SIZE) + 1} — ${relationsInserted} relations (${progress}%)`
-            );
         }
     }
 
-    // Step 6: Update category tool_count
-    console.log("\n📊 Updating category tool counts...");
     for (const [catName, catId] of categoryMap) {
         const count = allRelations.filter((r) => r.category_id === catId).length;
         const { error } = await supabase
@@ -271,19 +334,16 @@ async function main() {
             .eq("id", catId);
 
         if (error) {
-            console.error(`   ⚠️ Failed to update count for ${catName}: ${error.message}`);
+            console.error(`Failed to update tool_count for ${catName}: ${error.message}`);
         }
     }
 
-    // Final summary
-    console.log("\n" + "=".repeat(60));
-    console.log("🏁 Migration complete!");
-    console.log(`   📊 Categories: ${categoryMap.size}`);
-    console.log(`   📊 Tools: ${toolsInserted}`);
-    console.log(`   📊 Tool-Category relations: ${relationsInserted}`);
-    if (toolsFailed > 0) console.log(`   ❌ Tools failed: ${toolsFailed}`);
-    if (relationsFailed > 0) console.log(`   ❌ Relations failed: ${relationsFailed}`);
-    console.log("=".repeat(60));
+    console.log("Migration complete");
+    console.log(`Categories: ${categoryMap.size}`);
+    console.log(`Tools: ${toolsInserted}`);
+    console.log(`Tool-Category relations: ${relationsInserted}`);
+    if (toolsFailed > 0) console.log(`Tools failed: ${toolsFailed}`);
+    if (relationsFailed > 0) console.log(`Relations failed: ${relationsFailed}`);
 }
 
 main().catch((err) => {

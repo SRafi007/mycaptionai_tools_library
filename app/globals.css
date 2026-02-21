@@ -1045,8 +1045,8 @@ a {
   font-size: 12px;
   font-weight: 600;
   color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
   margin: 0 0 20px;
 }
 

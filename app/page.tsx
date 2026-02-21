@@ -9,7 +9,6 @@ import Link from "next/link";
 
 export default async function HomePage() {
   const settings = await getSettings([
-    "hero_title", "hero_subtitle", "hero_label",
     "featured_count", "trending_count",
   ]);
 
@@ -24,10 +23,9 @@ export default async function HomePage() {
     getToolCount(),
   ]);
 
-  const heroTitle = ((settings.hero_title as string) || "Discover {count}+ AI Tools")
-    .replace("{count}", toolCount.toLocaleString());
-  const heroSubtitle = (settings.hero_subtitle as string) || "Find the perfect AI tool for any task. Curated, rated, and ranked for creators, marketers, and developers.";
-  const heroLabel = (settings.hero_label as string) || "AI Tools Directory";
+  const heroTitle = "Best AI Tools Directory for Creators, Marketers, and Teams";
+  const heroSubtitle = "Compare trusted AI tools and choose with confidence.";
+  const heroLabel = "Discover 4,266+ AI Tools";
 
   return (
     <>
