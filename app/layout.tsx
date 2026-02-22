@@ -3,7 +3,6 @@ import { Space_Grotesk } from "next/font/google";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import PageViewTracker from "@/components/analytics/page-view-tracker";
-import AnalyticsConsentBanner from "@/components/analytics/analytics-consent-banner";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -61,7 +60,6 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
-        <AnalyticsConsentBanner />
         <PageViewTracker />
       </body>
     </html>

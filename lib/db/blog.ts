@@ -6,6 +6,9 @@ export interface BlogPost {
     slug: string;
     excerpt: string | null;
     content: string;
+    content_format: "markdown" | "blocks";
+    content_blocks: BlogContentBlock[];
+    canonical_source_url: string | null;
     cover_image_url: string | null;
     author: string;
     status: "draft" | "published" | "scheduled";
@@ -17,6 +20,17 @@ export interface BlogPost {
     created_at: string;
     updated_at: string;
 }
+
+export type BlogContentBlock =
+    | { type: "heading"; level?: 2 | 3; text: string }
+    | { type: "paragraph"; text: string }
+    | { type: "image"; src: string; alt?: string; caption?: string }
+    | { type: "quote"; text: string; cite?: string }
+    | { type: "list"; ordered?: boolean; items: string[] }
+    | { type: "code"; code: string; language?: string }
+    | { type: "cta"; title: string; text?: string; href?: string; label?: string }
+    | { type: "divider" }
+    | { type: "embed"; url: string; title?: string };
 
 const supabase = supabaseAdmin;
 

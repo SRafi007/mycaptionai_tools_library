@@ -7,10 +7,14 @@ export interface AnalyticsEvent {
     referer?: string | null;
     referrer_host?: string | null;
     device_type?: string | null;
+    language?: string | null;
     country?: string | null;
     country_code?: string | null;
     region?: string | null;
     city?: string | null;
+    page_title?: string | null;
+    action_name?: string | null;
+    action_target?: string | null;
     session_id?: string | null;
     visitor_id?: string | null;
     consent_status?: "granted" | "denied" | "unknown" | null;
@@ -25,6 +29,6 @@ export interface AnalyticsEvent {
     utm_campaign?: string | null;
     utm_term?: string | null;
     utm_content?: string | null;
-    metadata?: Record<string, any> | null;
+    metadata?: Record<string, unknown> | null;
     created_at?: string;
 }

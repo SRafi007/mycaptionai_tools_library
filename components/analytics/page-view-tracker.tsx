@@ -2,17 +2,10 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { trackPageView } from "@/app/actions/analytics";
+import { trackPageView, trackUserAction } from "@/app/actions/analytics";
 
-const CONSENT_KEY = "mc_analytics_consent";
 const VISITOR_KEY = "mc_visitor_id";
 const SESSION_KEY = "mc_session_id";
-
-function getConsentStatus(): "granted" | "denied" | "unknown" {
-    const raw = window.localStorage.getItem(CONSENT_KEY);
-    if (raw === "granted" || raw === "denied") return raw;
-    return "unknown";
-}
 
 function getOrCreateId(storage: Storage, key: string): string {
     const existing = storage.getItem(key);
@@ -29,19 +22,6 @@ export default function PageViewTracker() {
     useEffect(() => {
         // Only track once per pathname to avoid duplicates on re-renders.
         if (pathname && pathname !== tracked.current) {
-            const consentStatus = getConsentStatus();
-            const dntSignal =
-                navigator.doNotTrack === "1" ||
-                (window as any).doNotTrack === "1" ||
-                (navigator as any).msDoNotTrack === "1";
-            const gpcSignal = Boolean((navigator as any).globalPrivacyControl);
-
-            // Respect opt-out signals and missing consent.
-            if (consentStatus !== "granted" || dntSignal || gpcSignal) {
-                tracked.current = pathname;
-                return;
-            }
-
             const visitorId = getOrCreateId(window.localStorage, VISITOR_KEY);
             const sessionId = getOrCreateId(window.sessionStorage, SESSION_KEY);
 
@@ -52,12 +32,82 @@ export default function PageViewTracker() {
                 visitor_id: visitorId,
                 session_id: sessionId,
                 referrer: document.referrer || undefined,
-                consent_status: consentStatus,
-                dnt_signal: dntSignal,
-                gpc_signal: gpcSignal,
+                language: navigator.language || undefined,
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                page_title: document.title || undefined,
+                screen: `${window.screen.width}x${window.screen.height}`,
             });
         }
+    }, [pathname]);
+
+    useEffect(() => {
+        if (!pathname) return;
+
+        const visitorId = getOrCreateId(window.localStorage, VISITOR_KEY);
+        const sessionId = getOrCreateId(window.sessionStorage, SESSION_KEY);
+
+        const trackAction = (
+            action: string,
+            target: string | null,
+            label: string | null,
+            element: string | null
+        ) => {
+            trackUserAction({
+                pathname,
+                query_string: window.location.search || undefined,
+                visitor_id: visitorId,
+                session_id: sessionId,
+                referrer: document.referrer || undefined,
+                language: navigator.language || undefined,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                page_title: document.title || undefined,
+                screen: `${window.screen.width}x${window.screen.height}`,
+                action,
+                action_target: target || undefined,
+                action_label: label || undefined,
+                action_element: element || undefined,
+            });
+        };
+
+        const onClick = (event: MouseEvent) => {
+            const target = event.target as Element | null;
+            if (!target) return;
+
+            const trackedElement = target.closest("a,button,[data-analytics-action]");
+            if (!trackedElement) return;
+
+            const explicitAction = trackedElement.getAttribute("data-analytics-action");
+            const tagName = trackedElement.tagName.toLowerCase();
+            const action = explicitAction || (tagName === "a" ? "link_click" : "button_click");
+
+            const label =
+                trackedElement.getAttribute("data-analytics-label") ||
+                trackedElement.textContent?.trim().slice(0, 120) ||
+                null;
+
+            let resolvedTarget: string | null = null;
+            if (trackedElement instanceof HTMLAnchorElement) {
+                resolvedTarget = trackedElement.href || null;
+            }
+
+            trackAction(action, resolvedTarget, label, tagName);
+        };
+
+        const onSubmit = (event: SubmitEvent) => {
+            const form = event.target as HTMLFormElement | null;
+            if (!form) return;
+
+            const label = form.getAttribute("data-analytics-label") || form.getAttribute("name") || form.id || null;
+            const target = form.getAttribute("action");
+            trackAction("form_submit", target, label, "form");
+        };
+
+        document.addEventListener("click", onClick, true);
+        document.addEventListener("submit", onSubmit, true);
+        return () => {
+            document.removeEventListener("click", onClick, true);
+            document.removeEventListener("submit", onSubmit, true);
+        };
     }, [pathname]);
 
     return null; // Renders nothing - pure side-effect component.
