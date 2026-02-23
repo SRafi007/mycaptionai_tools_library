@@ -64,7 +64,11 @@ export async function getTrendingCategories(limit: number = 10): Promise<Categor
         return [];
     }
 
-    return (data || []).map((r: any) => r.categories).filter(Boolean) as Category[];
+    type TrendingCategoryRow = { categories: Category | Category[] | null };
+    const rows = ((data || []) as unknown) as TrendingCategoryRow[];
+    return rows
+        .map((row) => (Array.isArray(row.categories) ? row.categories[0] : row.categories))
+        .filter((category): category is Category => Boolean(category));
 }
 
 // ─── All Category Slugs (for static generation) ───
@@ -79,4 +83,21 @@ export async function getAllCategorySlugs(): Promise<string[]> {
     }
 
     return (data || []).map((c) => c.slug);
+}
+
+// ─── Categories by Slugs ───
+export async function getCategoriesBySlugs(slugs: string[]): Promise<Category[]> {
+    if (!slugs.length) return [];
+
+    const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .in("slug", slugs);
+
+    if (error) {
+        console.error("Error fetching categories by slugs:", error);
+        return [];
+    }
+
+    return (data as Category[]) || [];
 }

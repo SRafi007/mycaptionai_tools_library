@@ -21,8 +21,7 @@ export default async function HomePage() {
     getToolCount(),
   ]);
 
-  const heroTitle = "Best AI Tools Directory for Creators, Marketers, and Teams";
-  const heroSubtitle = "Compare trusted AI tools and choose with confidence.";
+  // const heroSubtitle = "Compare trusted AI tools and choose with confidence.";
   const heroLabel = "Discover 4,266+ AI Tools";
 
   return (
@@ -31,8 +30,11 @@ export default async function HomePage() {
         <div className="hero-accent" aria-hidden="true" />
         <div className="hero-content">
           <p className="hero-label">{heroLabel}</p>
-          <h1 className="hero-title">{heroTitle}</h1>
-          <p className="hero-subtitle">{heroSubtitle}</p>
+          <h1 className="hero-title">
+            <span>Best AI Tools Directory</span>
+            <span>for Creators, Marketers, and Teams</span>
+          </h1>
+          {/* <p className="hero-subtitle">{heroSubtitle}</p> */}
           <SearchBar />
           <div className="hero-stats">
             <div className="hero-stat">
@@ -61,9 +63,6 @@ export default async function HomePage() {
                   View all &rarr;
                 </Link>
               </div>
-              <p className="popular-categories-subtitle">
-                Explore high-signal categories creators use most.
-              </p>
               <div className="popular-categories-list">
                 {trendingCategories.map((cat, index) => (
                   <Link key={cat.id} href={`/category/${cat.slug}`} className="popular-category-item">
@@ -84,7 +83,7 @@ export default async function HomePage() {
               {featuredTools.length > 0 ? (
                 <div className="tools-grid">
                   {featuredTools.map((tool) => (
-                    <ToolCard key={tool.id} tool={tool} />
+                    <ToolCard key={tool.id} tool={tool} showVisitButton showViewButton={false} />
                   ))}
                 </div>
               ) : (
@@ -104,7 +103,7 @@ export default async function HomePage() {
               {trendingTools.length > 0 ? (
                 <div className="tools-grid">
                   {trendingTools.map((tool) => (
-                    <ToolCard key={tool.id} tool={tool} />
+                    <ToolCard key={tool.id} tool={tool} showVisitButton showViewButton={false} />
                   ))}
                 </div>
               ) : (

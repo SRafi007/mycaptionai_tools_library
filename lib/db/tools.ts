@@ -286,6 +286,33 @@ export async function getAllToolSlugs(): Promise<string[]> {
     return (data || []).map((t) => t.slug);
 }
 
+// ─── Increment Tool Upvotes ───
+export async function incrementToolUpvotes(toolId: string): Promise<number | null> {
+    const { data, error } = await supabase
+        .from("tools")
+        .select("upvotes")
+        .eq("id", toolId)
+        .single();
+
+    if (error || !data) {
+        console.error(`Error fetching upvotes for tool ${toolId}:`, error);
+        return null;
+    }
+
+    const nextUpvoteCount = (data.upvotes || 0) + 1;
+    const { error: updateError } = await supabase
+        .from("tools")
+        .update({ upvotes: nextUpvoteCount })
+        .eq("id", toolId);
+
+    if (updateError) {
+        console.error(`Error incrementing upvotes for tool ${toolId}:`, updateError);
+        return null;
+    }
+
+    return nextUpvoteCount;
+}
+
 // ─── Tool Count ───
 export async function getToolCount(): Promise<number> {
     const { count, error } = await supabase

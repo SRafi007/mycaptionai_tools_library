@@ -613,6 +613,10 @@ a {
   line-height: 1.3;
 }
 
+.tool-card-name-link:hover {
+  color: var(--accent);
+}
+
 .tool-card-verified {
   display: inline-flex;
   align-items: center;
@@ -641,6 +645,7 @@ a {
   justify-content: space-between;
   margin-top: 14px;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .tool-card-meta {
@@ -665,6 +670,12 @@ a {
   color: var(--text-muted);
   transition: color var(--transition);
   white-space: nowrap;
+}
+
+.tool-card-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .tool-card:hover .tool-card-arrow {
@@ -1065,12 +1076,16 @@ a {
 }
 
 .hero-title {
-  font-size: clamp(32px, 5vw, 52px);
+  font-size: clamp(40px, 6vw, 64px);
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.04em;
   line-height: 1.1;
-  margin: 0 0 16px;
+  margin: 0 0 20px;
+}
+
+.hero-title span {
+  display: block;
 }
 
 .hero-subtitle {
@@ -1182,6 +1197,33 @@ a {
   flex-wrap: wrap;
 }
 
+.tool-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  margin-top: 12px;
+}
+
+.tool-detail-layout-no-banner {
+  grid-template-columns: 1fr;
+}
+
+.tool-detail-banner {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+}
+
+.tool-detail-banner img {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 420px;
+  object-fit: cover;
+}
+
 .tool-detail-identity {
   display: flex;
   align-items: center;
@@ -1218,12 +1260,35 @@ a {
   flex-wrap: wrap;
 }
 
-.tool-detail-desc {
+.tool-detail-long-desc {
   font-size: 15px;
   color: var(--text-secondary);
   line-height: 1.8;
   margin: 24px 0;
   max-width: 720px;
+}
+
+.tool-detail-long-desc p {
+  margin: 0 0 12px;
+}
+
+.tool-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.tool-upvote-btn {
+  color: var(--text-primary);
+}
+
+.tool-detail-action-btn {
+  min-width: 140px;
+  min-height: 38px;
+  justify-content: center;
+  border-radius: var(--radius-md);
 }
 
 .tool-detail-categories {
@@ -1326,6 +1391,11 @@ a {
 
   .tool-detail-header {
     flex-direction: column;
+  }
+
+  .tool-detail-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .tool-detail-name {

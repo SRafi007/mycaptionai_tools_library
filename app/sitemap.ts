@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { USE_CASES } from "@/lib/seo/usecases";
 
 const SITE_URL = "https://mycaptionai.com";
 
@@ -48,7 +49,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             { url: `${SITE_URL}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.4 },
         ];
 
-        return [...staticPages, ...categoryEntries, ...blogEntries, ...toolEntries];
+        const useCaseEntries: MetadataRoute.Sitemap = USE_CASES.map((entry) => ({
+            url: `${SITE_URL}/best/${entry.slug}`,
+            lastModified: new Date(),
+            changeFrequency: "weekly",
+            priority: 0.75,
+        }));
+
+        return [...staticPages, ...useCaseEntries, ...categoryEntries, ...blogEntries, ...toolEntries];
     } catch (e) {
         console.error("Critical error generating sitemap:", e);
         // Fallback robust static pages to prevent Vercel build failing on DB errors

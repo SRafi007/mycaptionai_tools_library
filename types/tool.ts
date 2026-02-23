@@ -4,6 +4,7 @@ export interface Tool {
     slug: string;
     description: string | null;
     short_description: string | null;
+    long_description: string | null;
     url: string | null;
     image_url: string | null;
     icon_url: string | null;

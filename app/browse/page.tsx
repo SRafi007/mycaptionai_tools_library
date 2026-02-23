@@ -1,7 +1,9 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import { getCategories } from "@/lib/db/categories";
 import CategoryCard from "@/components/category-card";
 import BackToTop from "@/components/back-to-top";
+import { USE_CASES } from "@/lib/seo/usecases";
 
 export const metadata: Metadata = {
     title: "Browse AI Tool Categories — MyCaptionAI",
@@ -28,6 +30,23 @@ export default async function BrowsePage() {
                     ))}
                 </div>
             </div>
+
+            <section className="section-padding section-border-t">
+                <div className="section-header">
+                    <h2 className="section-title">Best AI Tools by Use Case</h2>
+                    <span className="section-count">{USE_CASES.length} pages</span>
+                </div>
+                <div className="categories-grid">
+                    {USE_CASES.map((useCase) => (
+                        <Link key={useCase.slug} href={`/best/${useCase.slug}`} className="card" style={{ padding: "16px" }}>
+                            <h3 style={{ margin: "0 0 8px", fontSize: "15px", color: "var(--text-primary)" }}>{useCase.title}</h3>
+                            <p style={{ margin: 0, fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.6 }}>
+                                {useCase.description}
+                            </p>
+                        </Link>
+                    ))}
+                </div>
+            </section>
 
             <BackToTop />
         </div>
