@@ -8,9 +8,7 @@ import BackToTop from "@/components/back-to-top";
 import Link from "next/link";
 
 export default async function HomePage() {
-  const settings = await getSettings([
-    "featured_count", "trending_count",
-  ]);
+  const settings = await getSettings(["featured_count", "trending_count"]);
 
   const featuredCount = (settings.featured_count as number) || 6;
   const trendingCount = (settings.trending_count as number) || 6;
@@ -29,7 +27,6 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* ─── Hero ─── */}
       <section className="hero dot-grid">
         <div className="hero-accent" aria-hidden="true" />
         <div className="hero-content">
@@ -54,82 +51,79 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ─── Trending Categories ─── */}
-      <section className="section-padding" style={{ paddingBottom: 0 }}>
-        <div className="container-main">
-          <div className="section-header">
-            <h2 className="section-title">Trending Categories</h2>
-            <Link href="/browse" className="btn-ghost">
-              View all →
-            </Link>
-          </div>
-          <div className="trending-scroll">
-            {trendingCategories.map((cat) => (
-              <Link key={cat.id} href={`/category/${cat.slug}`} className="trending-pill">
-                <span className="trending-pill-icon">📂</span>
-                {cat.name}
-                <span style={{ color: "var(--text-muted)", fontSize: "11px" }}>
-                  {cat.tool_count}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── Featured ─── */}
       <section className="section-padding">
         <div className="container-main">
-          <div className="section-header">
-            <h2 className="section-title">Featured Tools</h2>
-            <span className="section-count">{featuredTools.length} tools</span>
-          </div>
+          <div className="discovery-layout">
+            <aside className="popular-categories-panel card">
+              <div className="popular-categories-head">
+                <h2 className="section-title">Most Popular Categories</h2>
+                <Link href="/browse" className="btn-ghost btn-sm">
+                  View all &rarr;
+                </Link>
+              </div>
+              <p className="popular-categories-subtitle">
+                Explore high-signal categories creators use most.
+              </p>
+              <div className="popular-categories-list">
+                {trendingCategories.map((cat, index) => (
+                  <Link key={cat.id} href={`/category/${cat.slug}`} className="popular-category-item">
+                    <span className="popular-category-rank">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="popular-category-name">{cat.name}</span>
+                    <span className="popular-category-count">{cat.tool_count}</span>
+                  </Link>
+                ))}
+              </div>
+            </aside>
 
-          {featuredTools.length > 0 ? (
-            <div className="tools-grid">
-              {featuredTools.map((tool) => (
-                <ToolCard key={tool.id} tool={tool} />
-              ))}
+            <div className="discovery-main">
+              <div className="section-header">
+                <h2 className="section-title">Featured Tools</h2>
+                <span className="section-count">{featuredTools.length} tools</span>
+              </div>
+
+              {featuredTools.length > 0 ? (
+                <div className="tools-grid">
+                  {featuredTools.map((tool) => (
+                    <ToolCard key={tool.id} tool={tool} />
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-state">
+                  <div className="empty-state-icon">🔧</div>
+                  <p className="empty-state-text">No featured tools yet. Check back soon.</p>
+                </div>
+              )}
+
+              <div className="discovery-divider" />
+
+              <div className="section-header">
+                <h2 className="section-title">Trending Now</h2>
+                <span className="section-count">By upvotes</span>
+              </div>
+
+              {trendingTools.length > 0 ? (
+                <div className="tools-grid">
+                  {trendingTools.map((tool) => (
+                    <ToolCard key={tool.id} tool={tool} />
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-state">
+                  <div className="empty-state-icon">📈</div>
+                  <p className="empty-state-text">No trending tools yet.</p>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="empty-state">
-              <div className="empty-state-icon">🔧</div>
-              <p className="empty-state-text">No featured tools yet. Check back soon.</p>
-            </div>
-          )}
+          </div>
         </div>
       </section>
 
-      {/* ─── Trending ─── */}
-      <section className="section-padding section-border-t" style={{ background: "var(--bg-secondary)" }}>
-        <div className="container-main">
-          <div className="section-header">
-            <h2 className="section-title">Trending Now</h2>
-            <span className="section-count">By upvotes</span>
-          </div>
-
-          {trendingTools.length > 0 ? (
-            <div className="tools-grid">
-              {trendingTools.map((tool) => (
-                <ToolCard key={tool.id} tool={tool} />
-              ))}
-            </div>
-          ) : (
-            <div className="empty-state">
-              <div className="empty-state-icon">📈</div>
-              <p className="empty-state-text">No trending tools yet.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ─── Browse Categories ─── */}
       <section className="section-padding section-border-t">
         <div className="container-main">
           <div className="section-header">
             <h2 className="section-title">Browse by Category</h2>
             <Link href="/browse" className="btn-ghost">
-              All categories →
+              All categories &rarr;
             </Link>
           </div>
           <div className="categories-grid">
@@ -140,17 +134,24 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ─── Submit CTA ─── */}
       <section className="cross-grid section-padding section-border-t">
         <div className="container-main" style={{ textAlign: "center" }}>
-          <h2 style={{ fontSize: "24px", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", margin: "0 0 8px" }}>
+          <h2
+            style={{
+              fontSize: "24px",
+              fontWeight: 700,
+              color: "var(--text-primary)",
+              letterSpacing: "-0.03em",
+              margin: "0 0 8px",
+            }}
+          >
             Know an AI tool we&apos;re missing?
           </h2>
           <p style={{ fontSize: "14px", color: "var(--text-secondary)", margin: "0 0 24px" }}>
             Submit it and get listed in front of thousands of creators.
           </p>
           <Link href="/submit" className="btn-primary">
-            Submit Tool →
+            Submit Tool &rarr;
           </Link>
         </div>
       </section>
