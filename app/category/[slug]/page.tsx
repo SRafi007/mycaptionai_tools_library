@@ -8,6 +8,7 @@ import ToolCard from "@/components/tool-card";
 import FilterBar from "@/components/filter-bar";
 import Pagination from "@/components/pagination";
 import BackToTop from "@/components/back-to-top";
+import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 
 interface PageProps {
     params: Promise<{ slug: string }>;
@@ -38,14 +39,26 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
     const page = parseInt(pageStr || "1", 10) || 1;
     const hasFacetParams = page > 1 || Boolean(sort) || (pricing && pricing !== "all");
 
-    const title = category.seo_title || `Best ${toTitleCase(category.slug)} AI Tools in 2026 - Top ${category.tool_count} Ranked | MyCaptionAI`;
+    const year = new Date().getFullYear();
+    const title = category.seo_title || `Best ${toTitleCase(category.slug)} AI Tools in ${year} - Top ${category.tool_count} Ranked | ${SITE_NAME}`;
     const description = category.seo_description || `Discover top ${toTitleCase(category.slug)} AI tools. Compare features, pricing, ratings, and use-case fit.`;
-    const canonical = `https://mycaptionai.com/category/${category.slug}`;
+    const canonical = absoluteUrl(`/category/${category.slug}`);
 
     return {
         title,
         description,
-        openGraph: { title, description },
+        openGraph: {
+            title,
+            description,
+            url: canonical,
+            images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
+        },
         alternates: { canonical },
         robots: hasFacetParams
             ? { index: false, follow: true }
@@ -97,7 +110,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             "@type": "ListItem",
             position: (currentPage - 1) * PER_PAGE + i + 1,
             name: tool.name,
-            url: `https://mycaptionai.com/tools/${tool.slug}`,
+            url: absoluteUrl(`/tools/${tool.slug}`),
         })),
     };
 
@@ -125,7 +138,10 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
             />
             <div className="container-main">
-                <Breadcrumbs items={[{ label: "Categories", href: "/browse" }, { label: categoryLabel }]} />
+                <Breadcrumbs
+                    items={[{ label: "Categories", href: "/browse" }, { label: categoryLabel }]}
+                    currentPath={`/category/${category.slug}`}
+                />
 
                 <div className="page-header" style={{ borderBottom: "none" }}>
                     <h1 className="page-title">Best {categoryLabel} AI Tools</h1>

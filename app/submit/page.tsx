@@ -1,9 +1,25 @@
 import { Metadata } from "next";
+import { absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 
 export const metadata: Metadata = {
-    title: "Submit Your AI Tool — Get Listed Free | MyCaptionAI",
+    title: "Submit Your AI Tool - Get Listed Free",
     description:
         "Submit your AI tool to MyCaptionAI's directory and get discovered by thousands of creators, marketers, and developers.",
+    alternates: {
+        canonical: absoluteUrl("/submit"),
+    },
+    openGraph: {
+        title: "Submit Your AI Tool - Get Listed Free",
+        description: "Submit your AI tool to get discovered by creators, marketers, and developers.",
+        url: absoluteUrl("/submit"),
+        images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Submit Your AI Tool - Get Listed Free",
+        description: "Submit your AI tool to get discovered by creators, marketers, and developers.",
+        images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
+    },
 };
 
 export default function SubmitPage() {
@@ -56,7 +72,7 @@ export default function SubmitPage() {
                         <FormField label="Your Email" name="email" type="email" required placeholder="you@example.com" />
 
                         <button type="submit" className="btn-primary" style={{ width: "100%", justifyContent: "center", padding: "12px", fontSize: "15px" }}>
-                            Submit Tool →
+                            Submit Tool
                         </button>
                     </div>
                 </form>

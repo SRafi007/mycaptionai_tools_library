@@ -2,11 +2,27 @@ import { Metadata } from "next";
 import { getTopRatedTools } from "@/lib/db/tools";
 import ToolCard from "@/components/tool-card";
 import BackToTop from "@/components/back-to-top";
+import { absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 
 export const metadata: Metadata = {
-    title: "Top Rated AI Tools — Best AI Tools Ranked | MyCaptionAI",
+    title: "Top Rated AI Tools - Best AI Tools Ranked",
     description:
-        "Discover the highest-rated AI tools across all categories. Ranked by user ratings and reviews. Updated daily.",
+        "Discover the highest-rated AI tools across all categories. Ranked by user ratings and reviews.",
+    alternates: {
+        canonical: absoluteUrl("/top-rated"),
+    },
+    openGraph: {
+        title: "Top Rated AI Tools - Best AI Tools Ranked",
+        description: "Discover the highest-rated AI tools across all categories.",
+        url: absoluteUrl("/top-rated"),
+        images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Top Rated AI Tools - Best AI Tools Ranked",
+        description: "Discover the highest-rated AI tools across all categories.",
+        images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
+    },
 };
 
 export default async function TopRatedPage() {
@@ -36,13 +52,13 @@ export default async function TopRatedPage() {
                                             width: "28px",
                                             height: "28px",
                                             borderRadius: "50%",
-                                            background: i === 0 ? "#EAB308" : i === 1 ? "#94A3B8" : "#CD7F32",
+                                            background: i === 0 ? "var(--rank-gold)" : i === 1 ? "var(--rank-silver)" : "var(--rank-bronze)",
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "center",
                                             fontSize: "12px",
                                             fontWeight: 700,
-                                            color: "#000",
+                                            color: "var(--rank-text)",
                                         }}
                                     >
                                         #{i + 1}
@@ -54,7 +70,7 @@ export default async function TopRatedPage() {
                     </div>
                 ) : (
                     <div className="empty-state">
-                        <div className="empty-state-icon">⭐</div>
+                        <div className="empty-state-icon">Top</div>
                         <p className="empty-state-text">No rated tools yet.</p>
                     </div>
                 )}

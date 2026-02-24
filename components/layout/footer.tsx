@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const columns = [
     {
@@ -34,7 +35,15 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="footer-brand">
                         <Link href="/" className="footer-brand-link">
-                            <div className="header-logo">M</div>
+                            <div className="header-logo">
+                                <Image
+                                    src="/image/logo.png"
+                                    alt="MyCaptionAI logo"
+                                    width={28}
+                                    height={28}
+                                    className="header-logo-image"
+                                />
+                            </div>
                             <span className="header-brand-text">MyCaptionAI</span>
                         </Link>
                         <p className="footer-tagline">

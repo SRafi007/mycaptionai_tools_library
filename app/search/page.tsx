@@ -4,6 +4,7 @@ import ToolCard from "@/components/tool-card";
 import SearchBar from "@/components/search-bar";
 import Pagination from "@/components/pagination";
 import BackToTop from "@/components/back-to-top";
+import { absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 
 interface PageProps {
     searchParams: Promise<{ q?: string; page?: string }>;
@@ -11,12 +12,32 @@ interface PageProps {
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
     const { q } = await searchParams;
-    const title = q
-        ? `Search results for "${q}" — MyCaptionAI`
-        : "Search AI Tools — MyCaptionAI";
+    const query = q?.trim() || "";
+    const title = query
+        ? `Search Results for "${query}" - AI Tools`
+        : "Search AI Tools";
+    const description = query
+        ? `Search results for "${query}" in the AI tools directory.`
+        : "Search through thousands of AI tools by name, description, and use case.";
+
     return {
         title,
-        description: `Search through 4,000+ AI tools to find exactly what you need.${q ? ` Results for: ${q}` : ""}`,
+        description,
+        alternates: {
+            canonical: absoluteUrl("/search"),
+        },
+        openGraph: {
+            title,
+            description,
+            url: absoluteUrl("/search"),
+            images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
+        },
         robots: { index: false, follow: true },
     };
 }
@@ -28,7 +49,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
     const currentPage = parseInt(pageStr || "1", 10) || 1;
     const query = q?.trim() || "";
 
-    let tools: any[] = [];
+    let tools: Awaited<ReturnType<typeof searchTools>>["tools"] = [];
     let total = 0;
 
     if (query) {
@@ -77,7 +98,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
             {!query && (
                 <div className="empty-state">
-                    <div className="empty-state-icon">🔍</div>
+                    <div className="empty-state-icon">Search</div>
                     <p className="empty-state-text">
                         Type above to start searching for AI tools.
                     </p>

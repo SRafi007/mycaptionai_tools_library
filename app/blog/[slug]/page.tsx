@@ -4,6 +4,7 @@ import { getPostBySlug, getAllPostSlugs } from "@/lib/db/blog";
 import type { BlogContentBlock } from "@/lib/db/blog";
 import Breadcrumbs from "@/components/breadcrumbs";
 import BackToTop from "@/components/back-to-top";
+import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 
 interface PageProps {
     params: Promise<{ slug: string }>;
@@ -19,21 +20,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const post = await getPostBySlug(slug);
     if (!post) return { title: "Post Not Found" };
 
-    const title = post.seo_title || `${post.title} | MyCaptionAI Blog`;
+    const title = post.seo_title || `${post.title} | ${SITE_NAME} Blog`;
     const description = post.seo_description || post.excerpt || post.title;
+    const canonical = post.canonical_source_url || absoluteUrl(`/blog/${post.slug}`);
+    const socialImage = post.cover_image_url || absoluteUrl(DEFAULT_OG_IMAGE_PATH);
 
     return {
         title,
         description,
+        alternates: { canonical },
         openGraph: {
             title,
             description,
             type: "article",
+            url: canonical,
             publishedTime: post.published_at || undefined,
             authors: [post.author],
-            images: post.cover_image_url ? [post.cover_image_url] : undefined,
+            images: [socialImage],
         },
-        twitter: { card: "summary_large_image", title, description },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: [socialImage],
+        },
     };
 }
 
@@ -290,6 +300,8 @@ export default async function BlogPostPage({ params }: PageProps) {
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "Article",
+        mainEntityOfPage: post.canonical_source_url || absoluteUrl(`/blog/${post.slug}`),
+        url: absoluteUrl(`/blog/${post.slug}`),
         headline: post.title,
         description: post.excerpt || post.title,
         author: { "@type": "Person", name: post.author },
@@ -298,7 +310,11 @@ export default async function BlogPostPage({ params }: PageProps) {
         image: post.cover_image_url,
         publisher: {
             "@type": "Organization",
-            name: "MyCaptionAI",
+            name: SITE_NAME,
+            logo: {
+                "@type": "ImageObject",
+                url: absoluteUrl("/image/logo.png"),
+            },
         },
     };
 
@@ -309,7 +325,10 @@ export default async function BlogPostPage({ params }: PageProps) {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
             <div className="container-main">
-                <Breadcrumbs items={[{ label: "Blog", href: "/blog" }, { label: post.title }]} />
+                <Breadcrumbs
+                    items={[{ label: "Blog", href: "/blog" }, { label: post.title }]}
+                    currentPath={`/blog/${post.slug}`}
+                />
 
                 <article className="blog-article" style={{ padding: "24px 0 64px" }}>
                     <h1 style={{ fontSize: "clamp(24px, 4vw, 36px)", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.03em", lineHeight: 1.2, margin: "0 0 16px" }}>
@@ -357,4 +376,3 @@ export default async function BlogPostPage({ params }: PageProps) {
         </>
     );
 }
-

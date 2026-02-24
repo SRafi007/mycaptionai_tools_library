@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 
 const navLinks = [
-    { href: "/browse", label: "Browse" },
+    { href: "/browse", label: "AI Tools" },
     { href: "/top-rated", label: "Top Rated" },
     { href: "/blog", label: "Blog" },
     { href: "/search", label: "Search" },
@@ -19,7 +20,16 @@ export default function Header() {
                 <div className="container-main header-inner">
                     {/* Brand */}
                     <Link href="/" className="header-brand">
-                        <div className="header-logo">M</div>
+                        <div className="header-logo">
+                            <Image
+                                src="/image/logo.png"
+                                alt="MyCaptionAI logo"
+                                width={28}
+                                height={28}
+                                className="header-logo-image"
+                                priority
+                            />
+                        </div>
                         <span className="header-brand-text">MyCaptionAI</span>
                     </Link>
 

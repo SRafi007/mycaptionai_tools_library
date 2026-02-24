@@ -33,24 +33,24 @@ function getPricingLabel(pricingType: Tool["pricing_type"]): string {
 interface ToolCardProps {
     tool: Tool;
     showVisitButton?: boolean;
-    showViewButton?: boolean;
 }
 
-export default function ToolCard({ tool, showVisitButton = false, showViewButton = true }: ToolCardProps) {
+export default function ToolCard({ tool, showVisitButton = true }: ToolCardProps) {
+    const hasVisualIcon = Boolean(tool.image_url || tool.icon_url);
+
     return (
         <article className="card tool-card">
             <div className="tool-card-header">
                 <div className="tool-card-identity">
                     <div
-                        className="tool-card-icon"
-                        style={{
-                            background:
-                                tool.image_url || tool.icon_url
-                                    ? `url(${tool.icon_url || tool.image_url}) center/cover`
-                                    : "var(--accent-muted)",
-                        }}
+                        className={`tool-card-icon ${hasVisualIcon ? "tool-card-icon-image" : "tool-card-icon-fallback"}`}
+                        style={
+                            hasVisualIcon
+                                ? { background: `url(${tool.icon_url || tool.image_url}) center/cover` }
+                                : undefined
+                        }
                     >
-                        {!tool.image_url && !tool.icon_url && (
+                        {!hasVisualIcon && (
                             <span>{tool.name.charAt(0).toUpperCase()}</span>
                         )}
                     </div>
@@ -101,14 +101,9 @@ export default function ToolCard({ tool, showVisitButton = false, showViewButton
                 </div>
                 <div className="tool-card-actions">
                     {showVisitButton && tool.url && (
-                        <a href={tool.url} target="_blank" rel="noopener noreferrer" className="btn-outline btn-sm">
+                        <a href={tool.url} target="_blank" rel="noopener noreferrer" className="btn-secondary btn-sm">
                             Visit
                         </a>
-                    )}
-                    {showViewButton && (
-                        <Link href={`/tools/${tool.slug}`} className="tool-card-arrow">
-                            View -&gt;
-                        </Link>
                     )}
                 </div>
             </div>

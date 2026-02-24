@@ -8,6 +8,7 @@ import { USE_CASES, USE_CASE_MAP } from "@/lib/seo/usecases";
 import { getCategoriesBySlugs } from "@/lib/db/categories";
 import { getToolsByCategory } from "@/lib/db/tools";
 import { Tool } from "@/types/tool";
+import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 
 interface PageProps {
     params: Promise<{ usecase: string }>;
@@ -25,11 +26,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const config = USE_CASE_MAP.get(usecase);
     if (!config) return { title: "Best AI Tools" };
 
-    const title = `${config.title} (2026) | MyCaptionAI`;
+    const year = new Date().getFullYear();
+    const title = `${config.title} (${year}) | ${SITE_NAME}`;
+    const canonical = absoluteUrl(`/best/${config.slug}`);
     return {
         title,
         description: config.description,
-        openGraph: { title, description: config.description },
+        alternates: { canonical },
+        openGraph: {
+            title,
+            description: config.description,
+            url: canonical,
+            images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description: config.description,
+            images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
+        },
     };
 }
 
@@ -85,7 +100,20 @@ export default async function BestUseCasePage({ params }: PageProps) {
             "@type": "ListItem",
             position: idx + 1,
             name: tool.name,
-            url: `https://mycaptionai.com/tools/${tool.slug}`,
+            url: absoluteUrl(`/tools/${tool.slug}`),
+        })),
+    };
+
+    const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faq.map((item) => ({
+            "@type": "Question",
+            name: item.q,
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: item.a,
+            },
         })),
     };
 
@@ -95,12 +123,17 @@ export default async function BestUseCasePage({ params }: PageProps) {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+            />
             <div className="container-main">
                 <Breadcrumbs
                     items={[
                         { label: "Best AI Tools", href: "/browse" },
                         { label: config.title },
                     ]}
+                    currentPath={`/best/${config.slug}`}
                 />
 
                 <div className="page-header" style={{ borderBottom: "none" }}>

@@ -12,6 +12,7 @@ import RatingStars from "@/components/rating-stars";
 import ToolCard from "@/components/tool-card";
 import BackToTop from "@/components/back-to-top";
 import Link from "next/link";
+import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 
 interface PageProps {
     params: Promise<{ slug: string }>;
@@ -29,22 +30,27 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     const pricing = tool.pricing_type || "Free";
     const category = tool.categories?.[0]?.name || "AI";
-    const title = `${tool.name} - ${pricing} ${category} Tool | MyCaptionAI`;
+    const title = `${tool.name} - ${pricing} ${category} Tool | ${SITE_NAME}`;
     const description =
         tool.short_description || tool.description || `Discover ${tool.name}, a ${pricing.toLowerCase()} ${category.toLowerCase()} AI tool on MyCaptionAI.`;
+    const canonical = absoluteUrl(`/tools/${tool.slug}`);
+    const socialImage = tool.image_url || absoluteUrl(DEFAULT_OG_IMAGE_PATH);
 
     return {
         title,
         description,
+        alternates: { canonical },
         openGraph: {
             title,
             description,
-            images: tool.image_url ? [tool.image_url] : undefined,
+            url: canonical,
+            images: [socialImage],
         },
         twitter: {
             card: "summary_large_image",
             title,
             description,
+            images: [socialImage],
         },
     };
 }
@@ -104,6 +110,7 @@ export default async function ToolDetailPage({ params }: PageProps) {
                             : []),
                         { label: tool.name },
                     ]}
+                    currentPath={`/tools/${tool.slug}`}
                 />
 
                 <div className={`tool-detail-layout ${!hasBanner ? "tool-detail-layout-no-banner" : ""}`}>
