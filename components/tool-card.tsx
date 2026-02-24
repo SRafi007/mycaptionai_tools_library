@@ -55,7 +55,7 @@ export default function ToolCard({ tool, showVisitButton = true }: ToolCardProps
                         )}
                     </div>
 
-                    <div>
+                    <div className="tool-card-title-wrap">
                         <h3 className="tool-card-name">
                             <Link href={`/tools/${tool.slug}`} className="tool-card-name-link">
                                 {tool.name}
