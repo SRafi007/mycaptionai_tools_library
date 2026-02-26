@@ -6,7 +6,7 @@ const columns = [
         title: "Discover",
         links: [
             { href: "/browse", label: "Browse All" },
-            { href: "/top-rated", label: "Top Rated" },
+            { href: "/top-rated", label: "Top Upvoted" },
             { href: "/search", label: "Search" },
         ],
     },

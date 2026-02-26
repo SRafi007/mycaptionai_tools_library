@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { revalidatePath } from "next/cache";
 import { Tool } from "@/types/tool";
 import RatingStars from "@/components/rating-stars";
+import { incrementToolUpvotes } from "@/lib/db/tools";
 
 function getPricingBadgeClass(pricingType: Tool["pricing_type"]): string {
     switch (pricingType) {
@@ -33,10 +35,28 @@ function getPricingLabel(pricingType: Tool["pricing_type"]): string {
 interface ToolCardProps {
     tool: Tool;
     showVisitButton?: boolean;
+    showUpvoteButton?: boolean;
+    revalidatePaths?: string[];
 }
 
-export default function ToolCard({ tool, showVisitButton = true }: ToolCardProps) {
+export default function ToolCard({
+    tool,
+    showVisitButton = true,
+    showUpvoteButton = false,
+    revalidatePaths = [],
+}: ToolCardProps) {
     const hasVisualIcon = Boolean(tool.image_url || tool.icon_url);
+    const pathsToRevalidate = revalidatePaths.filter((path, index, arr) => path.startsWith("/") && arr.indexOf(path) === index);
+
+    async function upvoteTool() {
+        "use server";
+
+        await incrementToolUpvotes(tool.id);
+        revalidatePath(`/tools/${tool.slug}`);
+        for (const path of pathsToRevalidate) {
+            revalidatePath(path);
+        }
+    }
 
     return (
         <article className="card tool-card">
@@ -100,6 +120,16 @@ export default function ToolCard({ tool, showVisitButton = true }: ToolCardProps
                     )}
                 </div>
                 <div className="tool-card-actions">
+                    {showUpvoteButton && (
+                        <form action={upvoteTool}>
+                            <button type="submit" className="btn-outline btn-sm tool-upvote-btn">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                    <path d="M12 19V5M5 12l7-7 7 7" />
+                                </svg>
+                                Upvote ({tool.upvotes || 0})
+                            </button>
+                        </form>
+                    )}
                     {showVisitButton && tool.url && (
                         <a href={tool.url} target="_blank" rel="noopener noreferrer" className="btn-secondary btn-sm">
                             Visit

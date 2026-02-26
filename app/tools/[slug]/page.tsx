@@ -74,6 +74,7 @@ export default async function ToolDetailPage({ params }: PageProps) {
 
         await incrementToolUpvotes(toolId);
         revalidatePath(`/tools/${toolSlug}`);
+        revalidatePath("/top-rated");
     }
 
     const jsonLd = {

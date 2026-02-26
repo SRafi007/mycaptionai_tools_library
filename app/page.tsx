@@ -97,22 +97,23 @@ export default async function HomePage() {
       <section className="section-padding">
         <div className="container-main">
           <div className="discovery-layout">
-            <aside className="popular-categories-panel card">
+            <aside className="popular-categories-panel">
               <div className="popular-categories-head">
                 <h2 className="section-title">Most Popular Categories</h2>
-                <Link href="/browse" className="btn-ghost btn-sm">
-                  View all &rarr;
-                </Link>
               </div>
               <div className="popular-categories-list">
-                {trendingCategories.map((cat, index) => (
+                {trendingCategories.map((cat) => (
                   <Link key={cat.id} href={`/category/${cat.slug}`} className="popular-category-item">
-                    <span className="popular-category-rank">{String(index + 1).padStart(2, "0")}</span>
                     <span className="popular-category-name">{cat.name}</span>
-                    <span className="popular-category-count">{cat.tool_count}</span>
+                    <span className="popular-category-arrow" aria-hidden="true">
+                      &rarr;
+                    </span>
                   </Link>
                 ))}
               </div>
+              <Link href="/browse" className="popular-categories-cta">
+                View all categories &rarr;
+              </Link>
             </aside>
 
             <div className="discovery-main">

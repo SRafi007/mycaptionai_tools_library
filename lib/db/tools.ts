@@ -172,6 +172,23 @@ export async function getTopRatedTools(limit: number = 50): Promise<Tool[]> {
 }
 
 // ─── Search (full-text with ilike fallback) ───
+export async function getTopUpvotedTools(limit: number = 50): Promise<Tool[]> {
+    const { data, error } = await supabase
+        .from("tools")
+        .select("*")
+        .order("upvotes", { ascending: false })
+        .order("rating_score", { ascending: false })
+        .order("rating_count", { ascending: false })
+        .limit(limit);
+
+    if (error) {
+        console.error("Error fetching top upvoted tools:", error);
+        return [];
+    }
+
+    return (data as Tool[]) || [];
+}
+
 export async function searchTools(
     query: string,
     page: number = 1,
