@@ -18,6 +18,8 @@ interface PageProps {
     params: Promise<{ slug: string }>;
 }
 
+export const revalidate = 60;
+
 export async function generateStaticParams() {
     const slugs = await getAllToolSlugs();
     return slugs.map((slug) => ({ slug }));

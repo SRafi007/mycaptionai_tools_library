@@ -9,6 +9,8 @@ import BackToTop from "@/components/back-to-top";
 import Link from "next/link";
 import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Best AI Tools Directory",
   description: "Discover, compare, and choose the best AI tools for creators, marketers, and teams.",

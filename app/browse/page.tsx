@@ -6,6 +6,8 @@ import BackToTop from "@/components/back-to-top";
 import { USE_CASES } from "@/lib/seo/usecases";
 import { absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
     title: "Browse AI Tool Categories",
     description:

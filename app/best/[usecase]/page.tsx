@@ -16,6 +16,7 @@ interface PageProps {
 
 const MAX_TOOLS = 24;
 const TOOLS_PER_CATEGORY = 18;
+export const revalidate = 60;
 
 export async function generateStaticParams() {
     return USE_CASES.map((entry) => ({ usecase: entry.slug }));

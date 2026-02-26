@@ -16,6 +16,7 @@ interface PageProps {
 }
 
 const PER_PAGE = 24;
+export const revalidate = 60;
 
 function toTitleCase(value: string): string {
     return value
