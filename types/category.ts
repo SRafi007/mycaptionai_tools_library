@@ -5,6 +5,7 @@ export interface Category {
     description: string | null;
     icon: string | null;
     parent_id: string | null;
+    display_order: number;
     tool_count: number;
     seo_title: string | null;
     seo_description: string | null;

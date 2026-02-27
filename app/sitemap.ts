@@ -36,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
         const staticEntries: MetadataRoute.Sitemap = [
             { url: SITE_URL, lastModified: now, changeFrequency: "daily", priority: 1 },
-            { url: `${SITE_URL}/browse`, lastModified: now, changeFrequency: "daily", priority: 0.95 },
+            { url: `${SITE_URL}/ai-tools`, lastModified: now, changeFrequency: "daily", priority: 0.95 },
             { url: `${SITE_URL}/top-rated`, lastModified: now, changeFrequency: "daily", priority: 0.85 },
             { url: `${SITE_URL}/blog`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
             { url: `${SITE_URL}/submit`, lastModified: now, changeFrequency: "monthly", priority: 0.45 },
@@ -57,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.error("Critical error generating sitemap:", error);
         return [
             { url: SITE_URL, lastModified: now, changeFrequency: "daily", priority: 1 },
-            { url: `${SITE_URL}/browse`, lastModified: now, changeFrequency: "daily", priority: 0.95 },
+            { url: `${SITE_URL}/ai-tools`, lastModified: now, changeFrequency: "daily", priority: 0.95 },
             { url: `${SITE_URL}/top-rated`, lastModified: now, changeFrequency: "daily", priority: 0.85 },
             { url: `${SITE_URL}/blog`, lastModified: now, changeFrequency: "daily", priority: 0.8 },
             { url: `${SITE_URL}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },

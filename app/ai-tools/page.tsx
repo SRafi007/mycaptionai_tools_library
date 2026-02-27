@@ -13,12 +13,12 @@ export const metadata: Metadata = {
     description:
         "Explore all AI tool categories. Find the best AI tools for writing, image generation, video, marketing, coding, and more.",
     alternates: {
-        canonical: absoluteUrl("/browse"),
+        canonical: absoluteUrl("/ai-tools"),
     },
     openGraph: {
         title: "Browse AI Tool Categories",
         description: "Explore all AI tool categories and discover the best AI tools by use case.",
-        url: absoluteUrl("/browse"),
+        url: absoluteUrl("/ai-tools"),
         images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
     },
     twitter: {
@@ -42,7 +42,7 @@ export default async function BrowsePage() {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
         name: "Browse AI Tool Categories",
-        url: absoluteUrl("/browse"),
+        url: absoluteUrl("/ai-tools"),
         mainEntity: {
             "@type": "ItemList",
             itemListElement: categories.slice(0, 50).map((category, index) => ({

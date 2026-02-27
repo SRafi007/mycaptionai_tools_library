@@ -787,6 +787,20 @@ a {
   flex-wrap: wrap;
 }
 
+.tool-card-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tool-card-rating svg {
+  color: var(--rating-star-fill);
+  flex-shrink: 0;
+}
+
 .tool-card-upvotes {
   display: inline-flex;
   align-items: center;
@@ -814,6 +828,40 @@ a {
 .tool-card-actions form {
   margin: 0;
   display: inline-flex;
+}
+
+.tool-card-actions-dual {
+  margin-left: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  align-items: stretch;
+}
+
+.tool-card-actions-dual form {
+  width: 100%;
+}
+
+.tool-card-actions-dual .tool-upvote-btn,
+.tool-card-actions-dual .btn-secondary {
+  width: 100%;
+  min-height: 34px;
+  justify-content: center;
+  border-radius: var(--radius-md);
+}
+
+.tool-card-actions .tool-upvote-btn {
+  color: var(--badge-free);
+  border-color: color-mix(in srgb, var(--badge-free) 38%, var(--border-default));
+  background: color-mix(in srgb, var(--badge-free) 7%, transparent);
+  white-space: nowrap;
+}
+
+.tool-card-actions .tool-upvote-btn:hover {
+  color: var(--badge-free);
+  border-color: var(--badge-free);
+  background: color-mix(in srgb, var(--badge-free) 13%, transparent);
 }
 
 .tool-card-actions .btn-secondary {
@@ -1422,7 +1470,7 @@ a {
   justify-content: flex-end;
 }
 
-.tool-upvote-btn {
+.tool-detail-actions .tool-upvote-btn {
   color: var(--text-primary);
 }
 

@@ -111,7 +111,7 @@ export default async function HomePage() {
                   </Link>
                 ))}
               </div>
-              <Link href="/browse" className="popular-categories-cta">
+              <Link href="/ai-tools" className="popular-categories-cta">
                 View all categories &rarr;
               </Link>
             </aside>
@@ -163,7 +163,7 @@ export default async function HomePage() {
         <div className="container-main">
           <div className="section-header">
             <h2 className="section-title">Browse by Category</h2>
-            <Link href="/browse" className="btn-ghost">
+            <Link href="/ai-tools" className="btn-ghost">
               All categories &rarr;
             </Link>
           </div>

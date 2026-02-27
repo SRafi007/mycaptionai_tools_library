@@ -8,7 +8,8 @@ export async function getCategories(): Promise<Category[]> {
     const { data, error } = await supabase
         .from("categories")
         .select("*")
-        .order("tool_count", { ascending: false });
+        .order("display_order", { ascending: true })
+        .order("created_at", { ascending: false });
 
     if (error) {
         console.error("Error fetching categories:", error);

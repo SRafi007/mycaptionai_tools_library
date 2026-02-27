@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { Tool } from "@/types/tool";
-import RatingStars from "@/components/rating-stars";
 import { incrementToolUpvotes } from "@/lib/db/tools";
 
 function getPricingBadgeClass(pricingType: Tool["pricing_type"]): string {
@@ -46,6 +45,7 @@ export default function ToolCard({
     revalidatePaths = [],
 }: ToolCardProps) {
     const hasVisualIcon = Boolean(tool.image_url || tool.icon_url);
+    const hasDualActions = showUpvoteButton && showVisitButton && Boolean(tool.url);
     const pathsToRevalidate = revalidatePaths.filter((path, index, arr) => path.startsWith("/") && arr.indexOf(path) === index);
 
     async function upvoteTool() {
@@ -107,26 +107,27 @@ export default function ToolCard({
 
             <div className="tool-card-footer">
                 <div className="tool-card-meta">
-                    {tool.rating_score > 0 && (
-                        <RatingStars score={tool.rating_score} count={tool.rating_count} />
-                    )}
-                    {tool.upvotes > 0 && (
-                        <span className="tool-card-upvotes">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                <path d="M12 19V5M5 12l7-7 7 7" />
-                            </svg>
-                            {tool.upvotes}
-                        </span>
-                    )}
+                    <span className="tool-card-rating">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                        {(tool.rating_score || 0).toFixed(1)}
+                    </span>
+                    <span className="tool-card-upvotes">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <path d="M12 19V5M5 12l7-7 7 7" />
+                        </svg>
+                        {tool.upvotes || 0}
+                    </span>
                 </div>
-                <div className="tool-card-actions">
+                <div className={`tool-card-actions${hasDualActions ? " tool-card-actions-dual" : ""}`}>
                     {showUpvoteButton && (
                         <form action={upvoteTool}>
                             <button type="submit" className="btn-outline btn-sm tool-upvote-btn">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                     <path d="M12 19V5M5 12l7-7 7 7" />
                                 </svg>
-                                Upvote ({tool.upvotes || 0})
+                                Upvote
                             </button>
                         </form>
                     )}

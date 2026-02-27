@@ -140,7 +140,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             />
             <div className="container-main">
                 <Breadcrumbs
-                    items={[{ label: "Categories", href: "/browse" }, { label: categoryLabel }]}
+                    items={[{ label: "Categories", href: "/ai-tools" }, { label: categoryLabel }]}
                     currentPath={`/category/${category.slug}`}
                 />
 

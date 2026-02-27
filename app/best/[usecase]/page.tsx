@@ -131,7 +131,7 @@ export default async function BestUseCasePage({ params }: PageProps) {
             <div className="container-main">
                 <Breadcrumbs
                     items={[
-                        { label: "Best AI Tools", href: "/browse" },
+                        { label: "Best AI Tools", href: "/ai-tools" },
                         { label: config.title },
                     ]}
                     currentPath={`/best/${config.slug}`}
