@@ -15,7 +15,7 @@ export async function getToolsPaginated(
     const from = (page - 1) * perPage;
     const to = from + perPage - 1;
 
-    let query = supabase.from("tools").select("*", { count: "exact" });
+    let query = supabase.from("tools").select("*", { count: "exact" }).eq("status", "active");
 
     if (pricing && pricing !== "all") {
         query = query.eq("pricing_type", pricing);
@@ -49,6 +49,7 @@ export async function getToolBySlug(slug: string): Promise<ToolWithCategories | 
         .from("tools")
         .select("*")
         .eq("slug", slug)
+        .eq("status", "active")
         .single();
 
     if (error || !data) {
@@ -95,7 +96,8 @@ export async function getToolsByCategory(
     let query = supabase
         .from("tools")
         .select("*", { count: "exact" })
-        .in("id", toolIds);
+        .in("id", toolIds)
+        .eq("status", "active");
 
     if (pricing && pricing !== "all") {
         query = query.eq("pricing_type", pricing);
@@ -125,7 +127,8 @@ export async function getToolsByCategory(
 export async function getFeaturedTools(limit: number = 6): Promise<Tool[]> {
     const { data, error } = await supabase
         .from("featured_tools")
-        .select("tools(*)")
+        .select("tools!inner(*)")
+        .eq("tools.status", "active")
         .order("display_order", { ascending: true })
         .limit(limit);
 
@@ -141,7 +144,8 @@ export async function getFeaturedTools(limit: number = 6): Promise<Tool[]> {
 export async function getTrendingTools(limit: number = 6): Promise<Tool[]> {
     const { data, error } = await supabase
         .from("trending_tools")
-        .select("tools(*)")
+        .select("tools!inner(*)")
+        .eq("tools.status", "active")
         .order("display_order", { ascending: true })
         .limit(limit);
 
@@ -158,6 +162,7 @@ export async function getTopRatedTools(limit: number = 50): Promise<Tool[]> {
     const { data, error } = await supabase
         .from("tools")
         .select("*")
+        .eq("status", "active")
         .gt("rating_score", 0)
         .order("rating_score", { ascending: false })
         .order("rating_count", { ascending: false })
@@ -176,6 +181,7 @@ export async function getTopUpvotedTools(limit: number = 50): Promise<Tool[]> {
     const { data, error } = await supabase
         .from("tools")
         .select("*")
+        .eq("status", "active")
         .order("upvotes", { ascending: false })
         .order("rating_score", { ascending: false })
         .order("rating_count", { ascending: false })
@@ -202,6 +208,7 @@ export async function searchTools(
     const { data, error, count } = await supabase
         .from("tools")
         .select("*", { count: "exact" })
+        .eq("status", "active")
         .textSearch("search_vector", ftsQuery, { type: "plain", config: "english" })
         .order("rating_score", { ascending: false })
         .range(from, to);
@@ -215,6 +222,7 @@ export async function searchTools(
     const { data: fallback, error: fbErr, count: fbCount } = await supabase
         .from("tools")
         .select("*", { count: "exact" })
+        .eq("status", "active")
         .or(`name.ilike.%${query}%,short_description.ilike.%${query}%`)
         .order("rating_score", { ascending: false })
         .range(from, to);
@@ -235,6 +243,7 @@ export async function getSearchSuggestions(query: string, limit: number = 5): Pr
     const { data, error } = await supabase
         .from("tools")
         .select("name, slug, pricing_type")
+        .eq("status", "active")
         .ilike("name", `%${query}%`)
         .order("rating_score", { ascending: false })
         .limit(limit);
@@ -278,6 +287,7 @@ export async function getSimilarTools(
         .from("tools")
         .select("*")
         .in("id", toolIds)
+        .eq("status", "active")
         .order("rating_score", { ascending: false })
         .limit(limit);
 
@@ -293,7 +303,8 @@ export async function getSimilarTools(
 export async function getAllToolSlugs(): Promise<string[]> {
     const { data, error } = await supabase
         .from("tools")
-        .select("slug");
+        .select("slug")
+        .eq("status", "active");
 
     if (error) {
         console.error("Error fetching tool slugs:", error);
@@ -334,7 +345,8 @@ export async function incrementToolUpvotes(toolId: string): Promise<number | nul
 export async function getToolCount(): Promise<number> {
     const { count, error } = await supabase
         .from("tools")
-        .select("*", { count: "exact", head: true });
+        .select("*", { count: "exact", head: true })
+        .eq("status", "active");
 
     if (error) return 0;
     return count || 0;

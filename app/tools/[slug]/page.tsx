@@ -12,7 +12,8 @@ import RatingStars from "@/components/rating-stars";
 import ToolCard from "@/components/tool-card";
 import BackToTop from "@/components/back-to-top";
 import Link from "next/link";
-import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
+import Image from "next/image";
+import { absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 
 interface PageProps {
     params: Promise<{ slug: string }>;
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     const pricing = tool.pricing_type || "Free";
     const category = tool.categories?.[0]?.name || "AI";
-    const title = `${tool.name} - ${pricing} ${category} Tool | ${SITE_NAME}`;
+    const title = `${tool.name} - ${pricing} ${category} Tool`;
     const description =
         tool.short_description || tool.description || `Discover ${tool.name}, a ${pricing.toLowerCase()} ${category.toLowerCase()} AI tool on MyCaptionAI.`;
     const canonical = absoluteUrl(`/tools/${tool.slug}`);
@@ -64,6 +65,7 @@ export default async function ToolDetailPage({ params }: PageProps) {
 
     const categoryIds = tool.categories.map((c) => c.id);
     const similarTools = await getSimilarTools(tool.id, categoryIds, 6);
+    const primaryCategory = tool.categories[0] || null;
     const longDescription = tool.long_description || tool.description || tool.short_description || "No description available.";
     const hasBanner = Boolean(tool.image_url);
     const toolId = tool.id;
@@ -207,10 +209,14 @@ export default async function ToolDetailPage({ params }: PageProps) {
 
                     {hasBanner && (
                         <div className="tool-detail-banner">
-                            <img
-                                src={tool.image_url || ""}
+                            <Image
+                                src={tool.image_url || absoluteUrl(DEFAULT_OG_IMAGE_PATH)}
                                 alt={`${tool.name} screenshot`}
-                                loading="lazy"
+                                width={1200}
+                                height={675}
+                                sizes="(max-width: 1024px) 100vw, 40vw"
+                                priority
+                                style={{ width: "100%", height: "auto" }}
                             />
                         </div>
                     )}
@@ -226,6 +232,34 @@ export default async function ToolDetailPage({ params }: PageProps) {
                             {similarTools.map((t) => (
                                 <ToolCard key={t.id} tool={t} />
                             ))}
+                        </div>
+                        <div className="card" style={{ padding: "16px", marginTop: "20px" }}>
+                            <h3 style={{ margin: "0 0 10px", fontSize: "16px", color: "var(--text-primary)" }}>
+                                Explore Alternatives
+                            </h3>
+                            <p style={{ margin: "0 0 12px", fontSize: "14px", color: "var(--text-secondary)" }}>
+                                Compare close alternatives to {tool.name} and discover the best fit for your workflow.
+                            </p>
+                            <div style={{ display: "grid", gap: "8px" }}>
+                                {similarTools.map((alt) => (
+                                    <Link key={`alt-link-${alt.id}`} href={`/tools/${alt.slug}`} className="tool-detail-cat-link">
+                                        Alternative to {tool.name}: {alt.name}
+                                    </Link>
+                                ))}
+                            </div>
+                            {primaryCategory ? (
+                                <p style={{ margin: "12px 0 0", fontSize: "13px", color: "var(--text-muted)" }}>
+                                    See all options in{" "}
+                                    <Link href={`/category/${primaryCategory.slug}`} className="tool-detail-cat-link">
+                                        Best {primaryCategory.name} AI Tools
+                                    </Link>
+                                    {" "}or browse the full{" "}
+                                    <Link href="/ai-tools" className="tool-detail-cat-link">
+                                        AI Tools Directory
+                                    </Link>
+                                    .
+                                </p>
+                            ) : null}
                         </div>
                     </section>
                 )}

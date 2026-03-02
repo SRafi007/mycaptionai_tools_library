@@ -1,0 +1,40 @@
+name: SEO QA
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * *"
+  push:
+    branches: ["main"]
+    paths:
+      - "app/**"
+      - "lib/**"
+      - "scripts/**"
+      - "next.config.ts"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/seo-qa.yml"
+
+jobs:
+  seo-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run SEO QA checks
+        env:
+          SEO_QA_BASE_URL: ${{ vars.SEO_QA_BASE_URL }}
+          SEO_QA_SAMPLE_SIZE: "3"
+          SEO_QA_TIMEOUT_MS: "20000"
+        run: npm run seo:qa

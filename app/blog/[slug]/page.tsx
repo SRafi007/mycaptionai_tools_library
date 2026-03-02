@@ -1,6 +1,8 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getPostBySlug, getAllPostSlugs } from "@/lib/db/blog";
+import Image from "next/image";
+import Link from "next/link";
+import { getPostBySlug, getAllPostSlugs, getRelatedPosts } from "@/lib/db/blog";
 import type { BlogContentBlock } from "@/lib/db/blog";
 import Breadcrumbs from "@/components/breadcrumbs";
 import BackToTop from "@/components/back-to-top";
@@ -20,9 +22,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const post = await getPostBySlug(slug);
     if (!post) return { title: "Post Not Found" };
 
-    const title = post.seo_title || `${post.title} | ${SITE_NAME} Blog`;
+    const title = post.seo_title || post.title;
     const description = post.seo_description || post.excerpt || post.title;
-    const canonical = post.canonical_source_url || absoluteUrl(`/blog/${post.slug}`);
+    const localUrl = absoluteUrl(`/blog/${post.slug}`);
+    const canonical = post.canonical_source_url || localUrl;
+    const isSyndicated = Boolean(post.canonical_source_url);
     const socialImage = post.cover_image_url || absoluteUrl(DEFAULT_OG_IMAGE_PATH);
 
     return {
@@ -33,7 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
             title,
             description,
             type: "article",
-            url: canonical,
+            url: localUrl,
             publishedTime: post.published_at || undefined,
             authors: [post.author],
             images: [socialImage],
@@ -44,6 +48,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
             description,
             images: [socialImage],
         },
+        robots: isSyndicated ? { index: false, follow: true } : { index: true, follow: true },
     };
 }
 
@@ -138,7 +143,9 @@ function renderMarkdown(md: string): string {
             flushList();
             const alt = escapeHtml(imageMatch[1] || "");
             const src = sanitizeUrl(imageMatch[2] || "");
-            if (src) htmlParts.push(`<img src="${src}" alt="${alt}" loading="lazy" />`);
+            if (src) {
+                htmlParts.push(`<img src="${src}" alt="${alt}" loading="lazy" decoding="async" style="max-width:100%;height:auto;" />`);
+            }
             continue;
         }
 
@@ -204,7 +211,14 @@ function renderContentBlocks(blocks: BlogContentBlock[]) {
             if (!safeSrc) return null;
             return (
                 <figure key={key} style={{ margin: "24px 0" }}>
-                    <img src={safeSrc} alt={block.alt || ""} loading="lazy" />
+                    <Image
+                        src={safeSrc}
+                        alt={block.alt || ""}
+                        width={1200}
+                        height={675}
+                        sizes="(max-width: 768px) 100vw, 768px"
+                        style={{ width: "100%", height: "auto" }}
+                    />
                     {block.caption ? (
                         <figcaption style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "8px" }}>
                             {block.caption}
@@ -296,6 +310,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     const { slug } = await params;
     const post = await getPostBySlug(slug);
     if (!post) notFound();
+    const relatedPosts = await getRelatedPosts(post.slug, post.tags, 3);
 
     const jsonLd = {
         "@context": "https://schema.org",
@@ -349,11 +364,14 @@ export default async function BlogPostPage({ params }: PageProps) {
                     </div>
 
                     {post.cover_image_url && (
-                        <img
+                        <Image
                             src={post.cover_image_url}
                             alt={post.title}
+                            width={1200}
+                            height={630}
+                            sizes="(max-width: 1024px) 100vw, 1024px"
+                            priority
                             style={{ width: "100%", borderRadius: "var(--radius-lg)", border: "1px solid var(--border-default)", marginBottom: "32px" }}
-                            loading="lazy"
                         />
                     )}
 
@@ -370,6 +388,41 @@ export default async function BlogPostPage({ params }: PageProps) {
                         </p>
                     ) : null}
                 </article>
+
+                {relatedPosts.length > 0 ? (
+                    <section className="section-padding section-border-t" style={{ paddingTop: "24px" }}>
+                        <div className="section-header">
+                            <h2 className="section-title">Related Articles</h2>
+                        </div>
+                        <div className="blog-grid">
+                            {relatedPosts.map((relatedPost) => (
+                                <Link key={relatedPost.id} href={`/blog/${relatedPost.slug}`}>
+                                    <article className="blog-card">
+                                        <div className="blog-card-body">
+                                            <h3 className="blog-card-title">{relatedPost.title}</h3>
+                                            {relatedPost.excerpt ? (
+                                                <p className="blog-card-excerpt">{relatedPost.excerpt}</p>
+                                            ) : null}
+                                            <div className="blog-card-meta">
+                                                <span>
+                                                    {relatedPost.published_at
+                                                        ? new Date(relatedPost.published_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                                                        : "Published"}
+                                                </span>
+                                                {relatedPost.tags.length > 0 ? (
+                                                    <>
+                                                        <span>|</span>
+                                                        <span className="blog-card-tag">{relatedPost.tags[0]}</span>
+                                                    </>
+                                                ) : null}
+                                            </div>
+                                        </div>
+                                    </article>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                ) : null}
             </div>
 
             <BackToTop />

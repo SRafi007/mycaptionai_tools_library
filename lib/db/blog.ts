@@ -95,3 +95,40 @@ export async function getFeaturedPosts(limit: number = 3): Promise<BlogPost[]> {
     return (data as BlogPost[]) || [];
 }
 
+// â”€â”€â”€ Related Posts (tag+recency weighted) â”€â”€â”€
+export async function getRelatedPosts(
+    slug: string,
+    tags: string[] = [],
+    limit: number = 3
+): Promise<BlogPost[]> {
+    const candidatePoolSize = 48;
+    const normalizedTags = new Set(tags.map((tag) => tag.trim().toLowerCase()).filter(Boolean));
+
+    const { data, error } = await supabase
+        .from("blog_posts")
+        .select("*")
+        .eq("status", "published")
+        .neq("slug", slug)
+        .order("published_at", { ascending: false })
+        .limit(candidatePoolSize);
+
+    if (error || !data) return [];
+    const candidates = data as BlogPost[];
+
+    const scored = candidates.map((post) => {
+        const sharedTagCount = post.tags.reduce((count, tag) => {
+            return normalizedTags.has(tag.trim().toLowerCase()) ? count + 1 : count;
+        }, 0);
+        const publishedAt = post.published_at ? new Date(post.published_at).getTime() : 0;
+        return { post, sharedTagCount, publishedAt };
+    });
+
+    // Prefer tag relevance first, then recency.
+    scored.sort((a, b) => {
+        if (b.sharedTagCount !== a.sharedTagCount) return b.sharedTagCount - a.sharedTagCount;
+        return b.publishedAt - a.publishedAt;
+    });
+
+    return scored.slice(0, limit).map((entry) => entry.post);
+}
+

@@ -3,6 +3,7 @@ import { getPublishedPosts } from "@/lib/db/blog";
 import Pagination from "@/components/pagination";
 import BackToTop from "@/components/back-to-top";
 import Link from "next/link";
+import Image from "next/image";
 import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 
 interface PageProps {
@@ -77,11 +78,13 @@ export default async function BlogPage({ searchParams }: PageProps) {
                                 <Link key={post.id} href={`/blog/${post.slug}`}>
                                     <article className="blog-card">
                                         {post.cover_image_url && (
-                                            <img
+                                            <Image
                                                 src={post.cover_image_url}
                                                 alt={post.title}
+                                                width={640}
+                                                height={360}
+                                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                                 className="blog-card-cover"
-                                                loading="lazy"
                                             />
                                         )}
                                         {!post.cover_image_url && (

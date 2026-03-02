@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "backfill:icons": "tsx scripts/backfillToolIcons.ts"
+    "backfill:icons": "tsx scripts/backfillToolIcons.ts",
+    "seo:qa": "node scripts/seoQaCheck.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
