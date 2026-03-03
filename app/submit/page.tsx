@@ -22,7 +22,15 @@ export const metadata: Metadata = {
     },
 };
 
-export default function SubmitPage() {
+interface PageProps {
+    searchParams: Promise<{ submitted?: string; error?: string }>;
+}
+
+export default async function SubmitPage({ searchParams }: PageProps) {
+    const { submitted, error } = await searchParams;
+    const isSubmitted = submitted === "1";
+    const hasError = error === "invalid" || error === "save";
+
     return (
         <div className="container-main">
             <div style={{ maxWidth: "600px", margin: "0 auto", padding: "64px 0" }}>
@@ -36,39 +44,51 @@ export default function SubmitPage() {
                     Get your tool listed in front of thousands of creators, marketers, and developers. It&apos;s free.
                 </p>
 
+                {isSubmitted && (
+                    <p
+                        style={{
+                            margin: "0 auto 20px",
+                            maxWidth: "480px",
+                            padding: "12px 14px",
+                            fontSize: "13px",
+                            borderRadius: "var(--radius-md)",
+                            border: "1px solid rgba(31, 164, 107, 0.35)",
+                            background: "rgba(31, 164, 107, 0.12)",
+                            color: "var(--text-primary)",
+                            textAlign: "center",
+                        }}
+                    >
+                        Submission received. We&apos;ll review it within 48 hours.
+                    </p>
+                )}
+
+                {hasError && (
+                    <p
+                        style={{
+                            margin: "0 auto 20px",
+                            maxWidth: "480px",
+                            padding: "12px 14px",
+                            fontSize: "13px",
+                            borderRadius: "var(--radius-md)",
+                            border: "1px solid rgba(209, 89, 89, 0.35)",
+                            background: "rgba(209, 89, 89, 0.12)",
+                            color: "var(--text-primary)",
+                            textAlign: "center",
+                        }}
+                    >
+                        Couldn&apos;t submit right now. Please verify the fields and try again.
+                    </p>
+                )}
+
                 <form
                     className="card"
                     style={{ padding: "32px" }}
-                    action="https://formspree.io/f/placeholder"
+                    action="/api/tool-submissions"
                     method="POST"
                 >
                     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                         <FormField label="Tool Name" name="name" required placeholder="e.g. ChatGPT" />
                         <FormField label="Official URL" name="url" type="url" required placeholder="https://..." />
-                        <FormField label="Short Description" name="description" required placeholder="What does your tool do? (1-2 sentences)" />
-                        <FormField label="Category" name="category" required placeholder="e.g. Writing, Image Generation..." />
-                        <div>
-                            <label
-                                htmlFor="pricing"
-                                style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "6px" }}
-                            >
-                                Pricing
-                            </label>
-                            <select
-                                id="pricing"
-                                name="pricing"
-                                required
-                                className="filter-select"
-                                style={{ width: "100%", padding: "10px 12px", fontSize: "14px" }}
-                            >
-                                <option value="">Select pricing model</option>
-                                <option value="Free">Free</option>
-                                <option value="Freemium">Freemium</option>
-                                <option value="Paid">Paid</option>
-                                <option value="Free-Trial">Free Trial</option>
-                                <option value="Contact">Contact for Pricing</option>
-                            </select>
-                        </div>
                         <FormField label="Your Email" name="email" type="email" required placeholder="you@example.com" />
 
                         <button type="submit" className="btn-primary" style={{ width: "100%", justifyContent: "center", padding: "12px", fontSize: "15px" }}>

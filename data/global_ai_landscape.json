@@ -1,0 +1,477 @@
+[
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "OpenAI",
+    "published_on": "2015-12-11",
+    "tools": [
+      { "name": "ChatGPT", "slug": "chatgpt" },
+      { "name": "DALL-E", "slug": "dalle" },
+      { "name": "Sora", "slug": "sora" },
+      { "name": "Codex", "slug": "codex" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Anthropic",
+    "published_on": "2021-01-01",
+    "tools": [
+      { "name": "Claude", "slug": "claude" },
+      { "name": "Claude Code", "slug": "claude-code" },
+      { "name": "Claude for Enterprise", "slug": "claude-enterprise" }
+    ]
+  },
+  {
+    "country": "China",
+    "iso": "CN",
+    "company": "DeepSeek",
+    "published_on": "2023-07-17",
+    "tools": [
+      { "name": "DeepSeek Chat", "slug": "deepseek-chat" },
+      { "name": "DeepSeek Coder", "slug": "deepseek-coder" }
+    ]
+  },
+  {
+    "country": "France",
+    "iso": "FR",
+    "company": "Mistral AI",
+    "published_on": "2023-04-01",
+    "tools": [
+      { "name": "Mistral", "slug": "mistral" },
+      { "name": "Le Chat", "slug": "le-chat" },
+      { "name": "Codestral", "slug": "codestral" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Google",
+    "published_on": "1998-09-04",
+    "tools": [
+      { "name": "Gemini", "slug": "gemini" },
+      { "name": "Imagen", "slug": "imagen" },
+      { "name": "Vertex AI", "slug": "vertex-ai" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Perplexity AI",
+    "published_on": "2022-08-01",
+    "tools": [
+      { "name": "Perplexity Search", "slug": "perplexity-search" },
+      { "name": "Perplexity Pages", "slug": "perplexity-pages" }
+    ]
+  },
+  {
+    "country": "China",
+    "iso": "CN",
+    "company": "Alibaba",
+    "published_on": "1999-04-04",
+    "tools": [
+      { "name": "Qwen", "slug": "qwen" },
+      { "name": "Tongyi Qianwen", "slug": "tongyi-qianwen" }
+    ]
+  },
+  {
+    "country": "Canada",
+    "iso": "CA",
+    "company": "Cohere",
+    "published_on": "2019-01-01",
+    "tools": [
+      { "name": "Command", "slug": "command" },
+      { "name": "Coral", "slug": "coral" },
+      { "name": "Cohere Embed", "slug": "cohere-embed" }
+    ]
+  },
+  {
+    "country": "United Kingdom",
+    "iso": "GB",
+    "company": "Stability AI",
+    "published_on": "2019-01-01",
+    "tools": [
+      { "name": "Stable Diffusion", "slug": "stable-diffusion" },
+      { "name": "Stable Video", "slug": "stable-video" },
+      { "name": "Stable Audio", "slug": "stable-audio" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Meta",
+    "published_on": "2004-02-04",
+    "tools": [
+      { "name": "Llama", "slug": "llama" },
+      { "name": "Meta AI", "slug": "meta-ai" }
+    ]
+  },
+  {
+    "country": "United Arab Emirates",
+    "iso": "AE",
+    "company": "TII",
+    "published_on": "2020-01-01",
+    "tools": [
+      { "name": "Falcon", "slug": "falcon" }
+    ]
+  },
+  {
+    "country": "Germany",
+    "iso": "DE",
+    "company": "DeepL",
+    "published_on": "2017-08-28",
+    "tools": [
+      { "name": "DeepL Translator", "slug": "deepl-translator" },
+      { "name": "DeepL Write", "slug": "deepl-write" }
+    ]
+  },
+  {
+    "country": "China",
+    "iso": "CN",
+    "company": "Baidu",
+    "published_on": "2000-01-01",
+    "tools": [
+      { "name": "Ernie Bot", "slug": "ernie" }
+    ]
+  },
+  {
+    "country": "Israel",
+    "iso": "IL",
+    "company": "AI21 Labs",
+    "published_on": "2017-01-01",
+    "tools": [
+      { "name": "Jurassic", "slug": "jurassic" },
+      { "name": "Wordtune", "slug": "wordtune" },
+      { "name": "Jamba", "slug": "jamba" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Midjourney",
+    "published_on": "2022-07-12",
+    "tools": [
+      { "name": "Midjourney", "slug": "midjourney" }
+    ]
+  },
+  {
+    "country": "Japan",
+    "iso": "JP",
+    "company": "Sakana AI",
+    "published_on": "2023-07-01",
+    "tools": [
+      { "name": "AI Scientist", "slug": "ai-scientist" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "xAI",
+    "published_on": "2023-07-12",
+    "tools": [
+      { "name": "Grok", "slug": "grok" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Hugging Face",
+    "published_on": "2016-01-01",
+    "tools": [
+      { "name": "Hugging Chat", "slug": "hugging-chat" },
+      { "name": "Transformers", "slug": "transformers" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Runway",
+    "published_on": "2018-12-01",
+    "tools": [
+      { "name": "Runway Gen", "slug": "runway-gen" }
+    ]
+  },
+  {
+    "country": "Germany",
+    "iso": "DE",
+    "company": "Aleph Alpha",
+    "published_on": "2019-01-01",
+    "tools": [
+      { "name": "Luminous", "slug": "luminous" }
+    ]
+  },
+  {
+    "country": "China",
+    "iso": "CN",
+    "company": "Moonshot AI",
+    "published_on": "2023-03-01",
+    "tools": [
+      { "name": "Kimi", "slug": "kimi" }
+    ]
+  },
+  {
+    "country": "United Kingdom",
+    "iso": "GB",
+    "company": "Synthesia",
+    "published_on": "2017-01-01",
+    "tools": [
+      { "name": "Synthesia Video", "slug": "synthesia" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "NVIDIA",
+    "published_on": "1993-04-01",
+    "tools": [
+      { "name": "NIM", "slug": "nvidia-nim" },
+      { "name": "ChatRTX", "slug": "chat-rtx" }
+    ]
+  },
+  {
+    "country": "China",
+    "iso": "CN",
+    "company": "Zhipu AI",
+    "published_on": "2019-01-01",
+    "tools": [
+      { "name": "ChatGLM", "slug": "chatglm" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Character.ai",
+    "published_on": "2021-11-01",
+    "tools": [
+      { "name": "Character Chat", "slug": "character-chat" }
+    ]
+  },
+  {
+    "country": "South Korea",
+    "iso": "KR",
+    "company": "Naver",
+    "published_on": "1999-06-02",
+    "tools": [
+      { "name": "HyperCLOVA", "slug": "hyperclova" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Luma AI",
+    "published_on": "2021-01-01",
+    "tools": [
+      { "name": "Dream Machine", "slug": "dream-machine" },
+      { "name": "Genie", "slug": "genie" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Pika Labs",
+    "published_on": "2023-04-01",
+    "tools": [
+      { "name": "Pika", "slug": "pika" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Groq",
+    "published_on": "2016-01-01",
+    "tools": [
+      { "name": "Groq Cloud", "slug": "groq-cloud" }
+    ]
+  },
+  {
+    "country": "India",
+    "iso": "IN",
+    "company": "Sarvam AI",
+    "published_on": "2023-07-01",
+    "tools": [
+      { "name": "Sarvam LLM", "slug": "sarvam-llm" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "ElevenLabs",
+    "published_on": "2022-01-01",
+    "tools": [
+      { "name": "Voice AI", "slug": "eleven-voice" }
+    ]
+  },
+  {
+    "country": "China",
+    "iso": "CN",
+    "company": "SenseTime",
+    "published_on": "2014-10-01",
+    "tools": [
+      { "name": "SenseChat", "slug": "sensechat" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Suno AI",
+    "published_on": "2023-01-01",
+    "tools": [
+      { "name": "Suno", "slug": "suno" }
+    ]
+  },
+  {
+    "country": "India",
+    "iso": "IN",
+    "company": "Krutrim",
+    "published_on": "2023-04-01",
+    "tools": [
+      { "name": "Krutrim AI", "slug": "krutrim-ai" }
+    ]
+  },
+  {
+    "country": "Norway",
+    "iso": "NO",
+    "company": "Iris.ai",
+    "published_on": "2015-01-01",
+    "tools": [
+      { "name": "Iris Research", "slug": "iris-research" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Writer",
+    "published_on": "2020-01-01",
+    "tools": [
+      { "name": "Palmyra", "slug": "palmyra" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Descript",
+    "published_on": "2017-01-01",
+    "tools": [
+      { "name": "Overdub", "slug": "overdub" },
+      { "name": "Underlord", "slug": "underlord" }
+    ]
+  },
+  {
+    "country": "Canada",
+    "iso": "CA",
+    "company": "Waabi",
+    "published_on": "2021-01-01",
+    "tools": [
+      { "name": "Waabi World", "slug": "waabi-world" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Jasper",
+    "published_on": "2021-01-01",
+    "tools": [
+      { "name": "Jasper", "slug": "jasper" }
+    ]
+  },
+  {
+    "country": "Israel",
+    "iso": "IL",
+    "company": "Bria AI",
+    "published_on": "2020-01-01",
+    "tools": [
+      { "name": "Bria", "slug": "bria" }
+    ]
+  },
+  {
+    "country": "Netherlands",
+    "iso": "NL",
+    "company": "Zebra Medical",
+    "published_on": "2014-01-01",
+    "tools": [
+      { "name": "Zebra Health", "slug": "zebra-health" }
+    ]
+  },
+  {
+    "country": "United Kingdom",
+    "iso": "GB",
+    "company": "Graphcore",
+    "published_on": "2016-01-01",
+    "tools": [
+      { "name": "IPU", "slug": "graphcore-ipu" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "SambaNova",
+    "published_on": "2017-01-01",
+    "tools": [
+      { "name": "SambaNova Cloud", "slug": "sambanova-cloud" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Together AI",
+    "published_on": "2022-01-01",
+    "tools": [
+      { "name": "Together API", "slug": "together-api" }
+    ]
+  },
+  {
+    "country": "France",
+    "iso": "FR",
+    "company": "LightOn",
+    "published_on": "2016-01-01",
+    "tools": [
+      { "name": "Alfred", "slug": "alfred" },
+      { "name": "Paradigm", "slug": "paradigm" }
+    ]
+  },
+  {
+    "country": "China",
+    "iso": "CN",
+    "company": "MiniMax",
+    "published_on": "2021-01-01",
+    "tools": [
+      { "name": "Hailuo AI", "slug": "hailuo" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Glean",
+    "published_on": "2019-01-01",
+    "tools": [
+      { "name": "Glean", "slug": "glean" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Scale AI",
+    "published_on": "2016-01-01",
+    "tools": [
+      { "name": "Donovan", "slug": "donovan" }
+    ]
+  },
+  {
+    "country": "United States",
+    "iso": "US",
+    "company": "Cerebras",
+    "published_on": "2016-01-01",
+    "tools": [
+      { "name": "Cerebras AI", "slug": "cerebras-ai" }
+    ]
+  },
+  {
+    "country": "South Korea",
+    "iso": "KR",
+    "company": "Upstage",
+    "published_on": "2020-01-01",
+    "tools": [
+      { "name": "Solar LLM", "slug": "solar" }
+    ]
+  }
+]
