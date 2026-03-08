@@ -29,21 +29,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     const year = new Date().getFullYear();
     const title = `${config.title} (${year}) | ${SITE_NAME}`;
+    const description = `${config.description} Compare top tools, pricing models, and standout options for this workflow.`;
     const canonical = absoluteUrl(`/best/${config.slug}`);
     return {
         title,
-        description: config.description,
+        description,
         alternates: { canonical },
         openGraph: {
             title,
-            description: config.description,
+            description,
             url: canonical,
             images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
         },
         twitter: {
             card: "summary_large_image",
             title,
-            description: config.description,
+            description,
             images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
         },
     };
@@ -56,6 +57,21 @@ function rankTools(tools: Tool[]): Tool[] {
         }
         return (b.upvotes || 0) - (a.upvotes || 0);
     });
+}
+
+function collectTopValues(values: Array<string | null | undefined>, limit = 4): string[] {
+    const counts = new Map<string, number>();
+
+    for (const rawValue of values) {
+        const value = rawValue?.trim();
+        if (!value) continue;
+        counts.set(value, (counts.get(value) || 0) + 1);
+    }
+
+    return Array.from(counts.entries())
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .slice(0, limit)
+        .map(([value]) => value);
 }
 
 export default async function BestUseCasePage({ params }: PageProps) {
@@ -76,6 +92,17 @@ export default async function BestUseCasePage({ params }: PageProps) {
     }
 
     const rankedTools = rankTools(Array.from(deduped.values())).slice(0, MAX_TOOLS);
+    const verifiedCount = rankedTools.filter((tool) => tool.is_verified).length;
+    const pricingBreakdown = [
+        { label: "Free", count: rankedTools.filter((tool) => tool.pricing_type === "Free").length },
+        { label: "Freemium", count: rankedTools.filter((tool) => tool.pricing_type === "Freemium").length },
+        { label: "Paid", count: rankedTools.filter((tool) => tool.pricing_type === "Paid").length },
+        { label: "Free Trial", count: rankedTools.filter((tool) => tool.pricing_type === "Free-Trial").length },
+        { label: "Custom", count: rankedTools.filter((tool) => tool.pricing_type === "Contact").length },
+    ].filter((entry) => entry.count > 0);
+    const pricingSummary = pricingBreakdown.slice(0, 3).map((entry) => `${entry.count} ${entry.label.toLowerCase()}`).join(", ");
+    const commonWorkflows = collectTopValues(rankedTools.flatMap((tool) => tool.use_cases || []), 5);
+    const notablePublishers = collectTopValues(rankedTools.map((tool) => tool.publisher), 4);
 
     const faq = [
         {
@@ -157,6 +184,57 @@ export default async function BestUseCasePage({ params }: PageProps) {
                             </Link>
                         ))}
                     </div>
+                </section>
+
+                <section className="card" style={{ padding: "18px", marginBottom: "20px" }}>
+                    <h2 className="section-title" style={{ fontSize: "18px", marginBottom: "8px" }}>Use Case Snapshot</h2>
+                    <p className="page-subtitle" style={{ maxWidth: "none" }}>
+                        This ranking combines {categories.length} supporting categories and {rankedTools.length} shortlisted tools for {config.title.toLowerCase()}.
+                        {pricingSummary ? ` The current mix leans toward ${pricingSummary}.` : ""}
+                    </p>
+                    <div style={{ display: "grid", gap: "12px", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", marginTop: "12px" }}>
+                        <article className="card" style={{ padding: "14px" }}>
+                            <h3 style={{ margin: "0 0 6px", fontSize: "15px", color: "var(--text-primary)" }}>Categories covered</h3>
+                            <p style={{ margin: 0, fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.7 }}>
+                                {categories.length} linked categories contribute candidates to this ranked list.
+                            </p>
+                        </article>
+                        <article className="card" style={{ padding: "14px" }}>
+                            <h3 style={{ margin: "0 0 6px", fontSize: "15px", color: "var(--text-primary)" }}>Ranked tools</h3>
+                            <p style={{ margin: 0, fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.7 }}>
+                                {rankedTools.length} tools made the final shortlist after deduping and ranking.
+                            </p>
+                        </article>
+                        <article className="card" style={{ padding: "14px" }}>
+                            <h3 style={{ margin: "0 0 6px", fontSize: "15px", color: "var(--text-primary)" }}>Verified listings</h3>
+                            <p style={{ margin: 0, fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.7 }}>
+                                {verifiedCount} shortlisted tools are marked as verified listings.
+                            </p>
+                        </article>
+                        {pricingBreakdown.length > 0 && (
+                            <article className="card" style={{ padding: "14px" }}>
+                                <h3 style={{ margin: "0 0 6px", fontSize: "15px", color: "var(--text-primary)" }}>Pricing mix</h3>
+                                <p style={{ margin: 0, fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.7 }}>
+                                    {pricingBreakdown.slice(0, 3).map((entry) => `${entry.count} ${entry.label.toLowerCase()}`).join(", ")}.
+                                </p>
+                            </article>
+                        )}
+                    </div>
+                    {commonWorkflows.length > 0 && (
+                        <div style={{ marginTop: "14px" }}>
+                            <h3 style={{ margin: "0 0 8px", fontSize: "15px", color: "var(--text-primary)" }}>Recurring workflows across these tools</h3>
+                            <div className="tool-detail-categories">
+                                {commonWorkflows.map((workflow) => (
+                                    <span key={workflow} className="tool-detail-cat-link">{workflow}</span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    {notablePublishers.length > 0 && (
+                        <p style={{ margin: "14px 0 0", fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.7 }}>
+                            Publishers that appear frequently in this shortlist include {notablePublishers.join(", ")}.
+                        </p>
+                    )}
                 </section>
 
                 {rankedTools.length > 0 ? (

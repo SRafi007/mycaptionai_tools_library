@@ -2,38 +2,51 @@ import { Metadata } from "next";
 import { getTopUpvotedTools } from "@/lib/db/tools";
 import ToolCard from "@/components/tool-card";
 import BackToTop from "@/components/back-to-top";
-import { absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
+import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 
 export const metadata: Metadata = {
-    title: "Top Rated AI Tools - Best AI Tools Ranked",
+    title: `Top AI Tools Ranked by Upvotes | ${SITE_NAME}`,
     description:
-        "Discover top AI tools across all categories. Ranked by community upvotes.",
+        "Compare the top AI tools across writing, image generation, video, marketing, and coding. Ranked by community upvotes.",
     alternates: {
         canonical: absoluteUrl("/top-rated"),
     },
     openGraph: {
-        title: "Top Rated AI Tools - Best AI Tools Ranked",
-        description: "Discover top AI tools across all categories. Ranked by community upvotes.",
+        title: `Top AI Tools Ranked by Upvotes | ${SITE_NAME}`,
+        description: "Compare the top AI tools across major categories, ranked by community upvotes.",
         url: absoluteUrl("/top-rated"),
         images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
     },
     twitter: {
         card: "summary_large_image",
-        title: "Top Rated AI Tools - Best AI Tools Ranked",
-        description: "Discover top AI tools across all categories. Ranked by community upvotes.",
+        title: `Top AI Tools Ranked by Upvotes | ${SITE_NAME}`,
+        description: "Compare the top AI tools across major categories, ranked by community upvotes.",
         images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
     },
 };
 
 export default async function TopRatedPage() {
     const tools = await getTopUpvotedTools(50);
+    const itemListSchema = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: "Top AI Tools Ranked by Upvotes",
+        numberOfItems: tools.length,
+        itemListElement: tools.map((tool, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: tool.name,
+            url: absoluteUrl(`/tools/${tool.slug}`),
+        })),
+    };
 
     return (
         <div className="container-main">
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
             <div className="page-header">
                 <h1 className="page-title">Top Rated AI Tools</h1>
                 <p className="page-subtitle">
-                    Top tools across all categories, ranked by community upvotes.
+                    Compare the highest-upvoted AI tools across major categories and open each profile for pricing, features, and alternatives.
                 </p>
             </div>
 

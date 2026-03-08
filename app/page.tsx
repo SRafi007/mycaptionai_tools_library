@@ -12,21 +12,21 @@ import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Best AI Tools Directory",
-  description: "Discover, compare, and choose the best AI tools for creators, marketers, and teams.",
+  title: "Best AI Tools Directory for Creators, Marketers, and Teams",
+  description: "Discover, compare, and choose AI tools across writing, video, image, marketing, and productivity workflows.",
   alternates: {
     canonical: absoluteUrl("/"),
   },
   openGraph: {
     title: `${SITE_NAME} - Best AI Tools Directory`,
-    description: "Discover, compare, and choose the best AI tools for creators, marketers, and teams.",
+    description: "Discover and compare AI tools across writing, video, image, marketing, and productivity workflows.",
     url: absoluteUrl("/"),
     images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
   },
   twitter: {
     card: "summary_large_image",
     title: `${SITE_NAME} - Best AI Tools Directory`,
-    description: "Discover, compare, and choose the best AI tools for creators, marketers, and teams.",
+    description: "Discover and compare AI tools across writing, video, image, marketing, and productivity workflows.",
     images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
   },
 };

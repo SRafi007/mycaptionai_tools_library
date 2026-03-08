@@ -13,7 +13,7 @@ import ToolCard from "@/components/tool-card";
 import BackToTop from "@/components/back-to-top";
 import Link from "next/link";
 import Image from "next/image";
-import { absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
+import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 
 interface PageProps {
     params: Promise<{ slug: string }>;
@@ -33,9 +33,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     const pricing = tool.pricing_type || "Free";
     const category = tool.categories?.[0]?.name || "AI";
-    const title = `${tool.name} - ${pricing} ${category} Tool`;
-    const description =
-        tool.short_description || tool.description || `Discover ${tool.name}, a ${pricing.toLowerCase()} ${category.toLowerCase()} AI tool on MyCaptionAI.`;
+    const title = `${tool.name} Review, Pricing & Features | ${SITE_NAME}`;
+    const description = tool.short_description
+        || tool.description
+        || `${tool.name} is a ${pricing.toLowerCase()} ${category.toLowerCase()} AI tool. Compare features, pricing, ratings, and alternatives on ${SITE_NAME}.`;
     const canonical = absoluteUrl(`/tools/${tool.slug}`);
     const socialImage = tool.image_url || absoluteUrl(DEFAULT_OG_IMAGE_PATH);
 
@@ -58,6 +59,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
 }
 
+function formatPricingLabel(pricingType: string | null | undefined): string {
+    switch (pricingType) {
+        case "Free-Trial":
+            return "Free trial";
+        case "Freemium":
+            return "Freemium";
+        case "Paid":
+            return "Paid";
+        case "Contact":
+            return "Custom pricing";
+        case "Free":
+        default:
+            return "Free";
+    }
+}
+
+function sanitizeList(values: string[] | null | undefined, limit = 6): string[] {
+    if (!Array.isArray(values)) return [];
+    return values
+        .map((value) => value?.trim())
+        .filter((value): value is string => Boolean(value))
+        .slice(0, limit);
+}
+
 export default async function ToolDetailPage({ params }: PageProps) {
     const { slug } = await params;
     const tool = await getToolBySlug(slug);
@@ -70,6 +95,36 @@ export default async function ToolDetailPage({ params }: PageProps) {
     const hasBanner = Boolean(tool.image_url);
     const toolId = tool.id;
     const toolSlug = tool.slug;
+    const featureList = sanitizeList(tool.features);
+    const useCaseList = sanitizeList(tool.use_cases);
+    const pros = sanitizeList(tool.pros_cons?.pros, 5);
+    const cons = sanitizeList(tool.pros_cons?.cons, 5);
+    const pricingLabel = formatPricingLabel(tool.pricing_type);
+    const summary = tool.short_description || tool.description || `${tool.name} overview and feature breakdown.`;
+    const faq = [
+        {
+            q: `What is ${tool.name} used for?`,
+            a: useCaseList.length > 0
+                ? `${tool.name} is commonly used for ${useCaseList.slice(0, 3).join(", ")}.`
+                : `${tool.name} is used for ${primaryCategory ? `${primaryCategory.name.toLowerCase()} workflows` : "AI-powered workflows"}.`,
+        },
+        {
+            q: `Is ${tool.name} free?`,
+            a: tool.pricing_type === "Free"
+                ? `${tool.name} is listed as free to use.`
+                : tool.pricing_type === "Freemium"
+                    ? `${tool.name} offers a freemium pricing model.`
+                    : tool.pricing_type === "Free-Trial"
+                        ? `${tool.name} offers a free trial before paid access.`
+                        : tool.pricing_type === "Contact"
+                            ? `${tool.name} uses custom pricing.`
+                            : `${tool.name} uses paid pricing.`,
+        },
+        {
+            q: `How do I compare ${tool.name} with alternatives?`,
+            a: "Review pricing, feature coverage, ratings, and similar tools on this page before visiting the product site.",
+        },
+    ];
 
     async function upvoteTool() {
         "use server";
@@ -100,12 +155,28 @@ export default async function ToolDetailPage({ params }: PageProps) {
             }
             : undefined,
     };
+    const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faq.map((item) => ({
+            "@type": "Question",
+            name: item.q,
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: item.a,
+            },
+        })),
+    };
 
     return (
         <>
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
             />
             <div className="container-main">
                 <Breadcrumbs
@@ -190,6 +261,81 @@ export default async function ToolDetailPage({ params }: PageProps) {
                                 ))}
                         </div>
 
+                        <section className="card" style={{ padding: "18px", marginTop: "20px" }}>
+                            <h2 className="section-title" style={{ fontSize: "18px", marginBottom: "10px" }}>Tool Snapshot</h2>
+                            <p style={{ margin: "0 0 14px", fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.8 }}>
+                                {summary}
+                            </p>
+                            <div style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
+                                <div className="card" style={{ padding: "14px" }}>
+                                    <p style={{ margin: "0 0 6px", fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Pricing</p>
+                                    <p style={{ margin: 0, fontSize: "15px", color: "var(--text-primary)", fontWeight: 600 }}>{pricingLabel}</p>
+                                </div>
+                                <div className="card" style={{ padding: "14px" }}>
+                                    <p style={{ margin: "0 0 6px", fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Primary category</p>
+                                    <p style={{ margin: 0, fontSize: "15px", color: "var(--text-primary)", fontWeight: 600 }}>{primaryCategory?.name || "AI Tool"}</p>
+                                </div>
+                                <div className="card" style={{ padding: "14px" }}>
+                                    <p style={{ margin: "0 0 6px", fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Publisher</p>
+                                    <p style={{ margin: 0, fontSize: "15px", color: "var(--text-primary)", fontWeight: 600 }}>{tool.publisher || "Not listed"}</p>
+                                </div>
+                                <div className="card" style={{ padding: "14px" }}>
+                                    <p style={{ margin: "0 0 6px", fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Verification</p>
+                                    <p style={{ margin: 0, fontSize: "15px", color: "var(--text-primary)", fontWeight: 600 }}>{tool.is_verified ? "Verified listing" : "Community listing"}</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        {(featureList.length > 0 || useCaseList.length > 0 || pros.length > 0 || cons.length > 0) && (
+                            <section className="section-padding section-border-t" style={{ marginTop: "28px", paddingTop: "24px" }}>
+                                <div className="section-header">
+                                    <h2 className="section-title">What To Know About {tool.name}</h2>
+                                </div>
+                                <div style={{ display: "grid", gap: "16px", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
+                                    {featureList.length > 0 && (
+                                        <article className="card" style={{ padding: "16px" }}>
+                                            <h3 style={{ margin: "0 0 10px", fontSize: "16px", color: "var(--text-primary)" }}>Key features</h3>
+                                            <ul style={{ margin: 0, paddingLeft: "18px", display: "grid", gap: "8px" }}>
+                                                {featureList.map((feature) => (
+                                                    <li key={feature} style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>{feature}</li>
+                                                ))}
+                                            </ul>
+                                        </article>
+                                    )}
+                                    {useCaseList.length > 0 && (
+                                        <article className="card" style={{ padding: "16px" }}>
+                                            <h3 style={{ margin: "0 0 10px", fontSize: "16px", color: "var(--text-primary)" }}>Best for</h3>
+                                            <ul style={{ margin: 0, paddingLeft: "18px", display: "grid", gap: "8px" }}>
+                                                {useCaseList.map((useCase) => (
+                                                    <li key={useCase} style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>{useCase}</li>
+                                                ))}
+                                            </ul>
+                                        </article>
+                                    )}
+                                    {pros.length > 0 && (
+                                        <article className="card" style={{ padding: "16px" }}>
+                                            <h3 style={{ margin: "0 0 10px", fontSize: "16px", color: "var(--text-primary)" }}>Pros</h3>
+                                            <ul style={{ margin: 0, paddingLeft: "18px", display: "grid", gap: "8px" }}>
+                                                {pros.map((pro) => (
+                                                    <li key={pro} style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>{pro}</li>
+                                                ))}
+                                            </ul>
+                                        </article>
+                                    )}
+                                    {cons.length > 0 && (
+                                        <article className="card" style={{ padding: "16px" }}>
+                                            <h3 style={{ margin: "0 0 10px", fontSize: "16px", color: "var(--text-primary)" }}>Cons</h3>
+                                            <ul style={{ margin: 0, paddingLeft: "18px", display: "grid", gap: "8px" }}>
+                                                {cons.map((con) => (
+                                                    <li key={con} style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>{con}</li>
+                                                ))}
+                                            </ul>
+                                        </article>
+                                    )}
+                                </div>
+                            </section>
+                        )}
+
                         {tool.publisher && (
                             <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: "0 0 16px" }}>
                                 Published by <strong style={{ color: "var(--text-secondary)" }}>{tool.publisher}</strong>
@@ -221,6 +367,20 @@ export default async function ToolDetailPage({ params }: PageProps) {
                         </div>
                     )}
                 </div>
+
+                <section className="section-padding section-border-t" style={{ marginTop: "28px" }}>
+                    <div className="section-header">
+                        <h2 className="section-title">{tool.name} FAQ</h2>
+                    </div>
+                    <div style={{ display: "grid", gap: "12px" }}>
+                        {faq.map((item) => (
+                            <article key={item.q} className="card" style={{ padding: "14px 16px" }}>
+                                <h3 style={{ margin: "0 0 6px", fontSize: "15px", color: "var(--text-primary)" }}>{item.q}</h3>
+                                <p style={{ margin: 0, fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.7 }}>{item.a}</p>
+                            </article>
+                        ))}
+                    </div>
+                </section>
 
                 {similarTools.length > 0 && (
                     <section className="section-padding section-border-t" style={{ marginTop: "40px" }}>
