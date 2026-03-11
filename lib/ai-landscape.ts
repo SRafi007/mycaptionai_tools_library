@@ -1,19 +1,19 @@
 export interface AiLandscapeTool {
     name: string;
     slug: string;
+    published_on?: string;
+    description?: string;
 }
 
 export interface AiLandscapeRow {
     country: string;
     iso: string;
     company: string;
-    published_on: string;
     tools: AiLandscapeTool[];
 }
 
 export interface CountryCompany {
     name: string;
-    publishedOn: string;
 }
 
 export interface CountryLandscape {
@@ -90,8 +90,8 @@ export function aggregateLandscapeByCountry(rows: AiLandscapeRow[]): CountryLand
                 iso,
                 companies: new Map(),
                 tools: new Map(),
-                firstPublishedOn: row.published_on || null,
-                lastPublishedOn: row.published_on || null,
+                firstPublishedOn: null,
+                lastPublishedOn: null,
             });
         }
 
@@ -102,7 +102,6 @@ export function aggregateLandscapeByCountry(rows: AiLandscapeRow[]): CountryLand
         if (companyName) {
             countryEntry.companies.set(companyName.toLowerCase(), {
                 name: companyName,
-                publishedOn: row.published_on,
             });
         }
 
@@ -113,15 +112,17 @@ export function aggregateLandscapeByCountry(rows: AiLandscapeRow[]): CountryLand
             countryEntry.tools.set(toolKey, {
                 name: toolName,
                 slug: tool.slug?.trim() || "",
+                published_on: tool.published_on,
+                description: tool.description,
             });
-        }
 
-        if (row.published_on) {
-            if (!countryEntry.firstPublishedOn || row.published_on < countryEntry.firstPublishedOn) {
-                countryEntry.firstPublishedOn = row.published_on;
-            }
-            if (!countryEntry.lastPublishedOn || row.published_on > countryEntry.lastPublishedOn) {
-                countryEntry.lastPublishedOn = row.published_on;
+            if (tool.published_on) {
+                if (!countryEntry.firstPublishedOn || tool.published_on < countryEntry.firstPublishedOn) {
+                    countryEntry.firstPublishedOn = tool.published_on;
+                }
+                if (!countryEntry.lastPublishedOn || tool.published_on > countryEntry.lastPublishedOn) {
+                    countryEntry.lastPublishedOn = tool.published_on;
+                }
             }
         }
     }

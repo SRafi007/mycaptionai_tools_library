@@ -92,10 +92,10 @@ export default async function CountryLandscapePage({ params }: PageProps) {
                 </p>
                 <div className="country-detail-meta">
                     <span className="country-map-metric-chip">
-                        First company date: {formatDate(countryEntry.firstPublishedOn)}
+                        First tool date: {formatDate(countryEntry.firstPublishedOn)}
                     </span>
                     <span className="country-map-metric-chip">
-                        Latest company date: {formatDate(countryEntry.lastPublishedOn)}
+                        Latest tool date: {formatDate(countryEntry.lastPublishedOn)}
                     </span>
                 </div>
                 <div style={{ marginTop: "14px" }}>
@@ -136,7 +136,6 @@ export default async function CountryLandscapePage({ params }: PageProps) {
                     {countryEntry.companies.map((company) => (
                         <article key={company.name} className="card country-detail-company-card">
                             <h3>{company.name}</h3>
-                            <p>Published on: {formatDate(company.publishedOn)}</p>
                         </article>
                     ))}
                 </div>

@@ -300,10 +300,10 @@ export default function AiCountryMap() {
 
                             <div className="country-map-metrics">
                                 <span className="country-map-metric-chip">
-                                    First published: {formatDate(selectedCountry.firstPublishedOn)}
+                                    First tool date: {formatDate(selectedCountry.firstPublishedOn)}
                                 </span>
                                 <span className="country-map-metric-chip">
-                                    Latest published: {formatDate(selectedCountry.lastPublishedOn)}
+                                    Latest tool date: {formatDate(selectedCountry.lastPublishedOn)}
                                 </span>
                             </div>
 
