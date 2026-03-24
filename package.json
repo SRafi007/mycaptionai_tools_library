@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "backfill:icons": "tsx scripts/backfillToolIcons.ts",
+    "landscape:sync": "node scripts/syncLandscapeTools.cjs",
     "seo:qa": "node scripts/seoQaCheck.mjs"
   },
   "dependencies": {

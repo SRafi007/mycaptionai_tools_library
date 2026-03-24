@@ -11,8 +11,8 @@ import Breadcrumbs from "@/components/breadcrumbs";
 import RatingStars from "@/components/rating-stars";
 import ToolCard from "@/components/tool-card";
 import BackToTop from "@/components/back-to-top";
+import ToolDetailVisual from "@/components/tool-detail-visual";
 import Link from "next/link";
-import Image from "next/image";
 import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 
 interface PageProps {
@@ -92,7 +92,6 @@ export default async function ToolDetailPage({ params }: PageProps) {
     const similarTools = await getSimilarTools(tool.id, categoryIds, 6);
     const primaryCategory = tool.categories[0] || null;
     const longDescription = tool.long_description || tool.description || tool.short_description || "No description available.";
-    const hasBanner = Boolean(tool.image_url);
     const toolId = tool.id;
     const toolSlug = tool.slug;
     const featureList = sanitizeList(tool.features);
@@ -189,23 +188,16 @@ export default async function ToolDetailPage({ params }: PageProps) {
                     currentPath={`/tools/${tool.slug}`}
                 />
 
-                <div className={`tool-detail-layout ${!hasBanner ? "tool-detail-layout-no-banner" : ""}`}>
+                <div className="tool-detail-layout">
                     <div className="tool-detail-content">
                         <div className="tool-detail-header">
                             <div className="tool-detail-identity">
-                                <div
-                                    className="tool-detail-icon"
-                                    style={{
-                                        background:
-                                            tool.icon_url || tool.image_url
-                                                ? `url(${tool.icon_url || tool.image_url}) center/cover`
-                                                : "var(--accent-muted)",
-                                    }}
-                                >
-                                    {!tool.icon_url && !tool.image_url && (
-                                        <span>{tool.name.charAt(0).toUpperCase()}</span>
-                                    )}
-                                </div>
+                                <ToolDetailVisual
+                                    variant="icon"
+                                    name={tool.name}
+                                    imageUrl={tool.image_url}
+                                    iconUrl={tool.icon_url}
+                                />
                                 <div>
                                     <h1 className="tool-detail-name">{tool.name}</h1>
                                     <div className="tool-detail-meta">
@@ -353,19 +345,15 @@ export default async function ToolDetailPage({ params }: PageProps) {
                         )}
                     </div>
 
-                    {hasBanner && (
-                        <div className="tool-detail-banner">
-                            <Image
-                                src={tool.image_url || absoluteUrl(DEFAULT_OG_IMAGE_PATH)}
-                                alt={`${tool.name} screenshot`}
-                                width={1200}
-                                height={675}
-                                sizes="(max-width: 1024px) 100vw, 40vw"
-                                priority
-                                style={{ width: "100%", height: "auto" }}
-                            />
-                        </div>
-                    )}
+                    <ToolDetailVisual
+                        variant="banner"
+                        name={tool.name}
+                        imageUrl={tool.image_url}
+                        iconUrl={tool.icon_url}
+                        pricingLabel={pricingLabel}
+                        category={primaryCategory?.name || "AI Tool"}
+                        isVerified={tool.is_verified}
+                    />
                 </div>
 
                 <section className="section-padding section-border-t" style={{ marginTop: "28px" }}>
