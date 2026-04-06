@@ -1,55 +1,91 @@
 -- ============================================================
--- MyCaptionAI - Schema Update V4
--- New source-ready columns + ingestion metadata
--- Run this AFTER schema.sql / existing updates
+-- MyCaptionAI — Schema Update V4
+-- Ecosystems & Playbooks
+-- Run this in Supabase Dashboard → SQL Editor
 -- ============================================================
 
--- ------------------------------------------------------------
--- 1) tools table: preserve raw pricing + normalized URL + quality
--- ------------------------------------------------------------
-ALTER TABLE IF EXISTS tools
-  ADD COLUMN IF NOT EXISTS pricing_label_raw TEXT,
-  ADD COLUMN IF NOT EXISTS starting_price_text TEXT,
-  ADD COLUMN IF NOT EXISTS currency_code TEXT,
-  ADD COLUMN IF NOT EXISTS canonical_url TEXT,
-  ADD COLUMN IF NOT EXISTS quality_score INT DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS is_description_noisy BOOLEAN DEFAULT FALSE,
-  ADD COLUMN IF NOT EXISTS last_seen_at TIMESTAMPTZ;
+-- ────────────────────────────────────────────────
+-- 1. ECOSYSTEMS
+-- ────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS ecosystems (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT UNIQUE NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  description TEXT,
+  icon_url TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1
-    FROM pg_constraint
-    WHERE conname = 'tools_quality_score_range_ck'
-  ) THEN
-    ALTER TABLE tools
-      ADD CONSTRAINT tools_quality_score_range_ck
-      CHECK (quality_score >= 0 AND quality_score <= 100);
-  END IF;
-END $$;
+ALTER TABLE ecosystems ENABLE ROW LEVEL SECURITY;
 
-CREATE INDEX IF NOT EXISTS idx_tools_canonical_url ON tools(canonical_url);
-CREATE INDEX IF NOT EXISTS idx_tools_last_seen_at ON tools(last_seen_at DESC);
-CREATE INDEX IF NOT EXISTS idx_tools_quality_score ON tools(quality_score DESC);
-CREATE INDEX IF NOT EXISTS idx_tools_source_name ON tools(source);
+CREATE POLICY "Public ecosystems are viewable by everyone" ON ecosystems FOR SELECT USING (true);
+CREATE POLICY "Admins can insert ecosystems" ON ecosystems FOR INSERT WITH CHECK (auth.role() = 'service_role');
+CREATE POLICY "Admins can update ecosystems" ON ecosystems FOR UPDATE USING (auth.role() = 'service_role');
+CREATE POLICY "Admins can delete ecosystems" ON ecosystems FOR DELETE USING (auth.role() = 'service_role');
 
--- ------------------------------------------------------------
--- 2) scraped_tools table: keep raw payload + ingestion batch metadata
--- ------------------------------------------------------------
-ALTER TABLE IF EXISTS scraped_tools
-  ADD COLUMN IF NOT EXISTS long_description TEXT,
-  ADD COLUMN IF NOT EXISTS source_name TEXT DEFAULT 'futurepedia',
-  ADD COLUMN IF NOT EXISTS source_raw JSONB DEFAULT '{}'::jsonb,
-  ADD COLUMN IF NOT EXISTS ingestion_batch_id TEXT,
-  ADD COLUMN IF NOT EXISTS canonical_url TEXT,
-  ADD COLUMN IF NOT EXISTS ingested_at TIMESTAMPTZ DEFAULT NOW();
+-- ────────────────────────────────────────────────
+-- 2. ECOSYSTEM TOOLS (Junction)
+-- ────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS ecosystem_tools (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  ecosystem_id UUID REFERENCES ecosystems(id) ON DELETE CASCADE NOT NULL,
+  tool_id UUID REFERENCES tools(id) ON DELETE CASCADE NOT NULL,
+  role_category TEXT, -- e.g., 'Official UI', 'Developer SDK'
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(ecosystem_id, tool_id)
+);
 
-CREATE INDEX IF NOT EXISTS idx_scraped_tools_source_name ON scraped_tools(source_name);
-CREATE INDEX IF NOT EXISTS idx_scraped_tools_ingestion_batch_id ON scraped_tools(ingestion_batch_id);
-CREATE INDEX IF NOT EXISTS idx_scraped_tools_slug ON scraped_tools(slug);
+ALTER TABLE ecosystem_tools ENABLE ROW LEVEL SECURITY;
 
--- ------------------------------------------------------------
--- 3) Notes
--- featured_tools/trending_tools/trending_categories stay unchanged
--- ------------------------------------------------------------
+CREATE POLICY "Public ecosystem_tools are viewable by everyone" ON ecosystem_tools FOR SELECT USING (true);
+CREATE POLICY "Admins can insert ecosystem_tools" ON ecosystem_tools FOR INSERT WITH CHECK (auth.role() = 'service_role');
+CREATE POLICY "Admins can update ecosystem_tools" ON ecosystem_tools FOR UPDATE USING (auth.role() = 'service_role');
+CREATE POLICY "Admins can delete ecosystem_tools" ON ecosystem_tools FOR DELETE USING (auth.role() = 'service_role');
+
+-- ────────────────────────────────────────────────
+-- 3. PLAYBOOKS
+-- ────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS playbooks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  description TEXT,
+  ecosystem_id UUID REFERENCES ecosystems(id) ON DELETE SET NULL,
+  author_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  is_published BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE playbooks ENABLE ROW LEVEL SECURITY;
+
+-- Note: In the future, we can update the SELECT policy to allow authors to see their unpublished playbooks.
+-- For now, public can see published, admins can see all.
+CREATE POLICY "Published playbooks are viewable by everyone" ON playbooks FOR SELECT USING (is_published = true OR auth.role() = 'service_role');
+CREATE POLICY "Admins can insert playbooks" ON playbooks FOR INSERT WITH CHECK (auth.role() = 'service_role');
+CREATE POLICY "Admins can update playbooks" ON playbooks FOR UPDATE USING (auth.role() = 'service_role');
+CREATE POLICY "Admins can delete playbooks" ON playbooks FOR DELETE USING (auth.role() = 'service_role');
+
+-- ────────────────────────────────────────────────
+-- 4. PLAYBOOK TOOLS (Junction)
+-- ────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS playbook_tools (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  playbook_id UUID REFERENCES playbooks(id) ON DELETE CASCADE NOT NULL,
+  tool_id UUID REFERENCES tools(id) ON DELETE CASCADE NOT NULL,
+  step_order INT NOT NULL DEFAULT 0,
+  step_description TEXT, -- Specific instructions for what this tool does in this playbook step
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE playbook_tools ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public playbook_tools are viewable by everyone" ON playbook_tools FOR SELECT USING (true);
+CREATE POLICY "Admins can insert playbook_tools" ON playbook_tools FOR INSERT WITH CHECK (auth.role() = 'service_role');
+CREATE POLICY "Admins can update playbook_tools" ON playbook_tools FOR UPDATE USING (auth.role() = 'service_role');
+CREATE POLICY "Admins can delete playbook_tools" ON playbook_tools FOR DELETE USING (auth.role() = 'service_role');
+
+-- ============================================================
+-- DONE! Tables created and RLS configured.
+-- ============================================================

@@ -8,6 +8,10 @@ import SearchBar from "@/components/search-bar";
 import BackToTop from "@/components/back-to-top";
 import Link from "next/link";
 import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
+import { getEcosystems } from "@/lib/db/ecosystems";
+import { getPublishedPlaybooks } from "@/lib/db/playbooks";
+import EcosystemCard from "@/components/ecosystem-card";
+import PlaybookCard from "@/components/playbook-card";
 
 export const revalidate = 60;
 
@@ -37,12 +41,14 @@ export default async function HomePage() {
   const featuredCount = (settings.featured_count as number) || 6;
   const trendingCount = (settings.trending_count as number) || 6;
 
-  const [featuredTools, trendingTools, trendingCategories, categories, toolCount] = await Promise.all([
+  const [featuredTools, trendingTools, trendingCategories, categories, toolCount, ecosystems, playbooks] = await Promise.all([
     getFeaturedTools(featuredCount),
     getTrendingTools(trendingCount),
     getTrendingCategories(10),
     getTopCategories(12),
     getToolCount(),
+    getEcosystems(),
+    getPublishedPlaybooks(),
   ]);
 
   // const heroSubtitle = "Compare trusted AI tools and choose with confidence.";
@@ -94,7 +100,44 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section-padding">
+      {/* NEW: Ecosystems & Playbooks */}
+      <section className="section-padding" style={{ background: "linear-gradient(to bottom, var(--bg-surface-hover), var(--bg-primary))" }}>
+        <div className="container-main">
+          <div className="section-header" style={{ marginBottom: "12px" }}>
+            <h2 className="section-title" style={{ fontSize: "28px" }}>Explore the AI Giants</h2>
+            <Link href="/ecosystems" className="btn-outline">
+              All ecosystems &rarr;
+            </Link>
+          </div>
+          <p style={{ color: "var(--text-secondary)", marginBottom: "36px", fontSize: "16px", maxWidth: "600px" }}>
+            The era of 10,000 fragmented tools is over. Discover the trusted UI clients, frameworks, and playbooks built around the major AI foundational models.
+          </p>
+
+          <div className="tools-grid" style={{ marginBottom: "48px" }}>
+             {ecosystems.slice(0, 4).map((eco) => (
+                <EcosystemCard key={eco.id} ecosystem={eco} />
+             ))}
+          </div>
+
+          {playbooks.length > 0 && (
+             <>
+                <div className="section-header" style={{ marginBottom: "16px" }}>
+                  <h2 className="section-title">Trending Tech Stacks</h2>
+                  <Link href="/playbooks" className="btn-ghost">
+                    All playbooks &rarr;
+                  </Link>
+                </div>
+                <div className="tools-grid">
+                   {playbooks.slice(0, 3).map((playbook) => (
+                      <PlaybookCard key={playbook.id} playbook={playbook} />
+                   ))}
+                </div>
+             </>
+          )}
+        </div>
+      </section>
+
+      <section className="section-padding section-border-t">
         <div className="container-main">
           <div className="discovery-layout">
             <aside className="popular-categories-panel">
