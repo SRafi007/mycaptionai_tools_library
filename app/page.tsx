@@ -6,9 +6,10 @@ import ToolCard from "@/components/tool-card";
 import CategoryCard from "@/components/category-card";
 import SearchBar from "@/components/search-bar";
 import BackToTop from "@/components/back-to-top";
+import AnimatedCounter from "@/components/animated-counter";
 import Link from "next/link";
 import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
-import { getEcosystems } from "@/lib/db/ecosystems";
+import { getEcosystemsWithPreview } from "@/lib/db/ecosystems";
 import { getPublishedPlaybooks } from "@/lib/db/playbooks";
 import EcosystemCard from "@/components/ecosystem-card";
 import PlaybookCard from "@/components/playbook-card";
@@ -47,12 +48,12 @@ export default async function HomePage() {
     getTrendingCategories(10),
     getTopCategories(12),
     getToolCount(),
-    getEcosystems(),
+    getEcosystemsWithPreview(5),
     getPublishedPlaybooks(),
   ]);
 
-  // const heroSubtitle = "Compare trusted AI tools and choose with confidence.";
-  const heroLabel = "Discover 4,266+ AI Tools";
+  const trustedTools = featuredTools.filter((tool) => tool.icon_url).slice(0, 7);
+
   const homeSchema = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -73,66 +74,112 @@ export default async function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeSchema) }} />
-      <section className="hero dot-grid">
-        <div className="hero-accent" aria-hidden="true" />
+      <section className="hero hero-v2">
+        <div className="hero-orb hero-orb-a" aria-hidden="true" />
+        <div className="hero-orb hero-orb-b" aria-hidden="true" />
         <div className="hero-content">
-          <p className="hero-label">{heroLabel}</p>
+          <span className="hero-eyebrow">
+            <span className="hero-eyebrow-dot" aria-hidden="true" />
+            Discover {toolCount.toLocaleString()}+ AI Tools
+          </span>
           <h1 className="hero-title">
             <span>Best AI Tools Directory</span>
-            <span>for Creators, Marketers, and Teams</span>
+            <span className="hero-title-accent">for Creators, Marketers &amp; Teams</span>
           </h1>
-          {/* <p className="hero-subtitle">{heroSubtitle}</p> */}
+          <p className="hero-subtitle">
+            Compare trusted AI tools across writing, video, image, and productivity — and choose the right stack with confidence.
+          </p>
           <SearchBar />
+          <div className="hero-cta-row">
+            <Link href="/ai-tools" className="btn-primary hero-cta-primary">
+              Browse all tools &rarr;
+            </Link>
+            <Link href="/submit" className="btn-ghost hero-cta-ghost">
+              Submit a tool
+            </Link>
+          </div>
           <div className="hero-stats">
             <div className="hero-stat">
-              <div className="hero-stat-value">{toolCount.toLocaleString()}+</div>
+              <div className="hero-stat-value">
+                <AnimatedCounter value={toolCount} suffix="+" />
+              </div>
               <div className="hero-stat-label">AI Tools</div>
             </div>
+            <span className="hero-stat-divider" aria-hidden="true" />
             <div className="hero-stat">
-              <div className="hero-stat-value">{categories.length}+</div>
+              <div className="hero-stat-value">
+                <AnimatedCounter value={categories.length} suffix="+" />
+              </div>
               <div className="hero-stat-label">Categories</div>
             </div>
+            <span className="hero-stat-divider" aria-hidden="true" />
             <div className="hero-stat">
               <div className="hero-stat-value">Free</div>
               <div className="hero-stat-label">To Use</div>
             </div>
           </div>
+
+          {trustedTools.length > 0 && (
+            <div className="hero-trusted">
+              <span className="hero-trusted-label">Featuring tools from</span>
+              <div className="hero-trusted-logos">
+                {trustedTools.map((tool) => (
+                  <Link
+                    key={tool.id}
+                    href={`/tools/${tool.slug}`}
+                    className="hero-trusted-logo"
+                    title={tool.name}
+                    aria-label={tool.name}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={tool.icon_url!} alt="" loading="lazy" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* NEW: Ecosystems & Playbooks */}
-      <section className="section-padding" style={{ background: "linear-gradient(to bottom, var(--bg-surface-hover), var(--bg-primary))" }}>
+      {/* Ecosystems & Playbooks */}
+      <section className="section-padding ecosystem-section">
         <div className="container-main">
-          <div className="section-header" style={{ marginBottom: "12px" }}>
-            <h2 className="section-title" style={{ fontSize: "28px" }}>Explore the AI Giants</h2>
-            <Link href="/ecosystems" className="btn-outline">
-              All ecosystems &rarr;
-            </Link>
+          <div className="ecosystem-section-header">
+            <span className="hero-eyebrow ecosystem-eyebrow">
+              <span className="hero-eyebrow-dot" aria-hidden="true" />
+              Ecosystems
+            </span>
+            <div className="ecosystem-section-title-row">
+              <h2 className="section-title ecosystem-section-title">Explore the AI Giants</h2>
+              <Link href="/ecosystems" className="btn-outline">
+                All ecosystems &rarr;
+              </Link>
+            </div>
+            <p className="ecosystem-section-lede">
+              The era of 10,000 fragmented tools is over. Discover the trusted UI clients, frameworks, and playbooks built around the major AI foundational models.
+            </p>
           </div>
-          <p style={{ color: "var(--text-secondary)", marginBottom: "36px", fontSize: "16px", maxWidth: "600px" }}>
-            The era of 10,000 fragmented tools is over. Discover the trusted UI clients, frameworks, and playbooks built around the major AI foundational models.
-          </p>
 
-          <div className="tools-grid" style={{ marginBottom: "48px" }}>
-             {ecosystems.slice(0, 4).map((eco) => (
-                <EcosystemCard key={eco.id} ecosystem={eco} />
-             ))}
+          <div className="ecosystem-grid">
+            {ecosystems.slice(0, 4).map((eco) => (
+              <EcosystemCard key={eco.id} ecosystem={eco} />
+            ))}
           </div>
 
           {playbooks.length > 0 && (
-             <>
-                <div className="section-header" style={{ marginBottom: "16px" }}>
-                  <h2 className="section-title">Trending Tech Stacks</h2>
-                  <Link href="/playbooks" className="btn-ghost">
-                    All playbooks &rarr;
-                  </Link>
-                </div>
-                <div className="tools-grid">
-                   {playbooks.slice(0, 3).map((playbook) => (
-                      <PlaybookCard key={playbook.id} playbook={playbook} />
-                   ))}
-                </div>
-             </>
+            <div className="ecosystem-playbooks">
+              <div className="section-header">
+                <h2 className="section-title">Trending Tech Stacks</h2>
+                <Link href="/playbooks" className="btn-ghost">
+                  All playbooks &rarr;
+                </Link>
+              </div>
+              <div className="tools-grid">
+                {playbooks.slice(0, 3).map((playbook) => (
+                  <PlaybookCard key={playbook.id} playbook={playbook} />
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </section>

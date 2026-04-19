@@ -1,5 +1,47 @@
 import { supabaseAdmin as supabase } from "@/lib/supabase/admin";
-import { Ecosystem, EcosystemWithTools } from "../../types/ecosystem";
+import { Ecosystem, EcosystemWithTools, EcosystemWithPreview, EcosystemPreviewTool } from "../../types/ecosystem";
+
+export async function getEcosystemsWithPreview(previewLimit = 5): Promise<EcosystemWithPreview[]> {
+    const [{ data: ecosystems, error: ecoError }, { data: junction, error: jErr }] = await Promise.all([
+        supabase.from("ecosystems").select("*").order("name", { ascending: true }),
+        supabase
+            .from("ecosystem_tools")
+            .select("ecosystem_id, tools(id, name, slug, icon_url, upvotes)"),
+    ]);
+
+    if (ecoError || !ecosystems) {
+        console.error("Error fetching ecosystems:", ecoError);
+        return [];
+    }
+    if (jErr) {
+        console.error("Error fetching ecosystem_tools:", jErr);
+    }
+
+    const grouped = new Map<string, { tool: EcosystemPreviewTool; upvotes: number }[]>();
+    type JunctionRow = {
+        ecosystem_id: string;
+        tools: { id: string; name: string; slug: string; icon_url: string | null; upvotes: number | null } | null;
+    };
+    for (const row of ((junction || []) as unknown) as JunctionRow[]) {
+        if (!row.tools) continue;
+        const list = grouped.get(row.ecosystem_id) || [];
+        list.push({
+            tool: { id: row.tools.id, name: row.tools.name, slug: row.tools.slug, icon_url: row.tools.icon_url },
+            upvotes: row.tools.upvotes ?? 0,
+        });
+        grouped.set(row.ecosystem_id, list);
+    }
+
+    return (ecosystems as Ecosystem[]).map((eco) => {
+        const list = grouped.get(eco.id) || [];
+        list.sort((a, b) => b.upvotes - a.upvotes);
+        return {
+            ...eco,
+            tool_count: list.length,
+            preview_tools: list.slice(0, previewLimit).map((entry) => entry.tool),
+        };
+    });
+}
 
 export async function getEcosystems(): Promise<Ecosystem[]> {
     const { data, error } = await supabase

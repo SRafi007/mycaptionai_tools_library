@@ -30,25 +30,23 @@ const COUNTRY_ACCENTS: Record<string, string> = {
     JP: "#ff55b9",
 };
 
-const GRID_X_LINES = Array.from({ length: 17 }, (_, index) => Math.round((index * MAP_WIDTH) / 16));
-const GRID_Y_LINES = Array.from({ length: 11 }, (_, index) => Math.round((index * MAP_HEIGHT) / 10));
-const COUNTRY_CALLOUT_OFFSETS: Record<string, { dx: number; dy: number }> = {
-    US: { dx: -12, dy: -58 },
-    CA: { dx: -32, dy: -52 },
-    GB: { dx: -6, dy: -52 },
-    FR: { dx: 18, dy: -56 },
-    DE: { dx: 18, dy: -54 },
-    NL: { dx: -18, dy: -50 },
-    NO: { dx: -6, dy: -46 },
-    IL: { dx: 12, dy: -46 },
-    AE: { dx: 14, dy: -45 },
-    IN: { dx: 24, dy: -52 },
-    CN: { dx: 24, dy: -56 },
-    KR: { dx: 24, dy: -50 },
-    JP: { dx: 26, dy: -52 },
+const LABEL_POSITIONS: Record<string, "top" | "bottom" | "left" | "right"> = {
+    US: "bottom",
+    CA: "top",
+    GB: "top",
+    FR: "bottom",
+    DE: "top",
+    NL: "left",
+    NO: "top",
+    IL: "bottom",
+    AE: "bottom",
+    IN: "bottom",
+    CN: "bottom",
+    KR: "right",
+    JP: "right",
 };
 
-function getMarkerAccent(iso: string): string {
+function getAccent(iso: string): string {
     return COUNTRY_ACCENTS[iso] || "#5ad8ff";
 }
 
@@ -78,14 +76,12 @@ export default function AiCountryMap() {
     const [countries, setCountries] = useState<CountryLandscape[]>([]);
     const [selectedIso, setSelectedIso] = useState<string | null>(null);
     const [hoveredIso, setHoveredIso] = useState<string | null>(null);
-    const [supportsHover, setSupportsHover] = useState(true);
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
 
     useEffect(() => {
         let mounted = true;
-
-        const loadLandscape = async () => {
+        (async () => {
             try {
                 const dataModule = await import("@/data/global_ai_landscape.json");
                 const aggregated = aggregateLandscapeByCountry(dataModule.default as AiLandscapeRow[]);
@@ -100,30 +96,10 @@ export default function AiCountryMap() {
             } finally {
                 if (mounted) setLoading(false);
             }
-        };
-
-        loadLandscape();
-
+        })();
         return () => {
             mounted = false;
         };
-    }, []);
-
-    useEffect(() => {
-        if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
-
-        const query = window.matchMedia("(hover: hover) and (pointer: fine)");
-        const sync = () => setSupportsHover(query.matches);
-        sync();
-
-        const handleChange = () => sync();
-        if (typeof query.addEventListener === "function") {
-            query.addEventListener("change", handleChange);
-            return () => query.removeEventListener("change", handleChange);
-        }
-
-        query.addListener(handleChange);
-        return () => query.removeListener(handleChange);
     }, []);
 
     const countryMap = useMemo(
@@ -131,31 +107,59 @@ export default function AiCountryMap() {
         [countries]
     );
 
+    const sortedByCompanies = useMemo(
+        () => [...countries].sort((a, b) => b.companyCount - a.companyCount),
+        [countries]
+    );
+
     const selectedCountry = selectedIso ? countryMap.get(selectedIso) || null : null;
     const highlightedTools = selectedCountry?.tools.slice(0, TOP_TOOL_LIMIT) || [];
-    const selectedAccent = selectedCountry ? getMarkerAccent(selectedCountry.iso) : "#5ad8ff";
+    const selectedAccent = selectedCountry ? getAccent(selectedCountry.iso) : "#5ad8ff";
     const shellStyle = { "--country-accent": selectedAccent } as CSSProperties;
-    const calloutIso = supportsHover ? hoveredIso : hoveredIso || selectedIso;
-    const calloutCountry = calloutIso ? countryMap.get(calloutIso) || null : null;
 
     if (loading) {
-        return (
-            <div className="card country-map-loading">
-                Loading AI innovation map...
-            </div>
-        );
+        return <div className="card country-map-loading">Loading AI innovation map...</div>;
     }
 
     if (loadError) {
-        return (
-            <div className="card country-map-loading">
-                {loadError}
-            </div>
-        );
+        return <div className="card country-map-loading">{loadError}</div>;
     }
 
     return (
         <div className="country-map-stack" style={shellStyle}>
+            <div className="country-rail" role="list" aria-label="AI leading countries">
+                {sortedByCompanies.map((country) => {
+                    const accent = getAccent(country.iso);
+                    const isActive = country.iso === selectedIso;
+                    const style = { "--rail-accent": accent } as CSSProperties;
+                    return (
+                        <button
+                            key={`rail-${country.iso}`}
+                            type="button"
+                            role="listitem"
+                            className={`country-rail-card ${isActive ? "is-active" : ""}`}
+                            style={style}
+                            onClick={() => setSelectedIso(country.iso)}
+                            onMouseEnter={() => setHoveredIso(country.iso)}
+                            onMouseLeave={() => setHoveredIso(null)}
+                            aria-pressed={isActive}
+                        >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={`https://flagcdn.com/w40/${country.iso.toLowerCase()}.png`}
+                                alt=""
+                                width={24}
+                                height={18}
+                                loading="lazy"
+                                className="country-rail-flag"
+                            />
+                            <span className="country-rail-name">{country.country}</span>
+                            <span className="country-rail-count">{country.companyCount}</span>
+                        </button>
+                    );
+                })}
+            </div>
+
             <div className="country-map-shell">
                 <section className="card country-map-canvas">
                     <div className="country-map-stage">
@@ -163,38 +167,23 @@ export default function AiCountryMap() {
                             className="country-map-svg"
                             viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
                             role="img"
-                            aria-label="Global world map with highlighted AI country boundaries"
+                            aria-label="World map showing countries leading in AI innovation"
                         >
                             <defs>
-                                <linearGradient id="country-map-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#f3f6fa" />
-                                    <stop offset="54%" stopColor="#e8edf4" />
-                                    <stop offset="100%" stopColor="#e1e8f0" />
-                                </linearGradient>
-                                <radialGradient id="country-map-glow" cx="50%" cy="45%" r="65%">
-                                    <stop offset="0%" stopColor="rgba(255, 255, 255, 0.45)" />
-                                    <stop offset="100%" stopColor="rgba(208, 220, 233, 0)" />
+                                <radialGradient id="country-map-vignette" cx="50%" cy="50%" r="70%">
+                                    <stop offset="60%" stopColor="rgba(5, 10, 22, 0)" />
+                                    <stop offset="100%" stopColor="rgba(2, 4, 10, 0.85)" />
                                 </radialGradient>
+                                <filter id="country-map-glow" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="2.4" result="coloredBlur" />
+                                    <feMerge>
+                                        <feMergeNode in="coloredBlur" />
+                                        <feMergeNode in="SourceGraphic" />
+                                    </feMerge>
+                                </filter>
                             </defs>
 
                             <rect x="0" y="0" width={MAP_WIDTH} height={MAP_HEIGHT} className="country-map-bg" />
-                            <ellipse
-                                cx={MAP_WIDTH / 2}
-                                cy={MAP_HEIGHT / 2}
-                                rx={MAP_WIDTH * 0.46}
-                                ry={MAP_HEIGHT * 0.42}
-                                fill="url(#country-map-glow)"
-                                className="country-map-atmosphere"
-                            />
-
-                            <g className="country-map-graticule">
-                                {GRID_X_LINES.map((x) => (
-                                    <line key={`x-${x}`} x1={x} y1={0} x2={x} y2={MAP_HEIGHT} />
-                                ))}
-                                {GRID_Y_LINES.map((y) => (
-                                    <line key={`y-${y}`} x1={0} y1={y} x2={MAP_WIDTH} y2={y} />
-                                ))}
-                            </g>
 
                             <image
                                 href="/world-map-equirect.svg"
@@ -206,23 +195,34 @@ export default function AiCountryMap() {
                                 className="country-map-world-image"
                             />
 
+                            <rect
+                                x="0"
+                                y="0"
+                                width={MAP_WIDTH}
+                                height={MAP_HEIGHT}
+                                fill="url(#country-map-vignette)"
+                                pointerEvents="none"
+                            />
+
                             <g>
                                 {countries.map((country) => {
                                     const boundaryPath = (countryBoundaryPaths as Record<string, string>)[country.iso];
                                     if (!boundaryPath) return null;
 
-                                    const accent = getMarkerAccent(country.iso);
+                                    const accent = getAccent(country.iso);
                                     const isFocused = country.iso === selectedIso || country.iso === hoveredIso;
+                                    const isSelected = country.iso === selectedIso;
 
                                     return (
                                         <path
                                             key={`boundary-${country.iso}`}
                                             d={boundaryPath}
-                                            fill={hexToRgba(accent, isFocused ? 0.3 : 0.15)}
-                                            stroke={hexToRgba(accent, isFocused ? 1 : 0.9)}
-                                            strokeWidth={isFocused ? 2.6 : 1.8}
+                                            fill={hexToRgba(accent, isSelected ? 0.55 : isFocused ? 0.42 : 0.28)}
+                                            stroke={accent}
+                                            strokeWidth={isFocused ? 2.2 : 1.4}
                                             vectorEffect="non-scaling-stroke"
                                             className={`country-map-country-boundary ${isFocused ? "is-active" : ""}`}
+                                            filter={isFocused ? "url(#country-map-glow)" : undefined}
                                             onMouseEnter={() => setHoveredIso(country.iso)}
                                             onMouseLeave={() => setHoveredIso(null)}
                                             onClick={() => setSelectedIso(country.iso)}
@@ -230,48 +230,75 @@ export default function AiCountryMap() {
                                     );
                                 })}
                             </g>
+
+                            <g>
+                                {countries.map((country) => {
+                                    const marker = COUNTRY_MARKER_COORDS[country.iso];
+                                    if (!marker) return null;
+                                    const accent = getAccent(country.iso);
+                                    const isSelected = country.iso === selectedIso;
+                                    return (
+                                        <g key={`marker-${country.iso}`} transform={`translate(${marker.x}, ${marker.y})`}>
+                                            {isSelected && (
+                                                <circle
+                                                    r="8"
+                                                    fill="none"
+                                                    stroke={accent}
+                                                    strokeWidth="1.4"
+                                                    className="country-map-marker-pulse"
+                                                />
+                                            )}
+                                            <circle
+                                                r="5"
+                                                fill={accent}
+                                                stroke="rgba(5, 10, 22, 0.9)"
+                                                strokeWidth="1.6"
+                                                className="country-map-marker-dot"
+                                            />
+                                        </g>
+                                    );
+                                })}
+                            </g>
                         </svg>
 
-                        {calloutCountry && (() => {
-                            const marker = COUNTRY_MARKER_COORDS[calloutCountry.iso];
-                            if (!marker) return null;
-                            const accent = getMarkerAccent(calloutCountry.iso);
-                            const offset = COUNTRY_CALLOUT_OFFSETS[calloutCountry.iso] || { dx: 12, dy: -50 };
-                            const companyPreview = calloutCountry.companies.slice(0, 3).map((item) => item.name).join(" | ");
-                            const extraCount = Math.max(0, calloutCountry.companies.length - 3);
-                            const style = {
-                                left: `${(marker.x / MAP_WIDTH) * 100}%`,
-                                top: `${(marker.y / MAP_HEIGHT) * 100}%`,
-                                transform: `translate(${offset.dx}px, ${offset.dy}px)`,
-                                "--callout-accent": accent,
-                            } as CSSProperties;
+                        <div className="country-map-overlay-cards">
+                            {countries.map((country) => {
+                                const marker = COUNTRY_MARKER_COORDS[country.iso];
+                                if (!marker) return null;
+                                const accent = getAccent(country.iso);
+                                const isFocused = country.iso === selectedIso || country.iso === hoveredIso;
+                                const position = LABEL_POSITIONS[country.iso] || "bottom";
+                                const style = {
+                                    left: `${(marker.x / MAP_WIDTH) * 100}%`,
+                                    top: `${(marker.y / MAP_HEIGHT) * 100}%`,
+                                    "--label-accent": accent,
+                                } as CSSProperties;
 
-                            return (
-                                <div className="country-map-overlay-cards">
-                                    <div
-                                        className="country-map-overlay-card is-active"
+                                return (
+                                    <button
+                                        key={`label-${country.iso}`}
+                                        type="button"
+                                        className={`country-map-label pos-${position} ${isFocused ? "is-focused" : ""}`}
                                         style={style}
+                                        onClick={() => setSelectedIso(country.iso)}
+                                        onMouseEnter={() => setHoveredIso(country.iso)}
+                                        onMouseLeave={() => setHoveredIso(null)}
+                                        aria-label={`Select ${country.country}`}
                                     >
-                                        <span className="country-map-overlay-title">
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img
-                                                src={`https://flagcdn.com/w40/${calloutCountry.iso.toLowerCase()}.png`}
-                                                alt={`${calloutCountry.country} flag`}
-                                                width={16}
-                                                height={12}
-                                                loading="lazy"
-                                                className="country-map-overlay-flag-icon"
-                                            />
-                                            <span>{calloutCountry.country}</span>
-                                        </span>
-                                        <span className="country-map-overlay-subline">
-                                            {companyPreview}
-                                            {extraCount > 0 ? ` +${extraCount}` : ""}
-                                        </span>
-                                    </div>
-                                </div>
-                            );
-                        })()}
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                            src={`https://flagcdn.com/w40/${country.iso.toLowerCase()}.png`}
+                                            alt=""
+                                            width={18}
+                                            height={13}
+                                            loading="lazy"
+                                            className="country-map-label-flag"
+                                        />
+                                        <span className="country-map-label-text">{country.country}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 </section>
 
@@ -352,7 +379,7 @@ export default function AiCountryMap() {
                             </tr>
                         </thead>
                         <tbody>
-                            {countries.map((country) => {
+                            {sortedByCompanies.map((country) => {
                                 const isActive = country.iso === selectedIso;
                                 return (
                                     <tr

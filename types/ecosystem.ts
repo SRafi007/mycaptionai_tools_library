@@ -21,3 +21,15 @@ export interface EcosystemTool {
 export interface EcosystemWithTools extends Ecosystem {
     tools: (Tool & { role_category: string | null })[];
 }
+
+export interface EcosystemPreviewTool {
+    id: string;
+    name: string;
+    slug: string;
+    icon_url: string | null;
+}
+
+export interface EcosystemWithPreview extends Ecosystem {
+    tool_count: number;
+    preview_tools: EcosystemPreviewTool[];
+}
