@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { getCategoryBySlug, getAllCategorySlugs, getTopCategories } from "@/lib/db/categories";
+import { getCategoryBySlug, getAllCategorySlugs } from "@/lib/db/categories";
 import { getToolsByCategory } from "@/lib/db/tools";
 import Breadcrumbs from "@/components/breadcrumbs";
 import ToolCard from "@/components/tool-card";
@@ -23,21 +22,6 @@ function toTitleCase(value: string): string {
         .split("-")
         .join(" ")
         .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function collectTopValues(values: Array<string | null | undefined>, limit = 4): string[] {
-    const counts = new Map<string, number>();
-
-    for (const rawValue of values) {
-        const value = rawValue?.trim();
-        if (!value) continue;
-        counts.set(value, (counts.get(value) || 0) + 1);
-    }
-
-    return Array.from(counts.entries())
-        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-        .slice(0, limit)
-        .map(([value]) => value);
 }
 
 export async function generateStaticParams() {
@@ -93,25 +77,9 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
     const currentSort = sort || "rating";
     const currentPricing = pricing || "all";
 
-    const [{ tools, total }, topCategories] = await Promise.all([
-        getToolsByCategory(category.id, currentPage, PER_PAGE, currentSort, currentPricing),
-        getTopCategories(12),
-    ]);
-
-    const relatedCategories = topCategories.filter((cat) => cat.slug !== category.slug).slice(0, 6);
+    const { tools, total } = await getToolsByCategory(category.id, currentPage, PER_PAGE, currentSort, currentPricing);
     const totalPages = Math.ceil(total / PER_PAGE);
     const categoryLabel = toTitleCase(category.slug);
-    const verifiedCount = tools.filter((tool) => tool.is_verified).length;
-    const pricingBreakdown = [
-        { label: "Free", count: tools.filter((tool) => tool.pricing_type === "Free").length },
-        { label: "Freemium", count: tools.filter((tool) => tool.pricing_type === "Freemium").length },
-        { label: "Paid", count: tools.filter((tool) => tool.pricing_type === "Paid").length },
-        { label: "Free Trial", count: tools.filter((tool) => tool.pricing_type === "Free-Trial").length },
-        { label: "Custom", count: tools.filter((tool) => tool.pricing_type === "Contact").length },
-    ].filter((entry) => entry.count > 0);
-    const commonWorkflows = collectTopValues(tools.flatMap((tool) => tool.use_cases || []), 5);
-    const notablePublishers = collectTopValues(tools.map((tool) => tool.publisher), 4);
-    const pricingSummary = pricingBreakdown.slice(0, 3).map((entry) => `${entry.count} ${entry.label.toLowerCase()}`).join(", ");
 
     const faq = [
         {
@@ -179,70 +147,6 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                         {total.toLocaleString()} tools in this category
                     </p>
                 </div>
-
-                <section className="card" style={{ padding: "18px", marginBottom: "20px" }}>
-                    <h2 className="section-title" style={{ fontSize: "18px", marginBottom: "8px" }}>How We Rank These Tools</h2>
-                    <p className="page-subtitle" style={{ maxWidth: "none" }}>
-                        Rankings combine rating quality, upvote momentum, and category relevance. Use filters to narrow by pricing and sort by your preferred signal.
-                    </p>
-                    {relatedCategories.length > 0 && (
-                        <div className="tool-detail-categories" style={{ marginTop: "12px" }}>
-                            {relatedCategories.map((cat) => (
-                                <Link key={cat.id} href={`/category/${cat.slug}`} className="tool-detail-cat-link">
-                                    {toTitleCase(cat.slug)}
-                                </Link>
-                            ))}
-                        </div>
-                    )}
-                </section>
-
-                <section className="card" style={{ padding: "18px", marginBottom: "20px" }}>
-                    <h2 className="section-title" style={{ fontSize: "18px", marginBottom: "8px" }}>{categoryLabel} Category Snapshot</h2>
-                    <p className="page-subtitle" style={{ maxWidth: "none" }}>
-                        The current result set shows {tools.length.toLocaleString()} of {total.toLocaleString()} total listings in this category.
-                        {pricingSummary ? ` Pricing on this page currently skews toward ${pricingSummary}.` : ""}
-                    </p>
-                    <div style={{ display: "grid", gap: "12px", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", marginTop: "12px" }}>
-                        <article className="card" style={{ padding: "14px" }}>
-                            <h3 style={{ margin: "0 0 6px", fontSize: "15px", color: "var(--text-primary)" }}>Visible results</h3>
-                            <p style={{ margin: 0, fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.7 }}>
-                                {tools.length.toLocaleString()} tools are shown on this page out of {total.toLocaleString()} listings in the category.
-                            </p>
-                        </article>
-                        <article className="card" style={{ padding: "14px" }}>
-                            <h3 style={{ margin: "0 0 6px", fontSize: "15px", color: "var(--text-primary)" }}>Verified listings</h3>
-                            <p style={{ margin: 0, fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.7 }}>
-                                {verifiedCount.toLocaleString()} of the visible tools are marked as verified listings.
-                            </p>
-                        </article>
-                        {pricingBreakdown.length > 0 && (
-                            <article className="card" style={{ padding: "14px" }}>
-                                <h3 style={{ margin: "0 0 6px", fontSize: "15px", color: "var(--text-primary)" }}>Pricing mix</h3>
-                                <p style={{ margin: 0, fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.7 }}>
-                                    {pricingBreakdown.slice(0, 3).map((entry) => `${entry.count} ${entry.label.toLowerCase()}`).join(", ")}.
-                                </p>
-                            </article>
-                        )}
-                        {notablePublishers.length > 0 && (
-                            <article className="card" style={{ padding: "14px" }}>
-                                <h3 style={{ margin: "0 0 6px", fontSize: "15px", color: "var(--text-primary)" }}>Notable publishers</h3>
-                                <p style={{ margin: 0, fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.7 }}>
-                                    {notablePublishers.join(", ")}.
-                                </p>
-                            </article>
-                        )}
-                    </div>
-                    {commonWorkflows.length > 0 && (
-                        <div style={{ marginTop: "14px" }}>
-                            <h3 style={{ margin: "0 0 8px", fontSize: "15px", color: "var(--text-primary)" }}>Common workflows in this result set</h3>
-                            <div className="tool-detail-categories">
-                                {commonWorkflows.map((workflow) => (
-                                    <span key={workflow} className="tool-detail-cat-link">{workflow}</span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </section>
 
                 <FilterBar
                     currentSort={currentSort}

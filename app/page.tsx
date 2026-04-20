@@ -4,15 +4,14 @@ import { getTopCategories, getTrendingCategories } from "@/lib/db/categories";
 import { getSettings } from "@/lib/db/settings";
 import ToolCard from "@/components/tool-card";
 import CategoryCard from "@/components/category-card";
-import SearchBar from "@/components/search-bar";
 import BackToTop from "@/components/back-to-top";
-import AnimatedCounter from "@/components/animated-counter";
 import Link from "next/link";
 import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 import { getEcosystemsWithPreview } from "@/lib/db/ecosystems";
 import { getPublishedPlaybooks } from "@/lib/db/playbooks";
 import EcosystemCard from "@/components/ecosystem-card";
 import PlaybookCard from "@/components/playbook-card";
+import HomeHero from "@/components/home-hero";
 
 export const revalidate = 60;
 
@@ -37,10 +36,10 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const settings = await getSettings(["featured_count", "trending_count"]);
+  const settings = await getSettings(["featured_count"]);
 
   const featuredCount = (settings.featured_count as number) || 6;
-  const trendingCount = (settings.trending_count as number) || 6;
+  const trendingCount = 12;
 
   const [featuredTools, trendingTools, trendingCategories, categories, toolCount, ecosystems, playbooks] = await Promise.all([
     getFeaturedTools(featuredCount),
@@ -51,8 +50,6 @@ export default async function HomePage() {
     getEcosystemsWithPreview(5),
     getPublishedPlaybooks(),
   ]);
-
-  const trustedTools = featuredTools.filter((tool) => tool.icon_url).slice(0, 7);
 
   const homeSchema = {
     "@context": "https://schema.org",
@@ -74,70 +71,50 @@ export default async function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeSchema) }} />
-      <section className="hero hero-v2">
-        <div className="hero-orb hero-orb-a" aria-hidden="true" />
-        <div className="hero-orb hero-orb-b" aria-hidden="true" />
-        <div className="hero-content">
-          <span className="hero-eyebrow">
-            <span className="hero-eyebrow-dot" aria-hidden="true" />
-            Discover {toolCount.toLocaleString()}+ AI Tools
-          </span>
-          <h1 className="hero-title">
-            <span>Best AI Tools Directory</span>
-            <span className="hero-title-accent">for Creators, Marketers &amp; Teams</span>
-          </h1>
-          <p className="hero-subtitle">
-            Compare trusted AI tools across writing, video, image, and productivity — and choose the right stack with confidence.
-          </p>
-          <SearchBar />
-          <div className="hero-cta-row">
-            <Link href="/ai-tools" className="btn-primary hero-cta-primary">
-              Browse all tools &rarr;
-            </Link>
-            <Link href="/submit" className="btn-ghost hero-cta-ghost">
-              Submit a tool
-            </Link>
-          </div>
-          <div className="hero-stats">
-            <div className="hero-stat">
-              <div className="hero-stat-value">
-                <AnimatedCounter value={toolCount} suffix="+" />
-              </div>
-              <div className="hero-stat-label">AI Tools</div>
-            </div>
-            <span className="hero-stat-divider" aria-hidden="true" />
-            <div className="hero-stat">
-              <div className="hero-stat-value">
-                <AnimatedCounter value={categories.length} suffix="+" />
-              </div>
-              <div className="hero-stat-label">Categories</div>
-            </div>
-            <span className="hero-stat-divider" aria-hidden="true" />
-            <div className="hero-stat">
-              <div className="hero-stat-value">Free</div>
-              <div className="hero-stat-label">To Use</div>
-            </div>
-          </div>
+      <HomeHero toolCount={toolCount} categoryCount={categories.length} />
 
-          {trustedTools.length > 0 && (
-            <div className="hero-trusted">
-              <span className="hero-trusted-label">Featuring tools from</span>
-              <div className="hero-trusted-logos">
-                {trustedTools.map((tool) => (
-                  <Link
-                    key={tool.id}
-                    href={`/tools/${tool.slug}`}
-                    className="hero-trusted-logo"
-                    title={tool.name}
-                    aria-label={tool.name}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={tool.icon_url!} alt="" loading="lazy" />
+      <section className="section-padding section-border-t">
+        <div className="container-main">
+          <div className="discovery-layout trending-discovery-layout">
+            <aside className="popular-categories-panel">
+              <div className="popular-categories-head">
+                <h2 className="section-title">Most Popular Categories</h2>
+              </div>
+              <div className="popular-categories-list">
+                {trendingCategories.map((cat) => (
+                  <Link key={cat.id} href={`/category/${cat.slug}`} className="popular-category-item">
+                    <span className="popular-category-name">{cat.name}</span>
+                    <span className="popular-category-arrow" aria-hidden="true">
+                      &rarr;
+                    </span>
                   </Link>
                 ))}
               </div>
+              <Link href="/ai-tools" className="popular-categories-cta">
+                View all categories &rarr;
+              </Link>
+            </aside>
+
+            <div className="discovery-main">
+              <div className="section-header">
+                <h2 className="section-title">Trending Now</h2>
+                <span className="section-count">By upvotes</span>
+              </div>
+
+              {trendingTools.length > 0 ? (
+                <div className="tools-grid trending-tools-grid">
+                  {trendingTools.map((tool) => (
+                    <ToolCard key={tool.id} tool={tool} showVisitButton />
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-state">
+                  <div className="empty-state-icon">&#128200;</div>
+                  <p className="empty-state-text">No trending tools yet.</p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </section>
 
@@ -155,9 +132,6 @@ export default async function HomePage() {
                 All ecosystems &rarr;
               </Link>
             </div>
-            <p className="ecosystem-section-lede">
-              The era of 10,000 fragmented tools is over. Discover the trusted UI clients, frameworks, and playbooks built around the major AI foundational models.
-            </p>
           </div>
 
           <div className="ecosystem-grid">
@@ -181,71 +155,6 @@ export default async function HomePage() {
               </div>
             </div>
           )}
-        </div>
-      </section>
-
-      <section className="section-padding section-border-t">
-        <div className="container-main">
-          <div className="discovery-layout">
-            <aside className="popular-categories-panel">
-              <div className="popular-categories-head">
-                <h2 className="section-title">Most Popular Categories</h2>
-              </div>
-              <div className="popular-categories-list">
-                {trendingCategories.map((cat) => (
-                  <Link key={cat.id} href={`/category/${cat.slug}`} className="popular-category-item">
-                    <span className="popular-category-name">{cat.name}</span>
-                    <span className="popular-category-arrow" aria-hidden="true">
-                      &rarr;
-                    </span>
-                  </Link>
-                ))}
-              </div>
-              <Link href="/ai-tools" className="popular-categories-cta">
-                View all categories &rarr;
-              </Link>
-            </aside>
-
-            <div className="discovery-main">
-              <div className="section-header">
-                <h2 className="section-title">Featured Tools</h2>
-                <span className="section-count">{featuredTools.length} tools</span>
-              </div>
-
-              {featuredTools.length > 0 ? (
-                <div className="tools-grid">
-                  {featuredTools.map((tool) => (
-                    <ToolCard key={tool.id} tool={tool} showVisitButton />
-                  ))}
-                </div>
-              ) : (
-                <div className="empty-state">
-                  <div className="empty-state-icon">🔧</div>
-                  <p className="empty-state-text">No featured tools yet. Check back soon.</p>
-                </div>
-              )}
-
-              <div className="discovery-divider" />
-
-              <div className="section-header">
-                <h2 className="section-title">Trending Now</h2>
-                <span className="section-count">By upvotes</span>
-              </div>
-
-              {trendingTools.length > 0 ? (
-                <div className="tools-grid">
-                  {trendingTools.map((tool) => (
-                    <ToolCard key={tool.id} tool={tool} showVisitButton />
-                  ))}
-                </div>
-              ) : (
-                <div className="empty-state">
-                  <div className="empty-state-icon">📈</div>
-                  <p className="empty-state-text">No trending tools yet.</p>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </section>
 

@@ -10,7 +10,13 @@ interface Suggestion {
     pricing_type: string | null;
 }
 
-export default function SearchBar({ defaultValue = "" }: { defaultValue?: string }) {
+export default function SearchBar({
+    defaultValue = "",
+    placeholder = "Search AI tools...",
+}: {
+    defaultValue?: string;
+    placeholder?: string;
+}) {
     const [query, setQuery] = useState(defaultValue);
     const [focused, setFocused] = useState(false);
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -113,7 +119,7 @@ export default function SearchBar({ defaultValue = "" }: { defaultValue?: string
                     onFocus={() => { setFocused(true); if (suggestions.length > 0) setShowSuggestions(true); }}
                     onBlur={() => { setFocused(false); setTimeout(() => setShowSuggestions(false), 200); }}
                     onKeyDown={handleKeyDown}
-                    placeholder="Search 4,266+ AI tools..."
+                    placeholder={placeholder}
                     className="search-bar-input"
                     autoComplete="off"
                 />
