@@ -17,6 +17,13 @@ const ECOSYSTEM_BRAND: Record<string, { accent: string; tint: string }> = {
 
 const FALLBACK_BRAND = { accent: "#5ad8ff", tint: "rgba(90, 216, 255, 0.10)" };
 
+const ECOSYSTEM_FOCUS: Record<string, string> = {
+    openai: "Apps, agents, APIs",
+    anthropic: "Claude workflows",
+    "google-gemini": "Google AI stack",
+    "open-source": "Local + open models",
+};
+
 function brandFor(slug: string) {
     return ECOSYSTEM_BRAND[slug] || FALLBACK_BRAND;
 }
@@ -31,6 +38,9 @@ export default function EcosystemCard({ ecosystem }: { ecosystem: EcosystemCardD
     const brand = brandFor(ecosystem.slug);
     const previewTools = hasPreview(ecosystem) ? ecosystem.preview_tools : [];
     const toolCount = hasPreview(ecosystem) ? ecosystem.tool_count : null;
+    const focus = ECOSYSTEM_FOCUS[ecosystem.slug] || "Provider stack";
+    const visibleTools = previewTools.slice(0, 3);
+    const remainingTools = toolCount !== null ? Math.max(toolCount - visibleTools.length, 0) : 0;
 
     const style = {
         "--eco-accent": brand.accent,
@@ -40,6 +50,15 @@ export default function EcosystemCard({ ecosystem }: { ecosystem: EcosystemCardD
     return (
         <Link href={`/ecosystems/${ecosystem.slug}`} className="ecosystem-card" style={style}>
             <div className="ecosystem-card-glow" aria-hidden="true" />
+
+            <div className="ecosystem-card-topline">
+                <span className="ecosystem-card-kicker">{focus}</span>
+                {toolCount !== null && (
+                    <span className="ecosystem-card-count">
+                        {toolCount} tool{toolCount === 1 ? "" : "s"}
+                    </span>
+                )}
+            </div>
 
             <div className="ecosystem-card-head">
                 <div className="ecosystem-card-icon">
@@ -52,9 +71,7 @@ export default function EcosystemCard({ ecosystem }: { ecosystem: EcosystemCardD
                 </div>
                 <div className="ecosystem-card-titles">
                     <h3 className="ecosystem-card-name">{ecosystem.name}</h3>
-                    {toolCount !== null && (
-                        <span className="ecosystem-card-meta">{toolCount} tool{toolCount === 1 ? "" : "s"}</span>
-                    )}
+                    <span className="ecosystem-card-meta">Curated ecosystem map</span>
                 </div>
             </div>
 
@@ -62,20 +79,26 @@ export default function EcosystemCard({ ecosystem }: { ecosystem: EcosystemCardD
                 {ecosystem.description || `Discover tools and playbooks built around the ${ecosystem.name} ecosystem.`}
             </p>
 
-            {previewTools.length > 0 && (
-                <div className="ecosystem-card-avatars" aria-label="Featured tools in this ecosystem">
-                    {previewTools.map((tool) => (
-                        <span key={tool.id} className="ecosystem-card-avatar" title={tool.name}>
-                            {tool.icon_url ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img src={tool.icon_url} alt={tool.name} loading="lazy" />
-                            ) : (
-                                <span className="ecosystem-card-avatar-letter">{tool.name.charAt(0)}</span>
-                            )}
-                        </span>
-                    ))}
-                    {toolCount !== null && toolCount > previewTools.length && (
-                        <span className="ecosystem-card-avatar-more">+{toolCount - previewTools.length}</span>
+            {visibleTools.length > 0 && (
+                <div className="ecosystem-card-preview" aria-label="Featured tools in this ecosystem">
+                    <span className="ecosystem-card-preview-label">Start with</span>
+                    <div className="ecosystem-card-tool-list">
+                        {visibleTools.map((tool) => (
+                            <span key={tool.id} className="ecosystem-card-tool" title={tool.name}>
+                                <span className="ecosystem-card-tool-icon">
+                                    {tool.icon_url ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={tool.icon_url} alt="" loading="lazy" />
+                                    ) : (
+                                        <span aria-hidden="true">{tool.name.charAt(0)}</span>
+                                    )}
+                                </span>
+                                <span className="ecosystem-card-tool-name">{tool.name}</span>
+                            </span>
+                        ))}
+                    </div>
+                    {remainingTools > 0 && (
+                        <span className="ecosystem-card-more">+{remainingTools} more mapped tools</span>
                     )}
                 </div>
             )}

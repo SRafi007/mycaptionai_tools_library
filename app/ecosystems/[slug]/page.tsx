@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 import { getEcosystemBySlug, getEcosystems } from "@/lib/db/ecosystems";
-import ToolCard from "@/components/tool-card";
 import { notFound } from "next/navigation";
 import { absoluteUrl } from "@/lib/seo";
+import Link from "next/link";
 
 export const revalidate = 60;
 
@@ -70,7 +70,76 @@ export default async function EcosystemDetailsPage({ params }: { params: Promise
                     </div>
                     <div className="tools-grid">
                         {tools.map((tool) => (
-                            <ToolCard key={tool.id} tool={tool} showVisitButton={true} />
+                            <article key={tool.id} className="card tool-card ecosystem-tool-card">
+                                <div className="tool-card-header">
+                                    <div className="tool-card-identity">
+                                        <div
+                                            className={`tool-card-icon ${tool.icon_url || tool.image_url ? "tool-card-icon-image" : "tool-card-icon-fallback"}`}
+                                            style={
+                                                tool.icon_url || tool.image_url
+                                                    ? { background: `url(${tool.icon_url || tool.image_url}) center/cover` }
+                                                    : undefined
+                                            }
+                                        >
+                                            {!tool.icon_url && !tool.image_url && (
+                                                <span>{tool.name.charAt(0).toUpperCase()}</span>
+                                            )}
+                                        </div>
+                                        <div className="tool-card-title-wrap">
+                                            <h3 className="tool-card-name">
+                                                <Link href={`/tools/${tool.slug}`} className="tool-card-name-link">
+                                                    {tool.name}
+                                                </Link>
+                                            </h3>
+                                            <span className="ecosystem-tool-role">{tool.role_category || "Ecosystem tool"}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p className="tool-card-desc">
+                                    {tool.ecosystem_summary || tool.short_description || tool.description}
+                                </p>
+
+                                {(tool.best_for || tool.when_to_use || tool.recommendation || (tool.use_case_examples && tool.use_case_examples.length > 0)) && (
+                                    <div className="ecosystem-tool-guidance">
+                                        {tool.best_for && (
+                                            <div className="ecosystem-tool-guidance-row">
+                                                <span>Best for</span>
+                                                <strong>{tool.best_for}</strong>
+                                            </div>
+                                        )}
+                                        {tool.when_to_use && (
+                                            <div className="ecosystem-tool-guidance-row">
+                                                <span>When to use</span>
+                                                <p>{tool.when_to_use}</p>
+                                            </div>
+                                        )}
+                                        {tool.use_case_examples && tool.use_case_examples.length > 0 && (
+                                            <div className="ecosystem-tool-usecases">
+                                                {tool.use_case_examples.slice(0, 3).map((useCase) => (
+                                                    <span key={useCase}>{useCase}</span>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {tool.recommendation && (
+                                            <p className="ecosystem-tool-recommendation">{tool.recommendation}</p>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div className="tool-card-footer">
+                                    <div className="tool-card-meta">
+                                        {tool.content_status && tool.content_status !== "active" && (
+                                            <span className="ecosystem-tool-status">{tool.content_status}</span>
+                                        )}
+                                    </div>
+                                    {tool.url && (
+                                        <a href={tool.url} target="_blank" rel="noopener noreferrer" className="btn-secondary btn-sm">
+                                            Visit
+                                        </a>
+                                    )}
+                                </div>
+                            </article>
                         ))}
                     </div>
                 </div>
