@@ -1,14 +1,30 @@
 import Link from "next/link";
 import { Playbook } from "@/types/playbook";
 
+function getShortDescription(description?: string | null) {
+    const clean = description?.replace(/\s+/g, " ").trim();
+
+    if (!clean) {
+        return "A practical AI workflow with recommended tools and step-by-step order.";
+    }
+
+    const firstSentence = clean.split(/(?<=[.!?])\s+/)[0];
+    return firstSentence.length > 132 ? `${firstSentence.slice(0, 129).trim()}...` : firstSentence;
+}
+
 export default function PlaybookCard({ playbook }: { playbook: Playbook }) {
     return (
-        <Link href={`/playbooks/${playbook.slug}`} className="card" style={{ display: "flex", flexDirection: "column", padding: "24px", height: "100%", background: "linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-secondary) 100%)", borderColor: "var(--border-subtle)" }}>
-            <h3 style={{ fontSize: "18px", fontWeight: 600, color: "var(--text-primary)", marginBottom: "8px", lineHeight: 1.3 }}>{playbook.title}</h3>
-            <p className="tool-card-desc" style={{ marginTop: 0, flex: 1 }}>{playbook.description}</p>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "16px" }}>
-                <div className="badge badge-verified" style={{ background: "var(--accent-subtle)" }}>PLAYBOOK</div>
-                <span style={{ fontSize: "13px", color: "var(--text-secondary)", fontWeight: 500, marginLeft: "auto" }}>View Stack &rarr;</span>
+        <Link href={`/playbooks/${playbook.slug}`} className="card playbook-card">
+            <div className="playbook-card-head">
+                <div className="playbook-card-icon" aria-hidden="true">
+                    {playbook.title.charAt(0)}
+                </div>
+                <h3 className="playbook-card-title">{playbook.title}</h3>
+            </div>
+            <p className="playbook-card-desc">{getShortDescription(playbook.description)}</p>
+            <div className="playbook-card-footer">
+                <span>View stack</span>
+                <span aria-hidden="true" className="playbook-card-arrow">&rarr;</span>
             </div>
         </Link>
     );

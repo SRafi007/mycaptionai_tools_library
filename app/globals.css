@@ -1545,134 +1545,93 @@ a {
    ═══════════════════════════════════════════════ */
 
 .ecosystem-section {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--bg-surface-hover) 78%, white), var(--bg-primary));
+  background: var(--bg-primary);
   position: relative;
   border-top: 1px solid var(--border-subtle);
 }
 
-.ecosystem-section-header {
-  margin-bottom: 28px;
-  display: grid;
-  gap: 12px;
-  max-width: 860px;
-}
-
-.ecosystem-eyebrow {
-  margin: 0;
-  width: fit-content;
-}
-
-.ecosystem-section-title-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.ecosystem-section-title {
-  font-size: clamp(24px, 3vw, 32px);
-  letter-spacing: 0;
-  margin: 0;
-}
-
-.ecosystem-section-lede {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 16px;
-  line-height: 1.55;
-  max-width: 640px;
+.ecosystem-home-header {
+  margin-bottom: 20px;
 }
 
 .ecosystem-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
-  margin-bottom: 56px;
+  margin-bottom: 48px;
 }
 
 .ecosystem-playbooks {
-  padding-top: 8px;
+  padding-top: 28px;
   border-top: 1px solid var(--border-subtle);
-  margin-top: 8px;
-}
-
-.ecosystem-playbooks .section-header {
-  margin-top: 32px;
+  margin-top: 4px;
 }
 
 .ecosystem-card {
-  --eco-accent: #5ad8ff;
-  --eco-tint: rgba(90, 216, 255, 0.10);
+  --eco-accent: var(--accent);
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  min-height: 316px;
-  padding: 18px;
-  border-radius: 8px;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--eco-tint) 42%, var(--bg-surface)), var(--bg-surface) 46%),
-    var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-left: 4px solid var(--eco-accent);
+  gap: 12px;
+  min-height: 218px;
+  padding: 16px;
+  border-color: var(--border-default);
+  background: var(--bg-surface);
+  box-shadow: 0 8px 18px rgba(11, 20, 36, 0.06);
   text-decoration: none;
   color: var(--text-primary);
   overflow: hidden;
-  isolation: isolate;
-  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+  transition: transform var(--transition), border-color var(--transition), background var(--transition), box-shadow var(--transition);
 }
 
-.ecosystem-card-glow {
+.ecosystem-card::before,
+.playbook-card::before {
+  content: "";
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--eco-accent) 12%, transparent), transparent 38%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.72), transparent 46%);
-  opacity: 0.72;
-  z-index: -1;
-  transition: opacity 260ms ease;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.75);
   pointer-events: none;
 }
 
 .ecosystem-card:hover {
-  transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--eco-accent) 40%, var(--border-subtle));
-  box-shadow: 0 14px 32px color-mix(in srgb, var(--eco-accent) 18%, rgba(20, 30, 50, 0.10));
-}
-
-.ecosystem-card:hover .ecosystem-card-glow {
-  opacity: 1;
+  transform: translateY(-2px);
+  border-color: var(--border-hover);
+  background: var(--bg-surface-hover);
+  box-shadow: 0 14px 26px rgba(11, 20, 36, 0.09);
 }
 
 .ecosystem-card:hover .ecosystem-card-icon {
-  transform: scale(1.05);
+  border-color: color-mix(in srgb, var(--eco-accent) 44%, var(--border-default));
 }
 
 .ecosystem-card:hover .ecosystem-card-arrow {
   transform: translateX(4px);
+  color: var(--accent);
 }
 
 .ecosystem-card-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
+  min-width: 0;
 }
 
 .ecosystem-card-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 46px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--eco-tint) 74%, var(--bg-surface));
-  border: 1px solid color-mix(in srgb, var(--eco-accent) 24%, transparent);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-hover);
+  border: 1px solid var(--border-subtle);
   color: var(--eco-accent);
   font-weight: 800;
-  font-size: 20px;
+  font-size: 16px;
   flex-shrink: 0;
-  transition: transform 220ms ease;
+  overflow: hidden;
+  transition: border-color var(--transition);
 }
 
 .ecosystem-card-icon img {
@@ -1682,97 +1641,62 @@ a {
 }
 
 .ecosystem-card-titles {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  min-width: 0;
 }
 
 .ecosystem-card-name {
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 650;
   color: var(--text-primary);
-  letter-spacing: 0;
-}
-
-.ecosystem-card-meta {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  letter-spacing: 0.02em;
-}
-
-.ecosystem-card-topline {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  min-height: 24px;
-}
-
-.ecosystem-card-kicker,
-.ecosystem-card-count,
-.ecosystem-card-preview-label,
-.ecosystem-card-more {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0;
-}
-
-.ecosystem-card-kicker {
-  color: var(--eco-accent);
-}
-
-.ecosystem-card-count {
-  color: var(--text-muted);
-  white-space: nowrap;
-}
-
-.ecosystem-card-desc {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--text-secondary);
-  flex: 1;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.ecosystem-card-preview {
-  display: grid;
-  gap: 8px;
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid color-mix(in srgb, var(--eco-accent) 18%, var(--border-subtle));
+.ecosystem-card-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.ecosystem-card-preview-label {
-  color: var(--text-muted);
-}
-
-.ecosystem-card-tool-list {
-  display: grid;
-  gap: 2px;
+.ecosystem-card-tool-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-height: 30px;
 }
 
 .ecosystem-card-tool {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
-  padding: 5px 0;
+  max-width: 100%;
+  padding: 3px 7px 3px 3px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
 }
 
 .ecosystem-card-tool-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  background: var(--bg-surface);
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface-hover);
   border: 1px solid var(--border-subtle);
   color: var(--eco-accent);
   font-size: 11px;
@@ -1793,28 +1717,106 @@ a {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 13px;
-  font-weight: 650;
-  color: var(--text-primary);
-}
-
-.ecosystem-card-more {
+  font-size: 12px;
+  font-weight: 600;
   color: var(--text-secondary);
 }
 
-.ecosystem-card-cta {
+.ecosystem-card-footer,
+.playbook-card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
   font-size: 13px;
-  font-weight: 700;
-  color: var(--eco-accent);
-  letter-spacing: 0;
-  margin-top: 4px;
+  font-weight: 600;
+  color: var(--text-secondary);
 }
 
-.ecosystem-card-arrow {
-  transition: transform 220ms ease;
+.ecosystem-card-arrow,
+.playbook-card-arrow {
+  margin-left: auto;
+  flex: 0 0 auto;
+  transition: transform var(--transition), color var(--transition);
+}
+
+.playbook-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.playbook-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 180px;
+  padding: 16px;
+  border-color: var(--border-default);
+  background: var(--bg-surface);
+  box-shadow: 0 8px 18px rgba(11, 20, 36, 0.06);
+  overflow: hidden;
+  transition: transform var(--transition), border-color var(--transition), background var(--transition), box-shadow var(--transition);
+}
+
+.playbook-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-hover);
+  background: var(--bg-surface-hover);
+  box-shadow: 0 14px 26px rgba(11, 20, 36, 0.09);
+}
+
+.playbook-card:hover .playbook-card-arrow {
+  transform: translateX(4px);
+  color: var(--accent);
+}
+
+.playbook-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.playbook-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--teal-glow);
+  background: color-mix(in srgb, var(--bg-surface) 82%, var(--accent-muted));
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 800;
+  flex: 0 0 auto;
+}
+
+.playbook-card-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.playbook-card-desc {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.45;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .ecosystem-tool-card {
@@ -1878,20 +1880,38 @@ a {
 }
 
 @media (max-width: 1120px) {
-  .ecosystem-grid {
+  .ecosystem-grid,
+  .playbook-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 640px) {
-  .ecosystem-grid {
+  .ecosystem-section .section-header {
+    display: grid;
     grid-template-columns: 1fr;
+    align-items: start;
+    justify-items: start;
+    gap: 8px 12px;
   }
-  .ecosystem-section-header {
-    margin-bottom: 24px;
+  .ecosystem-section .section-header .btn-ghost {
+    padding-left: 0;
+  }
+  .ecosystem-grid,
+  .playbook-grid {
+    grid-template-columns: 1fr;
   }
   .ecosystem-card {
     min-height: auto;
+  }
+  .ecosystem-card-footer,
+  .playbook-card-footer {
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  .ecosystem-card-arrow,
+  .playbook-card-arrow {
+    margin-left: 0;
   }
 }
 

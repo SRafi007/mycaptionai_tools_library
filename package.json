@@ -9,6 +9,7 @@
     "lint": "eslint",
     "backfill:icons": "tsx scripts/backfillToolIcons.ts",
     "ecosystems:seed": "node scripts/seedEcosystemTools.mjs",
+    "playbooks:seed": "node scripts/seedPlaybooks.mjs",
     "landscape:sync": "node scripts/syncLandscapeTools.cjs",
     "seo:qa": "node scripts/seoQaCheck.mjs"
   },

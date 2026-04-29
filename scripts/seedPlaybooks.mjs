@@ -1,0 +1,659 @@
+import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error("Missing Supabase credentials in .env.local");
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const playbooks = [
+  {
+    title: "AI Research Briefing Stack",
+    slug: "ai-research-briefing-stack",
+    description:
+      "Turn a messy research question into a sourced, executive-ready brief. This stack combines web search, source-grounded notebooks, synthesis, writing, and presentation so visitors can move from discovery to a shareable recommendation.",
+    ecosystem_slug: null,
+    target_user: "Founders, analysts, marketers, consultants, and operators who need a defensible brief quickly.",
+    outcome: "A cited research memo, decision summary, and presentation draft.",
+    difficulty: "Beginner",
+    estimated_time: "2-4 hours",
+    best_for: "Market scans, competitor research, vendor comparison, and internal strategy notes.",
+    prerequisites: ["A clear research question", "A list of trusted sources or competitors", "A desired output format"],
+    source_urls: [
+      "https://help.openai.com/articles/10500283",
+      "https://support.google.com/notebooklm/answer/16212820",
+      "https://www.perplexity.ai/",
+      "https://gamma.app/products/documents",
+    ],
+    steps: [
+      ["perplexity-search", "Find current source material", "Use Perplexity first to collect recent, citable sources and map the major viewpoints around the question.", "A research question and constraints.", "A shortlist of source links and claims to verify.", "Perplexity is strongest as the first pass because it searches the web and surfaces citations instead of only drafting from memory."],
+      ["chatgpt", "Plan the brief", "Ask ChatGPT to turn the source list into a research plan, identify gaps, and define the structure of the final memo.", "Source links and the intended audience.", "A brief outline, open questions, and a synthesis plan.", "ChatGPT is useful for decomposing a broad research task into sections and deciding what evidence is still missing."],
+      ["notebooklm", "Ground the analysis in uploaded sources", "Upload PDFs, docs, transcripts, and source pages into NotebookLM, then ask source-grounded questions and pull quotes or facts into the memo outline.", "Primary sources, PDFs, or copied notes.", "Grounded answers and source-backed notes.", "NotebookLM is valuable when the visitor wants answers anchored to an explicit source set."],
+      ["claude", "Draft the analytical memo", "Move the outline and grounded notes into Claude and ask for a concise executive brief with assumptions, risks, and recommendations separated.", "Research notes and memo outline.", "A polished long-form brief.", "Claude is strong at long-form synthesis, structured writing, and careful wording."],
+      ["gamma", "Convert the brief into a deck", "Use Gamma to convert the finished memo into a leadership-ready presentation or shareable document.", "Final memo and audience context.", "A deck or document that can be shared with stakeholders.", "Gamma turns long-form analysis into a visually organized deliverable without starting from a blank slide deck."],
+    ],
+  },
+  {
+    title: "SEO Content Production Engine",
+    slug: "seo-content-production-engine",
+    description:
+      "A practical editorial workflow for producing search-ready articles without turning the site into generic AI spam. It starts with source research, moves through outline and draft, then finishes with human editing, visuals, and distribution.",
+    ecosystem_slug: null,
+    target_user: "Blog owners, affiliate marketers, agencies, and in-house content teams.",
+    outcome: "A researched article package with outline, draft, visuals, and social distribution copy.",
+    difficulty: "Beginner",
+    estimated_time: "3-6 hours per article",
+    best_for: "Comparison posts, educational guides, listicles, and product-led SEO pages.",
+    prerequisites: ["Target keyword or topic", "Audience segment", "Editorial quality standard"],
+    source_urls: [
+      "https://help.openai.com/articles/10500283",
+      "https://www.anthropic.com/claude",
+      "https://www.canva.com/canva-ai/",
+      "https://buffer.com/ai-assistant",
+    ],
+    steps: [
+      ["perplexity-search", "Collect SERP and source context", "Search the topic, capture competing angles, common questions, and authoritative sources before drafting.", "Keyword, audience, and region.", "Research notes and SERP patterns.", "It gives the content team current context and citations before any generation starts."],
+      ["chatgpt", "Create the search-intent outline", "Ask ChatGPT to group findings into a heading structure, search intent, FAQ targets, and internal-link opportunities.", "Research notes and keyword.", "A structured content brief.", "ChatGPT is effective for turning scattered research into an actionable writing brief."],
+      ["claude", "Draft the article", "Use Claude to write the first draft from the approved outline, with instructions for tone, reader level, and evidence boundaries.", "Approved outline and source notes.", "A complete article draft.", "Claude handles long-form writing and editorial structure well, especially when source notes are supplied."],
+      ["grammarly", "Edit for clarity and tone", "Run the draft through Grammarly to tighten grammar, clarity, sentence length, and tone before publication review.", "Article draft.", "Cleaner copy ready for human review.", "It catches mechanical issues that often remain after LLM drafting."],
+      ["canva", "Create featured and social visuals", "Use Canva to create a featured image, charts, carousels, and reusable social templates from the final article angle.", "Headline, key stats, and brand guidelines.", "Visual assets for the article and distribution.", "Canva is fast for non-designers and supports AI-assisted design workflows."],
+      ["buffer", "Schedule distribution", "Queue the article announcement, follow-up snippets, and visual posts in Buffer across the relevant social channels.", "Final URL and social copy.", "Scheduled social promotion.", "Buffer keeps promotion from being an afterthought after publishing."],
+    ],
+  },
+  {
+    title: "Short-Form Video Production Stack",
+    slug: "short-form-video-production-stack",
+    description:
+      "Build short videos from idea to publishable clip: hook, script, voice, generated footage, edit, captions, and scheduling. This is designed for creators and brands producing TikTok, Reels, Shorts, and paid social variants.",
+    ecosystem_slug: null,
+    target_user: "Creators, social teams, educators, and small brands producing repeatable short-form video.",
+    outcome: "A finished 15-60 second vertical video with captions and publishing assets.",
+    difficulty: "Intermediate",
+    estimated_time: "1-3 hours per clip",
+    best_for: "Product explainers, listicle videos, founder clips, educational snippets, and ad variants.",
+    prerequisites: ["Video topic", "Target platform", "Brand voice", "Basic visual style"],
+    source_urls: [
+      "https://runwayml.com/product",
+      "https://help.runwayml.com/hc/en-us/articles/42460036199443-Text-to-Video-Prompting-Guide",
+      "https://elevenlabs.io/dubbing",
+      "https://www.canva.com/canva-ai/",
+    ],
+    steps: [
+      ["chatgpt", "Write hooks and script options", "Generate multiple hook angles, a tight spoken script, B-roll notes, and caption-safe on-screen text.", "Topic, audience, and platform.", "Script variants and shot notes.", "ChatGPT is fast for testing many hooks before committing to production."],
+      ["elevenlabs", "Generate or localize voiceover", "Create a natural voiceover or use dubbing for localization while preserving emotion and timing.", "Approved script and voice direction.", "Voiceover audio in the target language.", "ElevenLabs is useful for fast narration and multilingual voice workflows."],
+      ["runway", "Generate visual clips", "Use Runway to create text-to-video or image-to-video B-roll, motion scenes, and stylized shots that match the script.", "Shot prompts, reference images, or product imagery.", "Short generated clips for the edit.", "Runway is built around AI video generation and editing, so it fits the generative footage step."],
+      ["capcut", "Edit, caption, and format", "Assemble clips, voiceover, music, captions, pacing, and platform-specific ratios in CapCut.", "Clips, voiceover, logo, and caption copy.", "Final vertical video.", "CapCut is a practical editing layer for fast social video assembly."],
+      ["canva", "Create thumbnail and post creative", "Design the cover frame, carousel companion asset, or ad-safe thumbnail in Canva.", "Final title, video frame, and brand colors.", "Thumbnail and supporting creative.", "Canva gives non-editors quick visual polish around the video."],
+      ["buffer", "Schedule and test copy", "Schedule the finished clip with two or three caption variants and track what angle performs best.", "Video file and post copy.", "Scheduled publishing plan.", "Buffer helps make production repeatable across channels."],
+    ],
+  },
+  {
+    title: "Podcast-to-Content Engine",
+    slug: "podcast-to-content-engine",
+    description:
+      "Record one long-form conversation and turn it into clips, show notes, quotes, captions, posts, and follow-up articles. This playbook is for teams that want every interview or webinar to become a multi-channel content asset.",
+    ecosystem_slug: null,
+    target_user: "Podcasters, webinar teams, creator-led companies, and B2B marketers.",
+    outcome: "One polished episode plus clips, notes, captions, thumbnails, and social copy.",
+    difficulty: "Intermediate",
+    estimated_time: "3-8 hours after recording",
+    best_for: "Podcasts, interviews, webinars, customer stories, and expert roundtables.",
+    prerequisites: ["Raw recording", "Guest/topic notes", "Publishing channels"],
+    source_urls: [
+      "https://riverside.com/",
+      "https://riverside.com/video-editor",
+      "https://podcast.adobe.com/en",
+      "https://www.descript.com/overdub-fb",
+    ],
+    steps: [
+      ["riverside", "Record and generate the first edit", "Record or upload the session, use transcription, chapters, show notes, and AI clips to create the first content package.", "Raw recording or scheduled recording session.", "Transcript, episode draft, show notes, and clips.", "Riverside combines recording, text-based editing, clips, and publishing-oriented assets."],
+      ["adobe-podcast", "Clean spoken audio", "Run noisy tracks through Adobe Podcast Enhance Speech before final editing or clip creation.", "Audio or video file with dialogue.", "Cleaner, more intelligible speech track.", "Adobe Podcast is focused on browser-based speech enhancement and audio cleanup."],
+      ["descript", "Edit by transcript", "Use Descript to remove filler words, trim sections by editing text, add captions, and fix small narration mistakes.", "Transcript and cleaned audio/video.", "Polished episode and captioned clips.", "Descript is strong for transcript-based video and podcast editing."],
+      ["chatgpt", "Write derivative assets", "Turn the transcript into show notes, newsletters, article outlines, quote cards, and social post variations.", "Transcript and episode angle.", "Written promotional assets.", "ChatGPT handles repetitive derivative writing once the source content is clear."],
+      ["canva", "Package visuals", "Create thumbnails, audiograms, quote cards, and social graphics using the episode theme and guest imagery.", "Episode title, quotes, and screenshots.", "Brand-ready visual assets.", "Canva is an efficient design layer for non-designers."],
+      ["buffer", "Schedule the rollout", "Schedule launch post, clip posts, quote posts, and follow-up reminders over multiple days.", "Final links, clips, and copy.", "Multi-day content calendar.", "Buffer makes the episode distribution plan operational."],
+    ],
+  },
+  {
+    title: "AI Coding Sprint Stack",
+    slug: "ai-coding-sprint-stack",
+    description:
+      "Use agentic coding tools without losing engineering control. This stack separates planning, implementation, review, and IDE assistance so developers can ship faster while preserving tests, diffs, and code ownership.",
+    ecosystem_slug: "anthropic",
+    target_user: "Software engineers, technical founders, and product teams shipping code with AI assistants.",
+    outcome: "A planned, implemented, reviewed, and tested feature branch.",
+    difficulty: "Advanced",
+    estimated_time: "Half-day to 2 days",
+    best_for: "Feature spikes, bug fixes, refactors, documentation upgrades, and test coverage work.",
+    prerequisites: ["Git repo", "Local test command", "Issue or feature brief", "Human review owner"],
+    source_urls: [
+      "https://claude.com/product/claude-code",
+      "https://openai.com/codex",
+      "https://docs.cursor.com/",
+      "https://cloud.google.com/gemini/docs/codeassist/overview",
+    ],
+    steps: [
+      ["claude-code", "Explore and plan the change", "Ask Claude Code to inspect the repo, identify relevant files, propose a bounded implementation plan, and surface risks before edits.", "Issue brief and repo access.", "A technical plan and target files.", "Claude Code is designed for codebase-aware terminal and IDE workflows."],
+      ["cursor-2", "Implement focused edits", "Use Cursor Agent for multi-file changes where the developer can watch diffs, steer context, and keep implementation close to the editor.", "Plan and selected files.", "Working code changes.", "Cursor is useful when the engineer wants AI edits inside the coding environment."],
+      ["copilot", "Fill small code gaps", "Use GitHub Copilot for inline completions, boilerplate, tests, and small local edits during implementation.", "Open file context.", "Faster local coding throughput.", "Copilot is efficient for autocomplete-style assistance and local code suggestions."],
+      ["codex", "Run a second engineering pass", "Use Codex for review, alternative implementation ideas, bug hunting, and test suggestions before final PR review.", "Diff and test output.", "Review notes and fixes.", "A second agent reduces single-assistant blind spots."],
+      ["gemini-code-assist", "Check enterprise or Google-stack concerns", "Use Gemini Code Assist when the stack touches Google Cloud, large code review surfaces, or IDE-integrated enterprise workflows.", "Final diff and deployment context.", "Additional code review and cloud-specific feedback.", "Gemini Code Assist is well placed for IDE and code-review workflows in Google environments."],
+    ],
+  },
+  {
+    title: "No-Code SaaS Prototype Stack",
+    slug: "no-code-saas-prototype-stack",
+    description:
+      "Move from product idea to clickable SaaS prototype without beginning in a blank editor. This stack is for validating UX, flows, and a rough data model before investing in a full engineering cycle.",
+    ecosystem_slug: null,
+    target_user: "Founders, product managers, indie hackers, and agencies testing product ideas.",
+    outcome: "A working prototype or early app that can be reviewed with users.",
+    difficulty: "Intermediate",
+    estimated_time: "1-3 days",
+    best_for: "MVP screens, internal tools, booking apps, dashboards, marketplaces, and SaaS concepts.",
+    prerequisites: ["Product problem statement", "Target user", "Core workflow", "Data entities"],
+    source_urls: [
+      "https://docs.lovable.dev/",
+      "https://support.bolt.new/building/intro-bolt",
+      "https://replit.com/",
+      "https://docs.cursor.com/",
+    ],
+    steps: [
+      ["chatgpt", "Define the product spec", "Turn the idea into user roles, core flows, data entities, acceptance criteria, and launch constraints.", "Idea and target customer.", "Prototype brief and screen list.", "A clear prompt spec improves every downstream app-builder result."],
+      ["lovable", "Generate the first full-stack app", "Use Lovable to create the app structure, frontend, backend, auth, database, and integrations from the spec.", "Prototype brief.", "A first working web application.", "Lovable is positioned for natural-language full-stack app generation with editable code."],
+      ["bolt-new", "Explore alternative UX quickly", "Use Bolt.new to generate a second UI direction or a smaller standalone workflow for comparison.", "Same spec or one focused workflow.", "Alternative prototype direction.", "Bolt is fast for prompt-to-working-product experiments."],
+      ["replit", "Host and inspect the prototype", "Use Replit to run, test, and share the app when the team needs a browser-based development environment.", "Prototype code or generated app.", "Runnable shared prototype.", "Replit is useful for browser-based coding, collaboration, and deployment checks."],
+      ["cursor-2", "Clean up the generated code", "Use Cursor to inspect generated code, rename confusing pieces, remove obvious duplication, and prepare the prototype for handoff.", "Generated repository.", "Cleaner codebase and implementation notes.", "Generated prototypes still need engineering cleanup before serious use."],
+    ],
+  },
+  {
+    title: "B2B Sales Outbound Stack",
+    slug: "b2b-sales-outbound-stack",
+    description:
+      "A complete outbound workflow for finding accounts, enriching leads, writing personalized messages, sequencing outreach, and syncing outcomes into CRM. It is designed to keep human review in the loop instead of sending generic automation at scale.",
+    ecosystem_slug: null,
+    target_user: "B2B founders, SDR teams, agencies, and revenue operators.",
+    outcome: "A researched account list, personalized sequence, and CRM-tracked outbound campaign.",
+    difficulty: "Intermediate",
+    estimated_time: "1-2 days to launch a campaign",
+    best_for: "Niche account-based outreach, founder-led sales, and new-market testing.",
+    prerequisites: ["ICP", "Offer", "Proof points", "Sending domain and CRM setup"],
+    source_urls: [
+      "https://openai.com/index/clay/",
+      "https://www.apollo.io/product/sales-engagement",
+      "https://www.apollo.io/ai",
+      "https://www.hubspot.com/products/artificial-intelligence",
+    ],
+    steps: [
+      ["clay", "Build and enrich the account list", "Use Clay to gather target accounts, enrich firmographic data, and research trigger events or personalization hooks.", "ICP and account filters.", "Enriched account and lead table.", "Clay is strong for enrichment and agentic sales research."],
+      ["apollo", "Validate contacts and channels", "Use Apollo to find verified contacts, build lead lists, and prepare multichannel outreach paths.", "Target accounts and personas.", "Contact list with outreach data.", "Apollo combines prospecting data and sales engagement workflows."],
+      ["claude", "Write personalized messaging", "Feed account insights into Claude and create concise email, LinkedIn, and call-note variants for each segment.", "Lead context and offer.", "Message variants for review.", "Claude is useful for nuanced B2B personalization without bloated copy."],
+      ["regie", "Create campaign structure", "Use Regie to turn messaging into a repeatable sequence framework for prospecting and follow-up.", "Message variants and campaign goal.", "Sequence copy and cadence.", "Regie fits the sales-content and prospecting automation layer."],
+      ["replyio", "Run and monitor outreach", "Load reviewed copy into Reply.io, run the sequence, and monitor replies, deliverability, and engagement.", "Approved contact list and cadence.", "Live outbound campaign.", "Reply.io handles outreach execution and analytics."],
+      ["hubspot", "Sync outcomes to CRM", "Log replies, meetings, lifecycle stage changes, and campaign performance in HubSpot.", "Campaign responses and CRM fields.", "Clean CRM records and follow-up tasks.", "HubSpot keeps sales actions connected to the customer record."],
+    ],
+  },
+  {
+    title: "AI Customer Support Stack",
+    slug: "ai-customer-support-stack",
+    description:
+      "Create a support experience where AI answers routine questions, humans handle edge cases, and knowledge gaps become documentation work. This stack is for improving response time without hiding support quality behind a weak chatbot.",
+    ecosystem_slug: null,
+    target_user: "Support leaders, SaaS operators, customer success teams, and founders.",
+    outcome: "An AI-assisted support workflow with knowledge base, escalation rules, and feedback loops.",
+    difficulty: "Intermediate",
+    estimated_time: "3-10 days depending on documentation quality",
+    best_for: "SaaS helpdesks, ecommerce support, internal IT support, and product knowledge bases.",
+    prerequisites: ["Existing FAQ or docs", "Support categories", "Escalation policy", "Helpdesk owner"],
+    source_urls: [
+      "https://fin.ai/",
+      "https://www.intercom.com/blog/fin-ai-bot-customer-service/",
+      "https://www.hubspot.com/products/artificial-intelligence",
+      "https://knowledge.hubspot.com/ai/use-breeze",
+    ],
+    steps: [
+      ["notion-ai", "Prepare support knowledge", "Consolidate product docs, FAQs, policies, and troubleshooting notes into a cleaner knowledge base.", "Existing docs and ticket history.", "Organized source knowledge.", "AI support quality depends on the quality of source documentation."],
+      ["claude", "Identify gaps and rewrite articles", "Ask Claude to find missing policy details, confusing instructions, and duplicate articles, then rewrite the highest-impact docs.", "Knowledge base export and ticket examples.", "Improved support articles.", "Claude is useful for careful rewrite work and policy-sensitive explanations."],
+      ["intercom", "Deploy customer-facing AI support", "Use Intercom or Fin-style AI support to answer common questions and hand off unresolved cases.", "Knowledge base and escalation rules.", "AI-assisted support entry point.", "Intercom's AI support ecosystem is built for customer-service workflows and escalation."],
+      ["hubspot", "Connect support to customer records", "Sync support interactions, account context, and follow-up work into HubSpot so sales and success can see issues.", "Customer records and support categories.", "Unified customer context.", "HubSpot connects service data with CRM and broader customer workflows."],
+      ["eesel-ai", "Add internal support assistant", "Use eesel AI for internal Slack, docs, and team knowledge Q&A so agents can answer faster.", "Internal docs and workspace permissions.", "Internal AI support assistant.", "Internal support teams need a private helper in addition to the public chatbot."],
+    ],
+  },
+  {
+    title: "Meeting-to-CRM Follow-Up Stack",
+    slug: "meeting-to-crm-follow-up-stack",
+    description:
+      "Convert meetings into notes, decisions, CRM updates, follow-up emails, and team knowledge. The goal is to remove manual admin while keeping humans responsible for promises and next steps.",
+    ecosystem_slug: null,
+    target_user: "Sales teams, consultants, account managers, recruiters, and founders.",
+    outcome: "Clean meeting notes, decisions, follow-up drafts, and CRM updates.",
+    difficulty: "Beginner",
+    estimated_time: "15-45 minutes after each meeting",
+    best_for: "Sales calls, customer success check-ins, interviews, and internal planning meetings.",
+    prerequisites: ["Meeting recording permission", "CRM fields", "Follow-up owner"],
+    source_urls: [
+      "https://fathom.video/",
+      "https://otter.ai/",
+      "https://www.hubspot.com/products/artificial-intelligence",
+    ],
+    steps: [
+      ["fathom", "Record and summarize the call", "Use Fathom to record, transcribe, highlight, and summarize important meeting moments.", "Meeting recording.", "Summary, highlights, and transcript.", "Fathom is built around meeting capture and instant summaries."],
+      ["otter-ai", "Capture backup transcript and action items", "Use Otter when the team needs live transcription, action items, or meeting notes across recurring sessions.", "Meeting audio or calendar integration.", "Transcript and action items.", "Otter is a practical transcription and meeting-note layer."],
+      ["claude", "Turn notes into follow-up", "Ask Claude to write a follow-up email, decision log, risk list, and next-step checklist from the transcript.", "Transcript and meeting objective.", "Follow-up package.", "Claude is effective for transforming messy transcripts into polished written commitments."],
+      ["notion-ai", "Store reusable knowledge", "Save decisions, FAQs, objections, and account notes in Notion so future meetings build on past context.", "Meeting summary and notes.", "Reusable team knowledge.", "Notion AI helps organize meeting knowledge into a searchable workspace."],
+      ["hubspot", "Update CRM fields", "Log the summary, next step, deal stage, contact notes, and task reminders in HubSpot.", "Follow-up notes and CRM account.", "Updated customer record.", "CRM updates are the business outcome of the meeting workflow."],
+    ],
+  },
+  {
+    title: "Brand Launch Identity Stack",
+    slug: "brand-launch-identity-stack",
+    description:
+      "Build a lightweight brand identity for a new product, newsletter, creator profile, or side project. This playbook keeps strategy, logo, visual direction, launch assets, and social rollout in one flow.",
+    ecosystem_slug: null,
+    target_user: "Founders, creators, marketers, and small businesses launching a new brand.",
+    outcome: "Brand brief, logo direction, visual style, launch assets, and social announcement plan.",
+    difficulty: "Beginner",
+    estimated_time: "1-2 days",
+    best_for: "MVP launches, newsletters, creator brands, and small product launches.",
+    prerequisites: ["Brand name or shortlist", "Audience", "Offer", "Tone preferences"],
+    source_urls: [
+      "https://www.canva.com/canva-ai/",
+      "https://www.adobe.com/products/firefly/",
+      "https://openai.com/index/dall-e",
+    ],
+    steps: [
+      ["chatgpt", "Create the brand brief", "Define positioning, audience, tone, tagline options, messaging pillars, and launch narrative.", "Brand idea and target customer.", "Concise brand strategy brief.", "A good visual system needs a clear strategic direction first."],
+      ["looka", "Generate logo directions", "Use Looka to explore logo concepts, typography, color families, and starter brand-kit options.", "Brand name and style preferences.", "Logo concepts and brand-kit ideas.", "Looka is useful for fast logo and identity exploration."],
+      ["midjourney", "Explore visual mood", "Generate visual territories, campaign art directions, and reference images for the brand mood board.", "Brand brief and visual keywords.", "Mood-board imagery.", "Midjourney is strong for expressive art direction and concept visuals."],
+      ["adobe-firefly", "Create commercially safer assets", "Use Adobe Firefly for editable, brand-conscious images, backgrounds, campaign visuals, or product mockups.", "Approved visual direction.", "Launch-ready creative assets.", "Firefly is positioned around creative generation and editing for brand and marketing workflows."],
+      ["canva", "Package the launch kit", "Build launch graphics, profile images, social banners, pitch slides, and reusable templates.", "Logo direction and creative assets.", "Brand launch kit.", "Canva makes it practical to package a brand kit without a designer."],
+      ["buffer", "Schedule launch posts", "Schedule announcement copy, founder story, feature posts, and follow-up reminders.", "Launch assets and social copy.", "Launch distribution calendar.", "Buffer turns the brand kit into a coordinated launch sequence."],
+    ],
+  },
+  {
+    title: "Private Local AI Stack",
+    slug: "private-local-ai-stack",
+    description:
+      "Set up a privacy-friendly local AI workflow for experimentation, document chat, and internal assistants. This is for visitors who want open models and local runtimes before committing sensitive data to hosted tools.",
+    ecosystem_slug: "open-source",
+    target_user: "Developers, privacy-conscious teams, researchers, and technical operators.",
+    outcome: "A local or self-hosted AI workspace using open models.",
+    difficulty: "Advanced",
+    estimated_time: "Half-day to 2 days",
+    best_for: "Private model testing, offline experimentation, internal assistants, and self-hosted chat.",
+    prerequisites: ["A capable laptop or server", "Basic terminal comfort", "Model license review"],
+    source_urls: [
+      "https://huggingface.co/",
+      "https://ollama.com/",
+      "https://lmstudio.ai/",
+      "https://openwebui.com/",
+      "https://github.com/ggml-org/llama.cpp",
+      "https://localai.io/docs/overview/index.html",
+    ],
+    steps: [
+      ["hugging-face-hub", "Choose candidate models", "Compare model cards, licenses, sizes, benchmarks, and community notes before downloading anything.", "Use case and hardware limits.", "Shortlist of models to test.", "Hugging Face Hub is the discovery layer for open models and datasets."],
+      ["ollama", "Run the first local model", "Install Ollama, pull a small model, and test chat, summarization, and coding prompts locally.", "Model shortlist.", "Working local model runtime.", "Ollama is a simple way to run and test open models locally."],
+      ["lm-studio", "Compare desktop model behavior", "Use LM Studio to load models, inspect performance, and expose a local server for app experiments.", "Downloaded or hub-selected model.", "Desktop model comparison and local endpoint.", "LM Studio is accessible for local model testing and private chat."],
+      ["open-webui", "Create a team-facing interface", "Connect Open WebUI to the local backend so non-technical users can chat with approved models.", "Local model endpoint.", "Self-hosted chat UI.", "Open WebUI provides the user interface layer for local and hosted backends."],
+      ["llama-cpp", "Optimize low-level inference", "Use llama.cpp when the team needs GGUF, quantization, CPU/GPU backend tuning, or embedded inference.", "Selected model and hardware profile.", "Optimized runtime path.", "llama.cpp is a core runtime for local inference and quantized models."],
+      ["localai", "Expose OpenAI-compatible APIs", "Use LocalAI when internal apps need OpenAI-style endpoints for private model serving.", "Model files and app integration plan.", "Self-hosted API endpoint.", "LocalAI helps teams swap hosted APIs for local OpenAI-compatible services."],
+    ],
+  },
+  {
+    title: "Production AI Agent App Stack",
+    slug: "production-ai-agent-app-stack",
+    description:
+      "A developer workflow for building agentic apps that can use tools, call APIs, orchestrate workflows, and be monitored. It separates model access, orchestration, automation, and business integrations.",
+    ecosystem_slug: "openai",
+    target_user: "Developers and technical teams building production AI features.",
+    outcome: "A first production agent workflow with model calls, tools, automation, and handoff points.",
+    difficulty: "Advanced",
+    estimated_time: "2-5 days for an MVP",
+    best_for: "Internal agents, customer workflows, search assistants, and workflow automation.",
+    prerequisites: ["Product requirement", "Tool/API list", "Security boundaries", "Logging plan"],
+    source_urls: [
+      "https://platform.openai.com/docs/guides/responses-vs-chat-completions",
+      "https://platform.openai.com/docs",
+      "https://docs.langchain.com/oss/javascript/langgraph",
+      "https://docs.n8n.io/",
+      "https://www.make.com/en?pc=effortlessworkflows",
+    ],
+    steps: [
+      ["openai-responses-api", "Design the model interaction", "Use the Responses API as the core model-call layer for tool use, stateful context, multimodal input, and streaming.", "Agent task and tool requirements.", "Model interaction design.", "The Responses API is the right primitive for modern OpenAI agentic applications."],
+      ["openai-api-platform", "Configure platform controls", "Set up API keys, model choices, usage limits, safety settings, and evaluation checkpoints in the OpenAI platform.", "Project and environment requirements.", "Configured development environment.", "Production work needs platform-level controls before broad usage."],
+      ["langchain", "Build controlled orchestration", "Use LangChain or LangGraph to define the agent graph, tools, state, human review, and observability boundaries.", "Tool list and workflow states.", "Agent orchestration layer.", "LangGraph is designed for stateful, long-running, controllable agent workflows."],
+      ["n8n", "Connect business systems", "Use n8n to connect the agent with forms, tickets, sheets, CRMs, webhooks, and internal APIs.", "App integrations and credentials.", "Connected workflow automation.", "n8n adds flexible workflow automation and self-hosting options."],
+      ["make", "Package visual automations", "Use Make for operator-friendly visual workflows, branching, error handling, and reusable business scenarios.", "Workflow map and app connections.", "Visual automation scenarios.", "Make helps non-developer operators understand and maintain automation flows."],
+    ],
+  },
+  {
+    title: "Ecommerce Ad Creative Stack",
+    slug: "ecommerce-ad-creative-stack",
+    description:
+      "Create product ad concepts, visuals, short videos, and posting variants for ecommerce campaigns. This playbook is optimized for testing many angles while keeping human brand review in place.",
+    ecosystem_slug: null,
+    target_user: "Ecommerce founders, growth marketers, and small agencies.",
+    outcome: "A batch of ad concepts, image creatives, product videos, captions, and posting variants.",
+    difficulty: "Intermediate",
+    estimated_time: "1-2 days per campaign batch",
+    best_for: "Product launches, seasonal campaigns, retargeting creatives, and paid social tests.",
+    prerequisites: ["Product photos", "Offer details", "Audience segments", "Brand rules"],
+    source_urls: [
+      "https://www.canva.com/canva-ai/",
+      "https://www.adobe.com/products/firefly/",
+      "https://runwayml.com/product",
+    ],
+    steps: [
+      ["adcreativeai", "Generate ad angles", "Use Adcreative.ai to quickly produce conversion-focused ad concepts and compare hooks for each audience segment.", "Product offer and audience notes.", "Initial ad concept set.", "It is built specifically around performance ad creative generation."],
+      ["chatgpt", "Write message variants", "Create benefit-led headlines, objections, UGC-style scripts, and platform-specific ad copy.", "Offer, reviews, and objections.", "Copy variants for testing.", "ChatGPT is fast at divergent messaging and ad angle exploration."],
+      ["adobe-firefly", "Create product visuals", "Generate or edit backgrounds, scenes, and campaign imagery while preserving the product and brand direction.", "Product image and visual direction.", "Ad-ready image assets.", "Firefly is strong for brand and marketing visual workflows."],
+      ["canva", "Package campaign creatives", "Build static ads, carousel layouts, product comparison graphics, and thumbnail variants.", "Copy and image assets.", "Campaign creative set.", "Canva turns raw concepts into usable ad formats quickly."],
+      ["capcut-commerce", "Create video ads", "Use CapCut Commerce to create short product videos with captions, product shots, and social-first pacing.", "Product media and script.", "Video ad variants.", "CapCut Commerce fits ecommerce video production and social formats."],
+      ["buffer", "Schedule organic variants", "Schedule organic versions of winning creative angles to validate demand outside paid campaigns.", "Creative assets and post copy.", "Organic test calendar.", "Buffer helps test messaging before or alongside paid spend."],
+    ],
+  },
+  {
+    title: "Course and Lesson Content Stack",
+    slug: "course-lesson-content-stack",
+    description:
+      "Convert expertise or source material into lessons, slides, quizzes, voiceovers, and study assets. This is useful for educators, coaches, and teams building internal training.",
+    ecosystem_slug: null,
+    target_user: "Educators, coaches, course creators, enablement teams, and internal trainers.",
+    outcome: "Lesson outline, slides, quiz, narration, and student-facing assets.",
+    difficulty: "Beginner",
+    estimated_time: "1-2 days per lesson module",
+    best_for: "Mini-courses, onboarding lessons, internal training, and study guides.",
+    prerequisites: ["Learning objective", "Source material", "Audience level"],
+    source_urls: [
+      "https://support.google.com/notebooklm/answer/16212820",
+      "https://gamma.app/products/documents",
+      "https://elevenlabs.io/dubbing",
+      "https://www.canva.com/canva-ai/",
+    ],
+    steps: [
+      ["notebooklm", "Ground the lesson in sources", "Upload documents, notes, transcripts, or PDFs and ask NotebookLM for key concepts, summaries, and student questions.", "Source material and learning objective.", "Grounded lesson notes.", "NotebookLM keeps lesson content tied to the supplied material."],
+      ["chatgpt", "Design lesson structure", "Create learning objectives, module sequence, examples, exercises, and assessment criteria.", "Grounded notes and audience level.", "Lesson plan.", "ChatGPT is useful for instructional structure and activity ideas."],
+      ["gamma", "Generate the teaching deck", "Turn the lesson plan into slides or an interactive document with sections, examples, and summary pages.", "Lesson plan and examples.", "Draft deck or document.", "Gamma quickly converts structured content into polished lesson material."],
+      ["quizgecko", "Create quiz and flashcards", "Generate quizzes, flashcards, and review questions from the lesson content.", "Lesson notes and objectives.", "Assessment assets.", "Quizgecko fits the quiz and study-material step."],
+      ["elevenlabs", "Generate narration", "Create voiceover audio for lesson videos, summaries, or multilingual course versions.", "Script and voice direction.", "Narrated lesson audio.", "ElevenLabs is useful for narration and localization."],
+      ["canva", "Package worksheets and visuals", "Create worksheets, cheat sheets, diagrams, and branded course graphics.", "Lesson outline and visual needs.", "Student-facing downloads and graphics.", "Canva makes course packaging accessible for non-designers."],
+    ],
+  },
+  {
+    title: "Social Media Calendar Stack",
+    slug: "social-media-calendar-stack",
+    description:
+      "Build a month of social content from research, campaign pillars, AI-assisted drafts, design templates, and scheduling. It is designed for small teams that need consistency without hiring a full content department.",
+    ecosystem_slug: null,
+    target_user: "Solo founders, creators, social media managers, and small marketing teams.",
+    outcome: "A researched 30-day calendar with post copy, visuals, and scheduled posts.",
+    difficulty: "Beginner",
+    estimated_time: "1-2 days per monthly batch",
+    best_for: "LinkedIn, X, Instagram, TikTok captions, newsletters, and launch campaigns.",
+    prerequisites: ["Brand voice", "Content pillars", "Offer or campaign goal"],
+    source_urls: [
+      "https://www.perplexity.ai/",
+      "https://www.semrush.com/goodcontent/ai-social-media-post-generator/",
+      "https://www.canva.com/canva-ai/",
+      "https://buffer.com/ai-assistant",
+    ],
+    steps: [
+      ["perplexity-search", "Research trends and angles", "Collect timely industry topics, common questions, news hooks, and competitor content angles.", "Industry and audience.", "Trend and angle list.", "Current social content needs current context."],
+      ["chatgpt", "Build the calendar framework", "Turn research into weekly themes, post formats, CTAs, and channel-specific content slots.", "Campaign goal and content pillars.", "30-day calendar outline.", "ChatGPT is useful for structuring and batching content ideas."],
+      ["ai-social-media-post-generator-or-semrush", "Draft channel-specific posts", "Generate first-pass social posts and variations for each channel and campaign pillar.", "Calendar outline and target channels.", "Draft post copy.", "The Semrush social generator is purpose-built for social copy generation."],
+      ["canva", "Create reusable templates", "Design post templates, carousel layouts, story frames, and announcement graphics.", "Brand assets and post themes.", "Reusable social design kit.", "Canva keeps the calendar visually consistent."],
+      ["buffer", "Schedule core posts", "Queue the approved posts, captions, assets, and links into a publishing schedule.", "Approved copy and visuals.", "Scheduled calendar.", "Buffer handles straightforward social publishing across channels."],
+      ["hootsuite", "Monitor and optimize", "Use Hootsuite for heavier social management needs, monitoring, engagement, and analytics across accounts.", "Published posts and channels.", "Performance and engagement workflow.", "Hootsuite fits teams that need monitoring and management beyond simple scheduling."],
+    ],
+  },
+  {
+    title: "AI Image Campaign Visual Stack",
+    slug: "ai-image-campaign-visual-stack",
+    description:
+      "Create campaign visuals by separating concept, generation, refinement, and final layout. This helps teams compare model strengths instead of forcing every image task through one generator.",
+    ecosystem_slug: "openai",
+    target_user: "Design-adjacent marketers, creators, agencies, and startup teams.",
+    outcome: "A cohesive set of campaign visuals, thumbnails, ads, and social graphics.",
+    difficulty: "Intermediate",
+    estimated_time: "Half-day to 2 days",
+    best_for: "Campaign art, thumbnails, social images, concept boards, and ad visuals.",
+    prerequisites: ["Campaign brief", "Brand constraints", "Required formats"],
+    source_urls: [
+      "https://openai.com/index/dall-e",
+      "https://www.adobe.com/products/firefly/",
+      "https://www.canva.com/canva-ai/",
+    ],
+    steps: [
+      ["chatgpt", "Write creative directions", "Generate visual territories, prompt structures, negative constraints, and format requirements before opening image tools.", "Campaign brief and brand rules.", "Prompt pack and creative direction.", "Better prompts and constraints improve generation quality across all image models."],
+      ["dalle", "Generate concept images", "Use DALL-E for quick concept exploration and image ideas from natural language prompts.", "Prompt pack.", "Initial generated concepts.", "DALL-E belongs early in the creative exploration phase."],
+      ["midjourney", "Explore premium art direction", "Use Midjourney for more stylized or expressive image directions and mood-board options.", "Visual territory and style references.", "Art direction concepts.", "Midjourney is strong for polished, stylized visual exploration."],
+      ["adobe-firefly", "Refine brand-safe assets", "Use Firefly to generate or edit marketing visuals, backgrounds, and campaign-ready image variants.", "Selected concepts and brand constraints.", "Refined image assets.", "Firefly fits brand and design workflows where editing matters."],
+      ["freepik-ai-image-generator", "Create supporting stock-style visuals", "Generate additional backgrounds, icons, and stock-like creative variants for layouts.", "Asset list and formats.", "Supporting visual library.", "Freepik is useful for broad visual asset generation around a campaign."],
+      ["canva", "Assemble final layouts", "Use Canva to create ads, thumbnails, banners, and social posts from the approved visual assets.", "Final images and copy.", "Ready-to-publish visual package.", "Canva is the layout and packaging step for campaign production."],
+    ],
+  },
+  {
+    title: "Open Model Evaluation and Deployment Stack",
+    slug: "open-model-evaluation-deployment-stack",
+    description:
+      "Choose, test, host, and expose open models without guessing. This stack helps technical teams compare model fit, local performance, hosted options, and the final user interface.",
+    ecosystem_slug: "open-source",
+    target_user: "ML engineers, developers, AI platform teams, and privacy-focused operators.",
+    outcome: "A tested open-model deployment path with local and hosted options.",
+    difficulty: "Advanced",
+    estimated_time: "2-5 days",
+    best_for: "Model selection, cost comparison, self-hosting, and open-model product prototypes.",
+    prerequisites: ["Evaluation prompts", "Hardware or hosting budget", "License requirements", "Latency target"],
+    source_urls: [
+      "https://huggingface.co/",
+      "https://ollama.com/",
+      "https://lmstudio.ai/",
+      "https://github.com/vllm-project/vllm",
+      "https://replicate.com/",
+      "https://openwebui.com/",
+    ],
+    steps: [
+      ["hugging-face-hub", "Shortlist model candidates", "Compare model cards, license terms, quantizations, community usage, and task fit.", "Evaluation criteria.", "Model shortlist.", "The model hub is the starting point for open-model due diligence."],
+      ["ollama", "Run quick local tests", "Pull candidate models and run the same prompts locally to compare basic quality and latency.", "Prompt suite and shortlist.", "Local comparison notes.", "Ollama gives quick local signal before deeper infrastructure work."],
+      ["lm-studio", "Inspect desktop usability", "Use LM Studio to test chat UX, local serving, and model behavior with non-technical reviewers.", "Candidate models.", "Reviewer-friendly local tests.", "LM Studio is useful when stakeholders need a simple desktop interface."],
+      ["vllm", "Benchmark serving performance", "Use vLLM to test high-throughput serving and API compatibility for the strongest candidates.", "Selected model and benchmark prompts.", "Serving benchmark results.", "vLLM is built for production inference throughput."],
+      ["replicate", "Compare hosted deployment", "Run the same model or similar alternatives on Replicate to compare setup time, cost, and operational overhead.", "Candidate model and workload estimate.", "Hosted deployment comparison.", "Replicate reduces infrastructure work for hosted model experiments."],
+      ["open-webui", "Expose the chosen model to users", "Connect the selected backend to Open WebUI for testing with real users or internal teams.", "Serving endpoint and access rules.", "Usable chat interface.", "A model deployment needs a user-facing testing surface."],
+    ],
+  },
+  {
+    title: "Multilingual Video Localization Stack",
+    slug: "multilingual-video-localization-stack",
+    description:
+      "Localize videos into new languages while preserving message, voice, visuals, and platform formatting. This playbook is for creators and businesses turning one video into multiple regional assets.",
+    ecosystem_slug: null,
+    target_user: "Creators, course teams, ecommerce brands, and global marketing teams.",
+    outcome: "Localized video variants with translated scripts, dubbed audio, captions, and localized creative.",
+    difficulty: "Intermediate",
+    estimated_time: "Half-day to 2 days per language batch",
+    best_for: "Course clips, product explainers, ads, shorts, webinars, and customer education videos.",
+    prerequisites: ["Source video", "Target language", "Glossary or brand terms", "Review speaker"],
+    source_urls: [
+      "https://elevenlabs.io/dubbing",
+      "https://podcast.adobe.com/en",
+      "https://www.canva.com/canva-ai/",
+    ],
+    steps: [
+      ["claude", "Translate and adapt the script", "Translate the script with tone, cultural context, product terms, and line-length constraints for captions.", "Original transcript and glossary.", "Localized script.", "Claude is useful for careful language adaptation beyond literal translation."],
+      ["elevenlabs", "Dub the video", "Use ElevenLabs dubbing to translate audio or video while preserving timing, emotion, and speaker style where appropriate.", "Source video and target language.", "Dubbed audio/video output.", "ElevenLabs is built for AI dubbing and multilingual voice workflows."],
+      ["heygen", "Create avatar or presenter variants", "Use HeyGen when the localized version needs an avatar, presenter-style clip, or lip-synced spokesperson video.", "Localized script and brand direction.", "Localized presenter video.", "HeyGen fits avatar and translated spokesperson workflows."],
+      ["adobe-podcast", "Clean localized audio", "Run the localized voice track through Adobe Podcast when audio clarity or background noise needs cleanup.", "Dubbed or recorded audio.", "Cleaner voice track.", "Audio quality matters more after translation because review is harder across languages."],
+      ["capcut", "Edit captions and platform versions", "Assemble localized captions, format vertical or horizontal versions, and check timing against the final audio.", "Dubbed audio/video and captions.", "Platform-ready localized video.", "CapCut is a practical editor for captioned social video variants."],
+      ["canva", "Localize thumbnails and graphics", "Create localized thumbnails, title cards, lower thirds, and social graphics in Canva.", "Localized copy and final video frame.", "Localized visual assets.", "Canva makes it easy to adapt supporting creative for each market."],
+    ],
+  },
+];
+
+async function hasPlaybookEditorialColumns() {
+  const { error } = await supabase
+    .from("playbooks")
+    .select("target_user,outcome,difficulty,estimated_time,best_for,prerequisites,source_urls,display_order,seo_title,seo_description")
+    .limit(1);
+  return !error;
+}
+
+async function hasPlaybookToolEditorialColumns() {
+  const { error } = await supabase
+    .from("playbook_tools")
+    .select("step_title,step_goal,how_to_use,input_needed,output_expected,why_this_tool,alternatives,is_required")
+    .limit(1);
+  return !error;
+}
+
+async function fetchAllRows(table, columns, pageSize = 1000) {
+  const rows = [];
+
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase
+      .from(table)
+      .select(columns)
+      .range(from, from + pageSize - 1);
+
+    if (error) throw error;
+
+    rows.push(...(data || []));
+
+    if (!data || data.length < pageSize) {
+      return rows;
+    }
+  }
+}
+
+function playbookRow(playbook, ecosystemBySlug, includeEditorial, index) {
+  const base = {
+    title: playbook.title,
+    slug: playbook.slug,
+    description: playbook.description,
+    ecosystem_id: playbook.ecosystem_slug ? ecosystemBySlug.get(playbook.ecosystem_slug)?.id ?? null : null,
+    is_published: true,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (!includeEditorial) return base;
+
+  return {
+    ...base,
+    target_user: playbook.target_user,
+    outcome: playbook.outcome,
+    difficulty: playbook.difficulty,
+    estimated_time: playbook.estimated_time,
+    best_for: playbook.best_for,
+    prerequisites: playbook.prerequisites,
+    source_urls: playbook.source_urls,
+    display_order: index + 1,
+    seo_title: `${playbook.title} | AI Workflow Playbook`,
+    seo_description: playbook.description.slice(0, 155),
+  };
+}
+
+function stepRow(playbookId, toolId, step, index, includeEditorial) {
+  const [, step_title, step_description, input_needed, output_expected, why_this_tool] = step;
+  const base = {
+    playbook_id: playbookId,
+    tool_id: toolId,
+    step_order: index + 1,
+    step_description: `${step_title}: ${step_description}`,
+  };
+
+  if (!includeEditorial) return base;
+
+  return {
+    ...base,
+    step_title,
+    step_goal: step_description,
+    how_to_use: step_description,
+    input_needed,
+    output_expected,
+    why_this_tool,
+    alternatives: [],
+    is_required: true,
+  };
+}
+
+async function main() {
+  console.log("Seeding editorial AI playbooks...");
+
+  const [ecosystems, tools] = await Promise.all([
+    fetchAllRows("ecosystems", "id, slug, name"),
+    fetchAllRows("tools", "id, slug, name"),
+  ]);
+
+  const ecosystemBySlug = new Map((ecosystems || []).map((ecosystem) => [ecosystem.slug, ecosystem]));
+  const toolBySlug = new Map((tools || []).map((tool) => [tool.slug, tool]));
+  const neededSlugs = [...new Set(playbooks.flatMap((playbook) => playbook.steps.map((step) => step[0])))];
+  const missingSlugs = neededSlugs.filter((slug) => !toolBySlug.has(slug));
+
+  if (missingSlugs.length > 0) {
+    throw new Error(`Missing tools for playbooks: ${missingSlugs.join(", ")}`);
+  }
+
+  const includePlaybookEditorial = await hasPlaybookEditorialColumns();
+  const includeStepEditorial = await hasPlaybookToolEditorialColumns();
+
+  const { data: upsertedPlaybooks, error: pbError } = await supabase
+    .from("playbooks")
+    .upsert(
+      playbooks.map((playbook, index) => playbookRow(playbook, ecosystemBySlug, includePlaybookEditorial, index)),
+      { onConflict: "slug" }
+    )
+    .select("id, slug, title");
+
+  if (pbError) throw pbError;
+
+  const playbookBySlug = new Map((upsertedPlaybooks || []).map((playbook) => [playbook.slug, playbook]));
+  const playbookIds = (upsertedPlaybooks || []).map((playbook) => playbook.id);
+
+  if (playbookIds.length > 0) {
+    const { error: deleteError } = await supabase.from("playbook_tools").delete().in("playbook_id", playbookIds);
+    if (deleteError) throw deleteError;
+  }
+
+  const stepRows = [];
+  for (const playbook of playbooks) {
+    const insertedPlaybook = playbookBySlug.get(playbook.slug);
+    if (!insertedPlaybook) throw new Error(`Could not find inserted playbook ${playbook.slug}`);
+
+    playbook.steps.forEach((step, index) => {
+      const tool = toolBySlug.get(step[0]);
+      stepRows.push(stepRow(insertedPlaybook.id, tool.id, step, index, includeStepEditorial));
+    });
+  }
+
+  const { error: stepsError } = await supabase.from("playbook_tools").insert(stepRows);
+  if (stepsError) throw stepsError;
+
+  console.log(
+    JSON.stringify(
+      {
+        playbooks_upserted: upsertedPlaybooks.length,
+        playbook_steps_inserted: stepRows.length,
+        rich_playbook_columns_detected: includePlaybookEditorial,
+        rich_playbook_tool_columns_detected: includeStepEditorial,
+      },
+      null,
+      2
+    )
+  );
+
+  if (!includePlaybookEditorial || !includeStepEditorial) {
+    console.log("Note: run lib/supabase/schema_update_v10_playbook_editorial_content.sql, then rerun this script to backfill richer playbook and step metadata.");
+  }
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

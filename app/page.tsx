@@ -121,17 +121,11 @@ export default async function HomePage() {
       {/* Ecosystems & Playbooks */}
       <section className="section-padding ecosystem-section">
         <div className="container-main">
-          <div className="ecosystem-section-header">
-            <span className="hero-eyebrow ecosystem-eyebrow">
-              <span className="hero-eyebrow-dot" aria-hidden="true" />
-              Ecosystems
-            </span>
-            <div className="ecosystem-section-title-row">
-              <h2 className="section-title ecosystem-section-title">Explore the AI Giants</h2>
-              <Link href="/ecosystems" className="btn-outline">
-                All ecosystems &rarr;
-              </Link>
-            </div>
+          <div className="section-header ecosystem-home-header">
+            <h2 className="section-title">Explore AI Ecosystems</h2>
+            <Link href="/ecosystems" className="btn-ghost">
+              All ecosystems &rarr;
+            </Link>
           </div>
 
           <div className="ecosystem-grid">
@@ -148,7 +142,7 @@ export default async function HomePage() {
                   All playbooks &rarr;
                 </Link>
               </div>
-              <div className="tools-grid">
+              <div className="tools-grid playbook-grid">
                 {playbooks.slice(0, 3).map((playbook) => (
                   <PlaybookCard key={playbook.id} playbook={playbook} />
                 ))}
