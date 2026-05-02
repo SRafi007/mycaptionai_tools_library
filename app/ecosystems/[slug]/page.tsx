@@ -2,9 +2,30 @@ import { Metadata } from "next";
 import { getEcosystemBySlug, getEcosystems } from "@/lib/db/ecosystems";
 import { notFound } from "next/navigation";
 import { absoluteUrl } from "@/lib/seo";
-import Link from "next/link";
+import EcosystemDetailCard from "@/components/ecosystem-detail-card";
+import EcoCategoryNav from "@/components/ecosystem-category-nav";
 
 export const revalidate = 60;
+
+/* ── Brand theming per ecosystem ── */
+const BRAND_THEME: Record<string, { accent: string; gradientFrom: string; gradientTo: string }> = {
+    openai: { accent: "#10a37f", gradientFrom: "rgba(16,163,127,0.12)", gradientTo: "rgba(16,163,127,0.03)" },
+    anthropic: { accent: "#d97757", gradientFrom: "rgba(217,119,87,0.14)", gradientTo: "rgba(217,119,87,0.03)" },
+    "google-gemini": { accent: "#4285f4", gradientFrom: "rgba(66,133,244,0.12)", gradientTo: "rgba(66,133,244,0.03)" },
+    google: { accent: "#4285f4", gradientFrom: "rgba(66,133,244,0.12)", gradientTo: "rgba(66,133,244,0.03)" },
+    gemini: { accent: "#4285f4", gradientFrom: "rgba(66,133,244,0.12)", gradientTo: "rgba(66,133,244,0.03)" },
+    "open-source": { accent: "#607994", gradientFrom: "rgba(96,121,148,0.10)", gradientTo: "rgba(96,121,148,0.03)" },
+    meta: { accent: "#0866ff", gradientFrom: "rgba(8,102,255,0.10)", gradientTo: "rgba(8,102,255,0.03)" },
+    mistral: { accent: "#ff7000", gradientFrom: "rgba(255,112,0,0.12)", gradientTo: "rgba(255,112,0,0.03)" },
+    cohere: { accent: "#39594d", gradientFrom: "rgba(57,89,77,0.10)", gradientTo: "rgba(57,89,77,0.03)" },
+    perplexity: { accent: "#20808d", gradientFrom: "rgba(32,128,141,0.12)", gradientTo: "rgba(32,128,141,0.03)" },
+};
+
+const FALLBACK_THEME = { accent: "#3585e8", gradientFrom: "rgba(53,133,232,0.10)", gradientTo: "rgba(53,133,232,0.03)" };
+
+function slugify(text: string) {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
 
 export async function generateStaticParams() {
     const ecosystems = await getEcosystems();
@@ -35,6 +56,8 @@ export default async function EcosystemDetailsPage({ params }: { params: Promise
         notFound();
     }
 
+    const brand = BRAND_THEME[ecosystem.slug] || FALLBACK_THEME;
+
     // Group tools by role_category
     const categorizedTools = ecosystem.tools.reduce((acc, tool) => {
         const cat = tool.role_category || "Other Tools";
@@ -43,111 +66,94 @@ export default async function EcosystemDetailsPage({ params }: { params: Promise
         return acc;
     }, {} as Record<string, typeof ecosystem.tools>);
 
+    const categories = Object.keys(categorizedTools);
+    const totalTools = ecosystem.tools.length;
+
+    const heroStyle = {
+        "--eco-accent": brand.accent,
+        "--eco-grad-from": brand.gradientFrom,
+        "--eco-grad-to": brand.gradientTo,
+    } as React.CSSProperties;
+
     return (
-        <div className="container-main section-padding">
-            <div style={{ display: "flex", alignItems: "center", gap: "24px", marginBottom: "48px", marginTop: "32px" }}>
-                 <div className="tool-card-icon" style={{ width: 80, height: 80 }}>
-                    {ecosystem.icon_url ? (
-                        <img src={ecosystem.icon_url} alt={ecosystem.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                    ) : (
-                        <span style={{ fontSize: "40px" }}>🌐</span>
-                    )}
-                 </div>
-                 <div>
-                    <h1 className="hero-title" style={{ textAlign: "left", margin: 0 }}>
-                        {ecosystem.name} Ecosystem
-                    </h1>
-                    <p style={{ color: "var(--text-secondary)", fontSize: "16px", marginTop: "12px", maxWidth: "800px" }}>
-                        {ecosystem.description}
-                    </p>
-                 </div>
-            </div>
-
-            {Object.entries(categorizedTools).map(([category, tools]) => (
-                <div key={category} style={{ marginBottom: "64px" }}>
-                    <div className="section-header">
-                        <h2 className="section-title">{category}</h2>
+        <div className="eco-detail-page" style={heroStyle}>
+            {/* ── HERO ── */}
+            <section className="eco-hero">
+                <div className="eco-hero-glow" aria-hidden="true" />
+                <div className="eco-hero-inner container-main">
+                    <div className="eco-hero-logo">
+                        {ecosystem.icon_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={ecosystem.icon_url} alt={ecosystem.name} />
+                        ) : (
+                            <span>{ecosystem.name.charAt(0)}</span>
+                        )}
                     </div>
-                    <div className="tools-grid">
-                        {tools.map((tool) => (
-                            <article key={tool.id} className="card tool-card ecosystem-tool-card">
-                                <div className="tool-card-header">
-                                    <div className="tool-card-identity">
-                                        <div
-                                            className={`tool-card-icon ${tool.icon_url || tool.image_url ? "tool-card-icon-image" : "tool-card-icon-fallback"}`}
-                                            style={
-                                                tool.icon_url || tool.image_url
-                                                    ? { background: `url(${tool.icon_url || tool.image_url}) center/cover` }
-                                                    : undefined
-                                            }
-                                        >
-                                            {!tool.icon_url && !tool.image_url && (
-                                                <span>{tool.name.charAt(0).toUpperCase()}</span>
-                                            )}
-                                        </div>
-                                        <div className="tool-card-title-wrap">
-                                            <h3 className="tool-card-name">
-                                                <Link href={`/tools/${tool.slug}`} className="tool-card-name-link">
-                                                    {tool.name}
-                                                </Link>
-                                            </h3>
-                                            <span className="ecosystem-tool-role">{tool.role_category || "Ecosystem tool"}</span>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <p className="tool-card-desc">
-                                    {tool.ecosystem_summary || tool.short_description || tool.description}
-                                </p>
+                    <div className="eco-hero-content">
+                        <h1 className="eco-hero-title">{ecosystem.name}</h1>
 
-                                {(tool.best_for || tool.when_to_use || tool.recommendation || (tool.use_case_examples && tool.use_case_examples.length > 0)) && (
-                                    <div className="ecosystem-tool-guidance">
-                                        {tool.best_for && (
-                                            <div className="ecosystem-tool-guidance-row">
-                                                <span>Best for</span>
-                                                <strong>{tool.best_for}</strong>
-                                            </div>
-                                        )}
-                                        {tool.when_to_use && (
-                                            <div className="ecosystem-tool-guidance-row">
-                                                <span>When to use</span>
-                                                <p>{tool.when_to_use}</p>
-                                            </div>
-                                        )}
-                                        {tool.use_case_examples && tool.use_case_examples.length > 0 && (
-                                            <div className="ecosystem-tool-usecases">
-                                                {tool.use_case_examples.slice(0, 3).map((useCase) => (
-                                                    <span key={useCase}>{useCase}</span>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {tool.recommendation && (
-                                            <p className="ecosystem-tool-recommendation">{tool.recommendation}</p>
-                                        )}
-                                    </div>
-                                )}
-
-                                <div className="tool-card-footer">
-                                    <div className="tool-card-meta">
-                                        {tool.content_status && tool.content_status !== "active" && (
-                                            <span className="ecosystem-tool-status">{tool.content_status}</span>
-                                        )}
-                                    </div>
-                                    {tool.url && (
-                                        <a href={tool.url} target="_blank" rel="noopener noreferrer" className="btn-secondary btn-sm">
-                                            Visit
-                                        </a>
-                                    )}
-                                </div>
-                            </article>
-                        ))}
+                        <div className="eco-hero-stats">
+                            <div className="eco-hero-stat">
+                                <span className="eco-hero-stat-value">{totalTools}</span>
+                                <span className="eco-hero-stat-label">Tools</span>
+                            </div>
+                            <div className="eco-hero-stat-sep" aria-hidden="true" />
+                            <div className="eco-hero-stat">
+                                <span className="eco-hero-stat-value">{categories.length}</span>
+                                <span className="eco-hero-stat-label">Categories</span>
+                            </div>
+                            <div className="eco-hero-stat-sep" aria-hidden="true" />
+                            <div className="eco-hero-stat">
+                                <span className="eco-hero-stat-value">
+                                    {ecosystem.tools.filter(t => t.url).length}
+                                </span>
+                                <span className="eco-hero-stat-label">Active</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            ))}
+            </section>
+
+            {/* ── STICKY NAV ── */}
+            {categories.length > 1 && (
+                <EcoCategoryNav categories={categories} brandAccent={brand.accent} />
+            )}
+
+            {/* ── CATEGORY LANES ── */}
+            <div className="eco-lanes container-main">
+                {Object.entries(categorizedTools).map(([category, tools], idx) => (
+                    <section
+                        key={category}
+                        id={`eco-cat-${slugify(category)}`}
+                        className="eco-lane"
+                        style={{ "--lane-index": idx } as React.CSSProperties}
+                    >
+                        {/* Lane header */}
+                        <div className="eco-lane-header">
+                            <div className="eco-lane-marker" aria-hidden="true">
+                                <div className="eco-lane-dot" />
+                            </div>
+                            <h2 className="eco-lane-title">{category}</h2>
+                            <span className="eco-lane-count">{tools.length} {tools.length === 1 ? "tool" : "tools"}</span>
+                        </div>
+
+                        {/* Connection line */}
+                        <div className="eco-lane-connector" aria-hidden="true" />
+
+                        {/* Tools grid */}
+                        <div className="eco-lane-grid">
+                            {tools.map((tool) => (
+                                <EcosystemDetailCard key={tool.id} tool={tool} />
+                            ))}
+                        </div>
+                    </section>
+                ))}
+            </div>
 
             {ecosystem.tools.length === 0 && (
-                <div className="empty-state">
-                    <p>No tools listed in this ecosystem yet.</p>
+                <div className="container-main" style={{ padding: "80px 24px", textAlign: "center" }}>
+                    <p style={{ color: "var(--text-muted)", fontSize: "16px" }}>No tools listed in this ecosystem yet.</p>
                 </div>
             )}
         </div>
