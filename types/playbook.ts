@@ -6,6 +6,7 @@ export interface Playbook {
     title: string;
     slug: string;
     description: string | null;
+    cover_url?: string | null;
     ecosystem_id: string | null;
     author_id: string | null;
     is_published: boolean;

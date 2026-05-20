@@ -91,118 +91,143 @@ export default async function PlaybookDetailsPage({ params }: { params: Promise<
     const flowHeight = Math.max(920, 210 * playbook.tools.length);
     const shortDesc = getShortDescription(playbook.description);
 
+    const howToSchema = {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        name: playbook.title,
+        description: playbook.description || `A step-by-step tech stack playbook showing how to use ${playbook.tools.map(t => t.name).join(", ")}.`,
+        url: absoluteUrl(`/playbooks/${playbook.slug}`),
+        step: playbook.tools.map((tool, index) => {
+            const { hook, body } = splitStepDescription(tool.step_description);
+            const stepText = body ? `${hook}: ${body}` : hook;
+            return {
+                "@type": "HowToStep",
+                position: index + 1,
+                name: `Step ${index + 1}: Use ${tool.name}`,
+                text: stepText,
+                url: absoluteUrl(`/tools/${tool.slug}`),
+            };
+        }),
+    };
+
     return (
-        <div className="container-main playbook-detail-page">
-            <section className="playbook-hero-compact">
-                <div className="playbook-title-row">
-                    <h1 className="playbook-detail-title">{playbook.title}</h1>
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+            />
+            <div className="container-main playbook-detail-page">
+                <section className="playbook-hero-compact">
+                    <div className="playbook-title-row">
+                        <h1 className="playbook-detail-title">{playbook.title}</h1>
 
-                    {playbook.tools.length > 0 && (
-                        <span className="playbook-tool-count-badge">
-                            {playbook.tools.length} connected tools
-                        </span>
+                        {playbook.tools.length > 0 && (
+                            <span className="playbook-tool-count-badge">
+                                {playbook.tools.length} connected tools
+                            </span>
+                        )}
+                    </div>
+
+                    {shortDesc && (
+                        <p className="playbook-inline-description">{shortDesc}</p>
                     )}
-                </div>
 
-                {shortDesc && (
-                    <p className="playbook-inline-description">{shortDesc}</p>
-                )}
+                    {playbook.ecosystem && (
+                        <div className="playbook-ecosystem-chip">
+                            <span>Built around</span>
+                            <strong>{playbook.ecosystem.name}</strong>
+                        </div>
+                    )}
+                </section>
 
-                {playbook.ecosystem && (
-                    <div className="playbook-ecosystem-chip">
-                        <span>Built around</span>
-                        <strong>{playbook.ecosystem.name}</strong>
-                    </div>
-                )}
-            </section>
+                <section className="playbook-workflow-section" aria-labelledby="playbook-workflow-title">
 
-            <section className="playbook-workflow-section" aria-labelledby="playbook-workflow-title">
-
-                {playbook.tools.length > 0 ? (
-                    <div
-                        className="playbook-flow-canvas dot-grid"
-                        style={{ "--flow-height": `${flowHeight}px` } as CSSProperties}
-                    >
-                        <svg
-                            className="playbook-flow-edges"
-                            viewBox="0 0 100 100"
-                            preserveAspectRatio="none"
-                            aria-hidden="true"
+                    {playbook.tools.length > 0 ? (
+                        <div
+                            className="playbook-flow-canvas dot-grid"
+                            style={{ "--flow-height": `${flowHeight}px` } as CSSProperties}
                         >
-                            <defs>
-                                <linearGradient id="playbook-edge-gradient" x1="0" x2="1" y1="0" y2="1">
-                                    <stop offset="0%" stopColor="var(--brand-500)" />
-                                    <stop offset="58%" stopColor="var(--secondary-accent)" />
-                                    <stop offset="100%" stopColor="var(--highlight-accent)" />
-                                </linearGradient>
-                            </defs>
-                            {flowPositions.slice(0, -1).map((position, index) => (
-                                <path
-                                    key={`${playbook.tools[index].id}-${playbook.tools[index + 1].id}`}
-                                    d={getEdgePath(position, flowPositions[index + 1])}
-                                />
-                            ))}
-                        </svg>
+                            <svg
+                                className="playbook-flow-edges"
+                                viewBox="0 0 100 100"
+                                preserveAspectRatio="none"
+                                aria-hidden="true"
+                            >
+                                <defs>
+                                    <linearGradient id="playbook-edge-gradient" x1="0" x2="1" y1="0" y2="1">
+                                        <stop offset="0%" stopColor="var(--brand-500)" />
+                                        <stop offset="58%" stopColor="var(--secondary-accent)" />
+                                        <stop offset="100%" stopColor="var(--highlight-accent)" />
+                                    </linearGradient>
+                                </defs>
+                                {flowPositions.slice(0, -1).map((position, index) => (
+                                    <path
+                                        key={`${playbook.tools[index].id}-${playbook.tools[index + 1].id}`}
+                                        d={getEdgePath(position, flowPositions[index + 1])}
+                                    />
+                                ))}
+                            </svg>
 
-                        <ol className="playbook-flow-nodes">
-                            {playbook.tools.map((tool, index) => {
-                                const position = flowPositions[index];
-                                const hasVisualIcon = Boolean(tool.image_url || tool.icon_url);
-                                const { hook, body } = splitStepDescription(tool.step_description);
+                            <ol className="playbook-flow-nodes">
+                                {playbook.tools.map((tool, index) => {
+                                    const position = flowPositions[index];
+                                    const hasVisualIcon = Boolean(tool.image_url || tool.icon_url);
+                                    const { hook, body } = splitStepDescription(tool.step_description);
 
-                                return (
-                                    <li
-                                        key={`${tool.id}-${index}`}
-                                        className="playbook-flow-node"
-                                        style={{
-                                            "--node-x": `${position.x}%`,
-                                            "--node-y": `${position.y}%`,
-                                            "--node-index": index,
-                                        } as CSSProperties}
-                                    >
-                                        <article className="playbook-node-card">
-                                            {/* Top bar: [logo  tool_name  |  step N] */}
-                                            <div className="playbook-node-topbar">
-                                                <div className="playbook-node-identity">
-                                                    <div
-                                                        className={`playbook-node-icon ${hasVisualIcon ? "playbook-node-icon-image" : "playbook-node-icon-fallback"}`}
-                                                        style={
-                                                            hasVisualIcon
-                                                                ? { backgroundImage: `url(${tool.icon_url || tool.image_url})` }
-                                                                : undefined
-                                                        }
-                                                        aria-hidden="true"
-                                                    >
-                                                        {!hasVisualIcon && tool.name.charAt(0).toUpperCase()}
+                                    return (
+                                        <li
+                                            key={`${tool.id}-${index}`}
+                                            className="playbook-flow-node"
+                                            style={{
+                                                "--node-x": `${position.x}%`,
+                                                "--node-y": `${position.y}%`,
+                                                "--node-index": index,
+                                            } as CSSProperties}
+                                        >
+                                            <article className="playbook-node-card">
+                                                {/* Top bar: [logo  tool_name  |  step N] */}
+                                                <div className="playbook-node-topbar">
+                                                    <div className="playbook-node-identity">
+                                                        <div
+                                                            className={`playbook-node-icon ${hasVisualIcon ? "playbook-node-icon-image" : "playbook-node-icon-fallback"}`}
+                                                            style={
+                                                                hasVisualIcon
+                                                                    ? { backgroundImage: `url(${tool.icon_url || tool.image_url})` }
+                                                                    : undefined
+                                                            }
+                                                            aria-hidden="true"
+                                                        >
+                                                            {!hasVisualIcon && tool.name.charAt(0).toUpperCase()}
+                                                        </div>
+                                                        <h3 className="playbook-node-title">
+                                                            <Link href={`/tools/${tool.slug}`}>{tool.name}</Link>
+                                                        </h3>
                                                     </div>
-                                                    <h3 className="playbook-node-title">
-                                                        <Link href={`/tools/${tool.slug}`}>{tool.name}</Link>
-                                                    </h3>
+                                                    <span className="playbook-step-pill">
+                                                        Step {String(tool.step_order || index + 1).padStart(2, "0")}
+                                                    </span>
                                                 </div>
-                                                <span className="playbook-step-pill">
-                                                    Step {String(tool.step_order || index + 1).padStart(2, "0")}
-                                                </span>
-                                            </div>
 
-                                            {/* Hook line */}
-                                            <p className="playbook-node-hook">{hook}</p>
+                                                {/* Hook line */}
+                                                <p className="playbook-node-hook">{hook}</p>
 
-                                            {/* Body text */}
-                                            {body && (
-                                                <p className="playbook-node-body">{body}</p>
-                                            )}
-                                        </article>
-                                    </li>
-                                );
-                            })}
-                        </ol>
-                    </div>
-                ) : (
-                    <div className="empty-state">
-                        <p>No tools listed in this playbook yet.</p>
-                    </div>
-                )}
-            </section>
-        </div>
+                                                {/* Body text */}
+                                                {body && (
+                                                    <p className="playbook-node-body">{body}</p>
+                                                )}
+                                            </article>
+                                        </li>
+                                    );
+                                })}
+                            </ol>
+                        </div>
+                    ) : (
+                        <div className="empty-state">
+                            <p>No tools listed in this playbook yet.</p>
+                        </div>
+                    )}
+                </section>
+            </div>
+        </>
     );
 }

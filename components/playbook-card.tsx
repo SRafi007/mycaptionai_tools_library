@@ -15,16 +15,31 @@ function getShortDescription(description?: string | null) {
 export default function PlaybookCard({ playbook }: { playbook: Playbook }) {
     return (
         <Link href={`/playbooks/${playbook.slug}`} className="card playbook-card">
-            <div className="playbook-card-head">
-                <div className="playbook-card-icon" aria-hidden="true">
-                    {playbook.title.charAt(0)}
-                </div>
-                <h3 className="playbook-card-title">{playbook.title}</h3>
+            <div className="playbook-card-cover" aria-hidden="true">
+                {playbook.cover_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img 
+                        src={playbook.cover_url} 
+                        alt="" 
+                        className="playbook-card-cover-img"
+                        loading="lazy"
+                    />
+                ) : (
+                    <div className="playbook-card-cover-placeholder">
+                        <div className="playbook-card-cover-placeholder-glow" />
+                        <span className="playbook-card-cover-placeholder-symbol">
+                            {playbook.title.charAt(0)}
+                        </span>
+                    </div>
+                )}
             </div>
-            <p className="playbook-card-desc">{getShortDescription(playbook.description)}</p>
-            <div className="playbook-card-footer">
-                <span>View stack</span>
-                <span aria-hidden="true" className="playbook-card-arrow">&rarr;</span>
+            <div className="playbook-card-content">
+                <h3 className="playbook-card-title">{playbook.title}</h3>
+                <p className="playbook-card-desc">{getShortDescription(playbook.description)}</p>
+                <div className="playbook-card-footer">
+                    <span>View stack</span>
+                    <span aria-hidden="true" className="playbook-card-arrow">&rarr;</span>
+                </div>
             </div>
         </Link>
     );

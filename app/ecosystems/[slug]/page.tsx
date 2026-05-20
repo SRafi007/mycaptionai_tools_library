@@ -75,87 +75,113 @@ export default async function EcosystemDetailsPage({ params }: { params: Promise
         "--eco-grad-to": brand.gradientTo,
     } as React.CSSProperties;
 
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: `${ecosystem.name} Ecosystem & Top Tools`,
+        description: ecosystem.description || `Explore the ${ecosystem.name} ecosystem.`,
+        url: absoluteUrl(`/ecosystems/${ecosystem.slug}`),
+        mainEntity: {
+            "@type": "ItemList",
+            name: `Top tools in ${ecosystem.name} Ecosystem`,
+            numberOfItems: totalTools,
+            itemListElement: ecosystem.tools.map((tool, idx) => ({
+                "@type": "ListItem",
+                position: idx + 1,
+                name: tool.name,
+                url: absoluteUrl(`/tools/${tool.slug}`),
+                description: tool.short_description || undefined,
+            })),
+        },
+    };
+
     return (
-        <div className="eco-detail-page" style={heroStyle}>
-            {/* ── HERO ── */}
-            <section className="eco-hero">
-                <div className="eco-hero-glow" aria-hidden="true" />
-                <div className="eco-hero-inner container-main">
-                    <div className="eco-hero-logo">
-                        {ecosystem.icon_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={ecosystem.icon_url} alt={ecosystem.name} />
-                        ) : (
-                            <span>{ecosystem.name.charAt(0)}</span>
-                        )}
-                    </div>
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <div className="eco-detail-page" style={heroStyle}>
+                {/* ── HERO ── */}
+                <section className="eco-hero">
+                    <div className="eco-hero-glow" aria-hidden="true" />
+                    <div className="eco-hero-inner container-main">
+                        <div className="eco-hero-logo">
+                            {ecosystem.icon_url ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={ecosystem.icon_url} alt={ecosystem.name} />
+                            ) : (
+                                <span>{ecosystem.name.charAt(0)}</span>
+                            )}
+                        </div>
 
-                    <div className="eco-hero-content">
-                        <h1 className="eco-hero-title">{ecosystem.name}</h1>
+                        <div className="eco-hero-content">
+                            <h1 className="eco-hero-title">{ecosystem.name}</h1>
 
-                        <div className="eco-hero-stats">
-                            <div className="eco-hero-stat">
-                                <span className="eco-hero-stat-value">{totalTools}</span>
-                                <span className="eco-hero-stat-label">Tools</span>
-                            </div>
-                            <div className="eco-hero-stat-sep" aria-hidden="true" />
-                            <div className="eco-hero-stat">
-                                <span className="eco-hero-stat-value">{categories.length}</span>
-                                <span className="eco-hero-stat-label">Categories</span>
-                            </div>
-                            <div className="eco-hero-stat-sep" aria-hidden="true" />
-                            <div className="eco-hero-stat">
-                                <span className="eco-hero-stat-value">
-                                    {ecosystem.tools.filter(t => t.url).length}
-                                </span>
-                                <span className="eco-hero-stat-label">Active</span>
+                            <div className="eco-hero-stats">
+                                <div className="eco-hero-stat">
+                                    <span className="eco-hero-stat-value">{totalTools}</span>
+                                    <span className="eco-hero-stat-label">Tools</span>
+                                </div>
+                                <div className="eco-hero-stat-sep" aria-hidden="true" />
+                                <div className="eco-hero-stat">
+                                    <span className="eco-hero-stat-value">{categories.length}</span>
+                                    <span className="eco-hero-stat-label">Categories</span>
+                                </div>
+                                <div className="eco-hero-stat-sep" aria-hidden="true" />
+                                <div className="eco-hero-stat">
+                                    <span className="eco-hero-stat-value">
+                                        {ecosystem.tools.filter(t => t.url).length}
+                                    </span>
+                                    <span className="eco-hero-stat-label">Active</span>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </section>
+
+                {/* ── STICKY NAV ── */}
+                {categories.length > 1 && (
+                    <EcoCategoryNav categories={categories} brandAccent={brand.accent} />
+                )}
+
+                {/* ── CATEGORY LANES ── */}
+                <div className="eco-lanes container-main">
+                    {Object.entries(categorizedTools).map(([category, tools], idx) => (
+                        <section
+                            key={category}
+                            id={`eco-cat-${slugify(category)}`}
+                            className="eco-lane"
+                            style={{ "--lane-index": idx } as React.CSSProperties}
+                        >
+                            {/* Lane header */}
+                            <div className="eco-lane-header">
+                                <div className="eco-lane-marker" aria-hidden="true">
+                                    <div className="eco-lane-dot" />
+                                </div>
+                                <h2 className="eco-lane-title">{category}</h2>
+                                <span className="eco-lane-count">{tools.length} {tools.length === 1 ? "tool" : "tools"}</span>
+                            </div>
+
+                            {/* Connection line */}
+                            <div className="eco-lane-connector" aria-hidden="true" />
+
+                            {/* Tools grid */}
+                            <div className="eco-lane-grid">
+                                {tools.map((tool) => (
+                                    <EcosystemDetailCard key={tool.id} tool={tool} />
+                                ))}
+                            </div>
+                        </section>
+                    ))}
                 </div>
-            </section>
 
-            {/* ── STICKY NAV ── */}
-            {categories.length > 1 && (
-                <EcoCategoryNav categories={categories} brandAccent={brand.accent} />
-            )}
-
-            {/* ── CATEGORY LANES ── */}
-            <div className="eco-lanes container-main">
-                {Object.entries(categorizedTools).map(([category, tools], idx) => (
-                    <section
-                        key={category}
-                        id={`eco-cat-${slugify(category)}`}
-                        className="eco-lane"
-                        style={{ "--lane-index": idx } as React.CSSProperties}
-                    >
-                        {/* Lane header */}
-                        <div className="eco-lane-header">
-                            <div className="eco-lane-marker" aria-hidden="true">
-                                <div className="eco-lane-dot" />
-                            </div>
-                            <h2 className="eco-lane-title">{category}</h2>
-                            <span className="eco-lane-count">{tools.length} {tools.length === 1 ? "tool" : "tools"}</span>
-                        </div>
-
-                        {/* Connection line */}
-                        <div className="eco-lane-connector" aria-hidden="true" />
-
-                        {/* Tools grid */}
-                        <div className="eco-lane-grid">
-                            {tools.map((tool) => (
-                                <EcosystemDetailCard key={tool.id} tool={tool} />
-                            ))}
-                        </div>
-                    </section>
-                ))}
+                {ecosystem.tools.length === 0 && (
+                    <div className="container-main" style={{ padding: "80px 24px", textAlign: "center" }}>
+                        <p style={{ color: "var(--text-muted)", fontSize: "16px" }}>No tools listed in this ecosystem yet.</p>
+                    </div>
+                )}
             </div>
-
-            {ecosystem.tools.length === 0 && (
-                <div className="container-main" style={{ padding: "80px 24px", textAlign: "center" }}>
-                    <p style={{ color: "var(--text-muted)", fontSize: "16px" }}>No tools listed in this ecosystem yet.</p>
-                </div>
-            )}
-        </div>
+        </>
     );
 }

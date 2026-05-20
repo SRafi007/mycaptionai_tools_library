@@ -8,6 +8,8 @@ const CHILD_SITEMAPS = [
     `${SITE_URL}/sitemaps/categories.xml`,
     `${SITE_URL}/sitemaps/blog.xml`,
     `${SITE_URL}/sitemaps/use-cases.xml`,
+    `${SITE_URL}/sitemaps/ecosystems.xml`,
+    `${SITE_URL}/sitemaps/playbooks.xml`,
 ];
 
 export async function GET() {

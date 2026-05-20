@@ -1750,9 +1750,8 @@ a {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-height: 180px;
-  padding: 16px;
+  min-height: 280px;
+  padding: 0;
   border-color: var(--border-default);
   background: var(--bg-surface);
   box-shadow: 0 8px 18px rgba(11, 20, 36, 0.06);
@@ -1761,10 +1760,19 @@ a {
 }
 
 .playbook-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
   border-color: var(--border-hover);
   background: var(--bg-surface-hover);
-  box-shadow: 0 14px 26px rgba(11, 20, 36, 0.09);
+  box-shadow: 0 16px 32px rgba(11, 20, 36, 0.1);
+}
+
+.playbook-card:hover .playbook-card-cover-img {
+  transform: scale(1.05);
+}
+
+.playbook-card:hover .playbook-card-cover-placeholder-glow {
+  transform: scale(1.15) translate(-10%, -10%);
+  opacity: 0.9;
 }
 
 .playbook-card:hover .playbook-card-arrow {
@@ -1772,26 +1780,80 @@ a {
   color: var(--accent);
 }
 
-.playbook-card-head {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  min-width: 0;
+/* 16:9 Cover Layout */
+.playbook-card-cover {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-.playbook-card-icon {
+.playbook-card-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Premium Placeholder with mesh gradient & glass badge */
+.playbook-card-cover-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, var(--bg-surface-hover)), color-mix(in srgb, var(--bg-surface) 90%, var(--accent-muted)));
+  overflow: hidden;
+}
+
+.playbook-card-cover-placeholder-glow {
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-muted) 0%, transparent 70%);
+  filter: blur(30px);
+  opacity: 0.6;
+  pointer-events: none;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+}
+
+.playbook-card-cover-placeholder-symbol {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--teal-glow);
-  background: color-mix(in srgb, var(--bg-surface) 82%, var(--accent-muted));
-  color: var(--accent);
-  font-size: 14px;
+  width: 46px;
+  height: 46px;
+  font-size: 20px;
   font-weight: 800;
-  flex: 0 0 auto;
+  color: var(--accent);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 12px rgba(11, 20, 36, 0.08), inset 0 2px 4px rgba(255, 255, 255, 0.5);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.playbook-card:hover .playbook-card-cover-placeholder-symbol {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 16px rgba(11, 20, 36, 0.12), inset 0 2px 4px rgba(255, 255, 255, 0.5);
+}
+
+/* Card content and typography */
+.playbook-card-content {
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
 }
 
 .playbook-card-title {
@@ -1800,18 +1862,23 @@ a {
   font-weight: 650;
   color: var(--text-primary);
   letter-spacing: -0.01em;
-  line-height: 1.3;
+  line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  transition: color var(--transition);
+}
+
+.playbook-card:hover .playbook-card-title {
+  color: var(--accent);
 }
 
 .playbook-card-desc {
   margin: 0;
   color: var(--text-secondary);
   font-size: 13px;
-  line-height: 1.45;
+  line-height: 1.5;
   flex: 1;
   display: -webkit-box;
   -webkit-line-clamp: 2;
