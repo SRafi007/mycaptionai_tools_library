@@ -48,7 +48,7 @@ export default async function HomePage() {
     getTopCategories(12),
     getToolCount(),
     getEcosystemsWithPreview(5),
-    getPublishedPlaybooks(),
+    getPublishedPlaybooks(3),
   ]);
 
   const homeSchema = {
@@ -143,7 +143,7 @@ export default async function HomePage() {
                 </Link>
               </div>
               <div className="tools-grid playbook-grid">
-                {playbooks.slice(0, 3).map((playbook) => (
+                {playbooks.map((playbook) => (
                   <PlaybookCard key={playbook.id} playbook={playbook} />
                 ))}
               </div>

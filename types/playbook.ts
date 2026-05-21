@@ -10,6 +10,7 @@ export interface Playbook {
     ecosystem_id: string | null;
     author_id: string | null;
     is_published: boolean;
+    visual_position?: number | null;
     created_at: string;
     updated_at: string;
 }

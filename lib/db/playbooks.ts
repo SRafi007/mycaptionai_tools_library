@@ -1,12 +1,19 @@
 import { supabaseAdmin as supabase } from "@/lib/supabase/admin";
 import { Playbook, PlaybookWithDetails } from "../../types/playbook";
 
-export async function getPublishedPlaybooks(): Promise<Playbook[]> {
-    const { data, error } = await supabase
+export async function getPublishedPlaybooks(limit?: number): Promise<Playbook[]> {
+    let query = supabase
         .from("playbooks")
         .select("*")
         .eq("is_published", true)
+        .order("visual_position", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: false });
+        
+    if (limit !== undefined) {
+        query = query.limit(limit);
+    }
+        
+    const { data, error } = await query;
         
     if (error) {
         console.error("Error fetching playbooks:", error);

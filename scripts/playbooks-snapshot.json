@@ -1,0 +1,200 @@
+[
+  {
+    "id": "a6f4fa00-2e80-4ba8-bec9-a2f5c5d7e499",
+    "slug": "omnichannel-creator-system-turn-podcast-into-social-assets",
+    "title": "Omnichannel Creator System: Turn One Podcast Into Ten High-Traffic Social Assets",
+    "description": "Stop leaving traffic on the table. Turn every single podcast episode, expert interview, or webinar into a massive multi-channel content engine. Automatically generate engaging video clips, comprehensive show notes, custom visual quote cards, newsletters, and promotional social posts that extend your brand reach across the web.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "9a869327-8ac4-4fc9-b534-1205c4ed6706",
+    "slug": "elite-developer-sprint-engine-ship-tested-code-faster",
+    "title": "Elite Developer Sprint Engine: Ship Tested Code Ten Times Faster With AI",
+    "description": "Supercharge your engineering throughput without sacrificing quality or system control. This elite workflow integrates Claude Code, Cursor, GitHub Copilot, and Gemini to automate repository exploration, feature implementation, and rigorous code reviews while maintaining absolute unit testing and code safety standards.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "ae21b0d5-e6ff-415b-8961-fd278d8a4459",
+    "slug": "rapid-saas-builder-launch-working-web-apps-no-code",
+    "title": "Rapid SaaS Builder: Launch Working Web Applications Without Writing Code",
+    "description": "Turn your million-dollar idea into a fully functional, interactive software application in record time. Skip the slow, expensive development cycles and use natural language to generate robust frontends, backends, databases, and authentication. Design and launch a real working MVP to start collecting user feedback today.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "2342e21c-c291-400d-a8e2-df04a7f83b64",
+    "slug": "high-converting-sales-pipeline-book-outbound-meetings",
+    "title": "High-Converting Sales Pipeline: Book Personalized Outbound Meetings on Autopilot",
+    "description": "Tired of cold emailing into a black hole? This cutting-edge sales pipeline helps SDRs and founders enrich hyper-targeted prospect lists, extract custom personalization triggers, write compelling hyper-focused email sequences, and sync every interaction directly into HubSpot for predictable, scaleable outbound revenue.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "d997ee4a-7639-4a9d-b4d4-1e3732a9b706",
+    "slug": "zero-friction-support-automation-build-context-aware-ai-helpdesk",
+    "title": "Zero-Friction Support Automation: Build Context-Aware AI Helpdesks With Escalation Loops",
+    "description": "Scale your customer success without hiring an army of agents. Deploy a sophisticated, context-aware support ecosystem that instantly answers routine customer inquiries, handles complex ticket resolution, and seamlessly routes high-priority tickets to human representatives, turning customer support into a competitive advantage.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "7a6c0d53-ce20-4749-ad8c-55a1c0a2af10",
+    "slug": "automated-meeting-synthesizer-convert-conversations-to-crm-records",
+    "title": "Automated Meeting Synthesizer: Instantly Convert Conversations Into CRM Records and Tasks",
+    "description": "Eliminate post-meeting admin work forever. This high-efficiency playbook automatically captures transcripts, flags critical action items, drafts beautifully written follow-up emails, and logs structured updates directly into your CRM. Keep your team aligned and ensure no customer promise ever slips through the cracks.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "e9e1d3c3-8bc8-402f-90cd-46fe7c16bc46",
+    "slug": "instant-brand-identity-creator-design-logos-launch-graphics",
+    "title": "Instant Brand Identity Creator: Design Beautiful Logos and Complete Launch Graphics",
+    "description": "Launch your next venture with a world-class visual presence from day one. Perfect for founders and creators, this playbook guides you through defining a laser-focused brand strategy, generating beautiful logo concepts, designing commercial-grade marketing assets, and scheduling a highly coordinated launch campaign.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "3e860716-8a47-42f1-b114-21dc4e53b8fd",
+    "slug": "bulletproof-private-ai-deploy-secure-offline-models",
+    "title": "Bulletproof Private AI: Deploy Secure Offline Language Models for Your Team",
+    "description": "Unleash the power of state-of-the-art AI models without compromising your proprietary data. Learn how to discover, evaluate, optimize, and deploy powerful open-source models (like Llama and Mistral) entirely offline on your local hardware or self-hosted servers with a beautiful, team-ready web interface.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "4c83159b-1215-4f4f-869c-0a8dbc67972c",
+    "slug": "production-ready-agent-builder-stateful-tool-using-ai-agents",
+    "title": "Production-Ready Agent Builder: Build Stateful, Tool-Using AI Automated Agents",
+    "description": "Go beyond basic chatbots. Master the tools needed to build autonomous, reliable, and observable AI agents. Learn to design structured models, build custom API tools, orchestrate complex state charts using LangGraph or n8n, and deploy production-grade automated agents that work for your business 24/7.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "3a8a494a-7433-4bac-877d-a65d7ae516c7",
+    "slug": "high-conversion-ecom-ad-factory-generate-copy-visuals",
+    "title": "High-Conversion Ecom Ad Factory: Generate Ad Copy and Visuals That Sell",
+    "description": "Stop wasting ad spend on creatives that don't convert. This hyper-efficient ecommerce advertising engine generates high-converting ad concepts, stunning product visuals, custom UGC-style video creatives, and channel-optimized copywriting designed to command attention, lower acquisition costs, and maximize ROAS.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "6bd99d2a-ae1a-4a4f-853e-1e4a17034c99",
+    "slug": "instant-academy-builder-convert-raw-material-to-lessons",
+    "title": "Instant Academy Builder: Convert Raw Material Into High-Impact Digital Lessons",
+    "description": "Transform your specialized expertise into a highly profitable digital academy or world-class internal training curriculum. Ground your lessons in source material, design perfect course modules, generate engaging slide decks, create interactive quizzes, and dub voiceovers in multiple languages to scale your impact.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "7a9b6578-69e5-440c-89f8-c7a47cb3bdc2",
+    "slug": "thirty-day-social-autopilot-schedule-content-for-month",
+    "title": "Thirty-Day Social Autopilot: Write and Schedule Content for a Month",
+    "description": "Regain your freedom while maintaining a dominant, hyper-consistent social media presence. Learn how to systematically discover industry trends, plan weekly themes, write highly engaging social posts for LinkedIn, X, and Instagram, package beautiful custom design templates, and queue a full month of traffic-driving content.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "ee03ada5-f6a9-48e5-8bdb-90b1c2d0097d",
+    "slug": "omnichannel-image-studio-create-breathtaking-marketing-visuals",
+    "title": "Omnichannel Image Studio: Create Breathtaking, Brand-Consistent Marketing Visuals with AI",
+    "description": "Stop struggling with low-quality, inconsistent AI images. Master the art of professional visual asset generation. Learn to write hyper-specific prompt structures, leverage the unique artistic strengths of Midjourney, DALL-E, and Adobe Firefly, edit assets with complete brand safety, and assemble stunning final layouts.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "775332aa-8574-46d7-8e46-3d488fd60fd3",
+    "slug": "enterprise-model-deployer-evaluate-benchmark-open-source-models",
+    "title": "Enterprise Model Deployer: Evaluate, Benchmark and Self-Host Open-Source Models",
+    "description": "Stop paying exorbitant API fees and regain complete model independence. This enterprise-grade playbook gives developers and ML teams the tools to systematically evaluate open models, benchmark high-throughput serving architectures using vLLM, and deploy secure, hosted or local endpoints.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "9e2d8a37-709a-448c-97ec-2a358e3671f9",
+    "slug": "global-video-localizer-translate-voice-dub-lip-sync-videos",
+    "title": "Global Video Localizer: Translate, Voice-Dub and Lip-Sync Videos Internationally",
+    "description": "Instantly multiply your video audience by unlocking international markets. This step-by-step localization playbook teaches you to translate transcripts with flawless cultural nuance, dub high-fidelity voices with emotional resonance, lip-sync presenters perfectly, and package localized visual assets.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "c7b3b52e-c67c-4195-b810-70a819b77311",
+    "slug": "build-executive-briefs-raw-research-strategic-memos",
+    "title": "Build Executive Briefs: Turn Raw Research Into Decision-Ready Strategic Memos",
+    "description": "Stop wasting hours drowning in open tabs and chaotic research papers. This playbook is your automated executive synthesis machine. Seamlessly chain Perplexity, ChatGPT, NotebookLM, Claude, and Gamma to instantly extract critical insights, construct a bulletproof cited decision memo, and auto-generate client-ready presentations that command authority.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.221+00:00"
+  },
+  {
+    "id": "8da12cab-e4ad-41c2-b9fe-7b1056d30a5a",
+    "slug": "high-rank-seo-engine-publish-articles-dominate-google",
+    "title": "High-Rank SEO Engine: Publish High-Value Articles That Dominate Google Search",
+    "description": "Stop publishing generic AI spam that gets penalized by search engines. This advanced editorial framework blends deep SERP research with structured writing systems and human editorial polish. Discover how to create search-optimized, genuinely helpful articles with complete distribution packages that capture traffic and drive organic revenue on autopilot.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  },
+  {
+    "id": "321e14f9-b99e-4da1-93bf-d7fbfcaafaea",
+    "slug": "short-form-viral-factory-create-high-retention-videos",
+    "title": "Short-Form Viral Factory: Create High-Retention Social Videos in Minutes",
+    "description": "Crack the short-form algorithm without ever staring at a blank screen. This complete end-to-end video engine takes you from basic idea to high-retention video in minutes. Learn how to write high-hook scripts, generate hyper-realistic voiceovers and custom B-roll footage, edit for retention, and schedule across all social networks.",
+    "cover_url": null,
+    "is_published": true,
+    "visual_position": null,
+    "created_at": "2026-05-20T17:36:55.375194+00:00",
+    "updated_at": "2026-05-20T17:48:10.222+00:00"
+  }
+]

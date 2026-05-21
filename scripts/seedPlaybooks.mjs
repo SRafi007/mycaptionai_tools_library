@@ -16,10 +16,10 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const playbooks = [
   {
-    title: "AI Research Briefing Stack",
-    slug: "ai-research-briefing-stack",
+    title: "Build Executive Briefs: Turn Raw Research Into Decision-Ready Strategic Memos",
+    slug: "build-executive-briefs-raw-research-strategic-memos",
     description:
-      "Turn a messy research question into a sourced, executive-ready brief. This stack combines web search, source-grounded notebooks, synthesis, writing, and presentation so visitors can move from discovery to a shareable recommendation.",
+      "Stop wasting hours drowning in open tabs and chaotic research papers. This playbook is your automated executive synthesis machine. Seamlessly chain Perplexity, ChatGPT, NotebookLM, Claude, and Gamma to instantly extract critical insights, construct a bulletproof cited decision memo, and auto-generate client-ready presentations that command authority.",
     ecosystem_slug: null,
     target_user: "Founders, analysts, marketers, consultants, and operators who need a defensible brief quickly.",
     outcome: "A cited research memo, decision summary, and presentation draft.",
@@ -42,10 +42,10 @@ const playbooks = [
     ],
   },
   {
-    title: "SEO Content Production Engine",
-    slug: "seo-content-production-engine",
+    title: "High-Rank SEO Engine: Publish High-Value Articles That Dominate Google Search",
+    slug: "high-rank-seo-engine-publish-articles-dominate-google",
     description:
-      "A practical editorial workflow for producing search-ready articles without turning the site into generic AI spam. It starts with source research, moves through outline and draft, then finishes with human editing, visuals, and distribution.",
+      "Stop publishing generic AI spam that gets penalized by search engines. This advanced editorial framework blends deep SERP research with structured writing systems and human editorial polish. Discover how to create search-optimized, genuinely helpful articles with complete distribution packages that capture traffic and drive organic revenue on autopilot.",
     ecosystem_slug: null,
     target_user: "Blog owners, affiliate marketers, agencies, and in-house content teams.",
     outcome: "A researched article package with outline, draft, visuals, and social distribution copy.",
@@ -69,10 +69,10 @@ const playbooks = [
     ],
   },
   {
-    title: "Short-Form Video Production Stack",
-    slug: "short-form-video-production-stack",
+    title: "Short-Form Viral Factory: Create High-Retention Social Videos in Minutes",
+    slug: "short-form-viral-factory-create-high-retention-videos",
     description:
-      "Build short videos from idea to publishable clip: hook, script, voice, generated footage, edit, captions, and scheduling. This is designed for creators and brands producing TikTok, Reels, Shorts, and paid social variants.",
+      "Crack the short-form algorithm without ever staring at a blank screen. This complete end-to-end video engine takes you from basic idea to high-retention video in minutes. Learn how to write high-hook scripts, generate hyper-realistic voiceovers and custom B-roll footage, edit for retention, and schedule across all social networks.",
     ecosystem_slug: null,
     target_user: "Creators, social teams, educators, and small brands producing repeatable short-form video.",
     outcome: "A finished 15-60 second vertical video with captions and publishing assets.",
@@ -96,10 +96,10 @@ const playbooks = [
     ],
   },
   {
-    title: "Podcast-to-Content Engine",
-    slug: "podcast-to-content-engine",
+    title: "Omnichannel Creator System: Turn One Podcast Into Ten High-Traffic Social Assets",
+    slug: "omnichannel-creator-system-turn-podcast-into-social-assets",
     description:
-      "Record one long-form conversation and turn it into clips, show notes, quotes, captions, posts, and follow-up articles. This playbook is for teams that want every interview or webinar to become a multi-channel content asset.",
+      "Stop leaving traffic on the table. Turn every single podcast episode, expert interview, or webinar into a massive multi-channel content engine. Automatically generate engaging video clips, comprehensive show notes, custom visual quote cards, newsletters, and promotional social posts that extend your brand reach across the web.",
     ecosystem_slug: null,
     target_user: "Podcasters, webinar teams, creator-led companies, and B2B marketers.",
     outcome: "One polished episode plus clips, notes, captions, thumbnails, and social copy.",
@@ -123,10 +123,10 @@ const playbooks = [
     ],
   },
   {
-    title: "AI Coding Sprint Stack",
-    slug: "ai-coding-sprint-stack",
+    title: "Elite Developer Sprint Engine: Ship Tested Code Ten Times Faster With AI",
+    slug: "elite-developer-sprint-engine-ship-tested-code-faster",
     description:
-      "Use agentic coding tools without losing engineering control. This stack separates planning, implementation, review, and IDE assistance so developers can ship faster while preserving tests, diffs, and code ownership.",
+      "Supercharge your engineering throughput without sacrificing quality or system control. This elite workflow integrates Claude Code, Cursor, GitHub Copilot, and Gemini to automate repository exploration, feature implementation, and rigorous code reviews while maintaining absolute unit testing and code safety standards.",
     ecosystem_slug: "anthropic",
     target_user: "Software engineers, technical founders, and product teams shipping code with AI assistants.",
     outcome: "A planned, implemented, reviewed, and tested feature branch.",
@@ -149,10 +149,10 @@ const playbooks = [
     ],
   },
   {
-    title: "No-Code SaaS Prototype Stack",
-    slug: "no-code-saas-prototype-stack",
+    title: "Rapid SaaS Builder: Launch Working Web Applications Without Writing Code",
+    slug: "rapid-saas-builder-launch-working-web-apps-no-code",
     description:
-      "Move from product idea to clickable SaaS prototype without beginning in a blank editor. This stack is for validating UX, flows, and a rough data model before investing in a full engineering cycle.",
+      "Turn your million-dollar idea into a fully functional, interactive software application in record time. Skip the slow, expensive development cycles and use natural language to generate robust frontends, backends, databases, and authentication. Design and launch a real working MVP to start collecting user feedback today.",
     ecosystem_slug: null,
     target_user: "Founders, product managers, indie hackers, and agencies testing product ideas.",
     outcome: "A working prototype or early app that can be reviewed with users.",
@@ -175,10 +175,10 @@ const playbooks = [
     ],
   },
   {
-    title: "B2B Sales Outbound Stack",
-    slug: "b2b-sales-outbound-stack",
+    title: "High-Converting Sales Pipeline: Book Personalized Outbound Meetings on Autopilot",
+    slug: "high-converting-sales-pipeline-book-outbound-meetings",
     description:
-      "A complete outbound workflow for finding accounts, enriching leads, writing personalized messages, sequencing outreach, and syncing outcomes into CRM. It is designed to keep human review in the loop instead of sending generic automation at scale.",
+      "Tired of cold emailing into a black hole? This cutting-edge sales pipeline helps SDRs and founders enrich hyper-targeted prospect lists, extract custom personalization triggers, write compelling hyper-focused email sequences, and sync every interaction directly into HubSpot for predictable, scaleable outbound revenue.",
     ecosystem_slug: null,
     target_user: "B2B founders, SDR teams, agencies, and revenue operators.",
     outcome: "A researched account list, personalized sequence, and CRM-tracked outbound campaign.",
@@ -202,10 +202,10 @@ const playbooks = [
     ],
   },
   {
-    title: "AI Customer Support Stack",
-    slug: "ai-customer-support-stack",
+    title: "Zero-Friction Support Automation: Build Context-Aware AI Helpdesks With Escalation Loops",
+    slug: "zero-friction-support-automation-build-context-aware-ai-helpdesk",
     description:
-      "Create a support experience where AI answers routine questions, humans handle edge cases, and knowledge gaps become documentation work. This stack is for improving response time without hiding support quality behind a weak chatbot.",
+      "Scale your customer success without hiring an army of agents. Deploy a sophisticated, context-aware support ecosystem that instantly answers routine customer inquiries, handles complex ticket resolution, and seamlessly routes high-priority tickets to human representatives, turning customer support into a competitive advantage.",
     ecosystem_slug: null,
     target_user: "Support leaders, SaaS operators, customer success teams, and founders.",
     outcome: "An AI-assisted support workflow with knowledge base, escalation rules, and feedback loops.",
@@ -228,10 +228,10 @@ const playbooks = [
     ],
   },
   {
-    title: "Meeting-to-CRM Follow-Up Stack",
-    slug: "meeting-to-crm-follow-up-stack",
+    title: "Automated Meeting Synthesizer: Instantly Convert Conversations Into CRM Records and Tasks",
+    slug: "automated-meeting-synthesizer-convert-conversations-to-crm-records",
     description:
-      "Convert meetings into notes, decisions, CRM updates, follow-up emails, and team knowledge. The goal is to remove manual admin while keeping humans responsible for promises and next steps.",
+      "Eliminate post-meeting admin work forever. This high-efficiency playbook automatically captures transcripts, flags critical action items, drafts beautifully written follow-up emails, and logs structured updates directly into your CRM. Keep your team aligned and ensure no customer promise ever slips through the cracks.",
     ecosystem_slug: null,
     target_user: "Sales teams, consultants, account managers, recruiters, and founders.",
     outcome: "Clean meeting notes, decisions, follow-up drafts, and CRM updates.",
@@ -253,10 +253,10 @@ const playbooks = [
     ],
   },
   {
-    title: "Brand Launch Identity Stack",
-    slug: "brand-launch-identity-stack",
+    title: "Instant Brand Identity Creator: Design Beautiful Logos and Complete Launch Graphics",
+    slug: "instant-brand-identity-creator-design-logos-launch-graphics",
     description:
-      "Build a lightweight brand identity for a new product, newsletter, creator profile, or side project. This playbook keeps strategy, logo, visual direction, launch assets, and social rollout in one flow.",
+      "Launch your next venture with a world-class visual presence from day one. Perfect for founders and creators, this playbook guides you through defining a laser-focused brand strategy, generating beautiful logo concepts, designing commercial-grade marketing assets, and scheduling a highly coordinated launch campaign.",
     ecosystem_slug: null,
     target_user: "Founders, creators, marketers, and small businesses launching a new brand.",
     outcome: "Brand brief, logo direction, visual style, launch assets, and social announcement plan.",
@@ -279,10 +279,10 @@ const playbooks = [
     ],
   },
   {
-    title: "Private Local AI Stack",
-    slug: "private-local-ai-stack",
+    title: "Bulletproof Private AI: Deploy Secure Offline Language Models for Your Team",
+    slug: "bulletproof-private-ai-deploy-secure-offline-models",
     description:
-      "Set up a privacy-friendly local AI workflow for experimentation, document chat, and internal assistants. This is for visitors who want open models and local runtimes before committing sensitive data to hosted tools.",
+      "Unleash the power of state-of-the-art AI models without compromising your proprietary data. Learn how to discover, evaluate, optimize, and deploy powerful open-source models (like Llama and Mistral) entirely offline on your local hardware or self-hosted servers with a beautiful, team-ready web interface.",
     ecosystem_slug: "open-source",
     target_user: "Developers, privacy-conscious teams, researchers, and technical operators.",
     outcome: "A local or self-hosted AI workspace using open models.",
@@ -308,10 +308,10 @@ const playbooks = [
     ],
   },
   {
-    title: "Production AI Agent App Stack",
-    slug: "production-ai-agent-app-stack",
+    title: "Production-Ready Agent Builder: Build Stateful, Tool-Using AI Automated Agents",
+    slug: "production-ready-agent-builder-stateful-tool-using-ai-agents",
     description:
-      "A developer workflow for building agentic apps that can use tools, call APIs, orchestrate workflows, and be monitored. It separates model access, orchestration, automation, and business integrations.",
+      "Go beyond basic chatbots. Master the tools needed to build autonomous, reliable, and observable AI agents. Learn to design structured models, build custom API tools, orchestrate complex state charts using LangGraph or n8n, and deploy production-grade automated agents that work for your business 24/7.",
     ecosystem_slug: "openai",
     target_user: "Developers and technical teams building production AI features.",
     outcome: "A first production agent workflow with model calls, tools, automation, and handoff points.",
@@ -335,10 +335,10 @@ const playbooks = [
     ],
   },
   {
-    title: "Ecommerce Ad Creative Stack",
-    slug: "ecommerce-ad-creative-stack",
+    title: "High-Conversion Ecom Ad Factory: Generate Ad Copy and Visuals That Sell",
+    slug: "high-conversion-ecom-ad-factory-generate-copy-visuals",
     description:
-      "Create product ad concepts, visuals, short videos, and posting variants for ecommerce campaigns. This playbook is optimized for testing many angles while keeping human brand review in place.",
+      "Stop wasting ad spend on creatives that don't convert. This hyper-efficient ecommerce advertising engine generates high-converting ad concepts, stunning product visuals, custom UGC-style video creatives, and channel-optimized copywriting designed to command attention, lower acquisition costs, and maximize ROAS.",
     ecosystem_slug: null,
     target_user: "Ecommerce founders, growth marketers, and small agencies.",
     outcome: "A batch of ad concepts, image creatives, product videos, captions, and posting variants.",
@@ -361,10 +361,10 @@ const playbooks = [
     ],
   },
   {
-    title: "Course and Lesson Content Stack",
-    slug: "course-lesson-content-stack",
+    title: "Instant Academy Builder: Convert Raw Material Into High-Impact Digital Lessons",
+    slug: "instant-academy-builder-convert-raw-material-to-lessons",
     description:
-      "Convert expertise or source material into lessons, slides, quizzes, voiceovers, and study assets. This is useful for educators, coaches, and teams building internal training.",
+      "Transform your specialized expertise into a highly profitable digital academy or world-class internal training curriculum. Ground your lessons in source material, design perfect course modules, generate engaging slide decks, create interactive quizzes, and dub voiceovers in multiple languages to scale your impact.",
     ecosystem_slug: null,
     target_user: "Educators, coaches, course creators, enablement teams, and internal trainers.",
     outcome: "Lesson outline, slides, quiz, narration, and student-facing assets.",
@@ -388,10 +388,10 @@ const playbooks = [
     ],
   },
   {
-    title: "Social Media Calendar Stack",
-    slug: "social-media-calendar-stack",
+    title: "Thirty-Day Social Autopilot: Write and Schedule Content for a Month",
+    slug: "thirty-day-social-autopilot-schedule-content-for-month",
     description:
-      "Build a month of social content from research, campaign pillars, AI-assisted drafts, design templates, and scheduling. It is designed for small teams that need consistency without hiring a full content department.",
+      "Regain your freedom while maintaining a dominant, hyper-consistent social media presence. Learn how to systematically discover industry trends, plan weekly themes, write highly engaging social posts for LinkedIn, X, and Instagram, package beautiful custom design templates, and queue a full month of traffic-driving content.",
     ecosystem_slug: null,
     target_user: "Solo founders, creators, social media managers, and small marketing teams.",
     outcome: "A researched 30-day calendar with post copy, visuals, and scheduled posts.",
@@ -415,10 +415,10 @@ const playbooks = [
     ],
   },
   {
-    title: "AI Image Campaign Visual Stack",
-    slug: "ai-image-campaign-visual-stack",
+    title: "Omnichannel Image Studio: Create Breathtaking, Brand-Consistent Marketing Visuals with AI",
+    slug: "omnichannel-image-studio-create-breathtaking-marketing-visuals",
     description:
-      "Create campaign visuals by separating concept, generation, refinement, and final layout. This helps teams compare model strengths instead of forcing every image task through one generator.",
+      "Stop struggling with low-quality, inconsistent AI images. Master the art of professional visual asset generation. Learn to write hyper-specific prompt structures, leverage the unique artistic strengths of Midjourney, DALL-E, and Adobe Firefly, edit assets with complete brand safety, and assemble stunning final layouts.",
     ecosystem_slug: "openai",
     target_user: "Design-adjacent marketers, creators, agencies, and startup teams.",
     outcome: "A cohesive set of campaign visuals, thumbnails, ads, and social graphics.",
@@ -441,10 +441,10 @@ const playbooks = [
     ],
   },
   {
-    title: "Open Model Evaluation and Deployment Stack",
-    slug: "open-model-evaluation-deployment-stack",
+    title: "Enterprise Model Deployer: Evaluate, Benchmark and Self-Host Open-Source Models",
+    slug: "enterprise-model-deployer-evaluate-benchmark-open-source-models",
     description:
-      "Choose, test, host, and expose open models without guessing. This stack helps technical teams compare model fit, local performance, hosted options, and the final user interface.",
+      "Stop paying exorbitant API fees and regain complete model independence. This enterprise-grade playbook gives developers and ML teams the tools to systematically evaluate open models, benchmark high-throughput serving architectures using vLLM, and deploy secure, hosted or local endpoints.",
     ecosystem_slug: "open-source",
     target_user: "ML engineers, developers, AI platform teams, and privacy-focused operators.",
     outcome: "A tested open-model deployment path with local and hosted options.",
@@ -470,10 +470,10 @@ const playbooks = [
     ],
   },
   {
-    title: "Multilingual Video Localization Stack",
-    slug: "multilingual-video-localization-stack",
+    title: "Global Video Localizer: Translate, Voice-Dub and Lip-Sync Videos Internationally",
+    slug: "global-video-localizer-translate-voice-dub-lip-sync-videos",
     description:
-      "Localize videos into new languages while preserving message, voice, visuals, and platform formatting. This playbook is for creators and businesses turning one video into multiple regional assets.",
+      "Instantly multiply your video audience by unlocking international markets. This step-by-step localization playbook teaches you to translate transcripts with flawless cultural nuance, dub high-fidelity voices with emotional resonance, lip-sync presenters perfectly, and package localized visual assets.",
     ecosystem_slug: null,
     target_user: "Creators, course teams, ecommerce brands, and global marketing teams.",
     outcome: "Localized video variants with translated scripts, dubbed audio, captions, and localized creative.",
@@ -532,7 +532,7 @@ async function fetchAllRows(table, columns, pageSize = 1000) {
   }
 }
 
-function playbookRow(playbook, ecosystemBySlug, includeEditorial, index) {
+function playbookRow(playbook, ecosystemBySlug, includeEditorial, index, cover_url = null) {
   const base = {
     title: playbook.title,
     slug: playbook.slug,
@@ -540,6 +540,7 @@ function playbookRow(playbook, ecosystemBySlug, includeEditorial, index) {
     ecosystem_id: playbook.ecosystem_slug ? ecosystemBySlug.get(playbook.ecosystem_slug)?.id ?? null : null,
     is_published: true,
     updated_at: new Date().toISOString(),
+    ...(cover_url !== undefined ? { cover_url } : {}),
   };
 
   if (!includeEditorial) return base;
@@ -603,10 +604,22 @@ async function main() {
   const includePlaybookEditorial = await hasPlaybookEditorialColumns();
   const includeStepEditorial = await hasPlaybookToolEditorialColumns();
 
+  // Fetch existing cover_urls keyed by slug so we don't overwrite them on upsert
+  const existingSlugs = playbooks.map((p) => p.slug);
+  const { data: existingPlaybooks } = await supabase
+    .from("playbooks")
+    .select("slug, cover_url")
+    .in("slug", existingSlugs);
+  const coverUrlBySlug = new Map(
+    (existingPlaybooks || []).map((p) => [p.slug, p.cover_url ?? null])
+  );
+
   const { data: upsertedPlaybooks, error: pbError } = await supabase
     .from("playbooks")
     .upsert(
-      playbooks.map((playbook, index) => playbookRow(playbook, ecosystemBySlug, includePlaybookEditorial, index)),
+      playbooks.map((playbook, index) =>
+        playbookRow(playbook, ecosystemBySlug, includePlaybookEditorial, index, coverUrlBySlug.get(playbook.slug) ?? null)
+      ),
       { onConflict: "slug" }
     )
     .select("id, slug, title");
