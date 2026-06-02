@@ -3,6 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { useAuth } from "@/lib/auth/hooks";
+import SignInModal from "@/components/auth/sign-in-modal";
+import UserAvatarMenu from "@/components/auth/user-avatar-menu";
 
 const navLinks = [
     { href: "/ai-tools", label: "AI Tools" },
@@ -14,6 +17,8 @@ const navLinks = [
 
 export default function Header() {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [signInOpen, setSignInOpen] = useState(false);
+    const { user, loading, signOut } = useAuth();
 
     return (
         <>
@@ -42,6 +47,21 @@ export default function Header() {
                             </Link>
                         ))}
                         <div className="header-divider" />
+                        
+                        {/* Auth Elements */}
+                        {loading ? (
+                            <div className="header-auth-skeleton" />
+                        ) : user ? (
+                            <UserAvatarMenu />
+                        ) : (
+                            <button 
+                                onClick={() => setSignInOpen(true)} 
+                                className="header-nav-link btn-signin-nav"
+                            >
+                                Sign In
+                            </button>
+                        )}
+
                         <Link href="/submit" className="btn-primary btn-sm">
                             Submit Tool
                         </Link>
@@ -84,6 +104,37 @@ export default function Header() {
                             </Link>
                         ))}
                         <hr className="mobile-drawer-sep" />
+                        
+                        {/* Mobile Auth */}
+                        {!loading && (
+                            <>
+                                {user ? (
+                                    <button 
+                                        onClick={async () => {
+                                            setMobileOpen(false);
+                                            await signOut();
+                                        }}
+                                        className="mobile-drawer-link mobile-btn-signout"
+                                        style={{ textAlign: "left", width: "100%", cursor: "pointer" }}
+                                    >
+                                        Sign Out ({user.email?.split("@")[0]})
+                                    </button>
+                                ) : (
+                                    <button 
+                                        onClick={() => {
+                                            setMobileOpen(false);
+                                            setSignInOpen(true);
+                                        }}
+                                        className="mobile-drawer-link mobile-btn-signin"
+                                        style={{ textAlign: "left", width: "100%", cursor: "pointer" }}
+                                    >
+                                        Sign In
+                                    </button>
+                                )}
+                                <hr className="mobile-drawer-sep" />
+                            </>
+                        )}
+
                         <Link
                             href="/submit"
                             className="btn-primary"
@@ -95,6 +146,9 @@ export default function Header() {
                     </nav>
                 </div>
             )}
+
+            {/* Sign In Modal */}
+            <SignInModal isOpen={signInOpen} onClose={() => setSignInOpen(false)} />
         </>
     );
 }

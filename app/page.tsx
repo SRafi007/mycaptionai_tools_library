@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import { getFeaturedTools, getTrendingTools, getToolCount } from "@/lib/db/tools";
-import { getTopCategories, getTrendingCategories } from "@/lib/db/categories";
+import { getFeaturedTools, getTrendingTools, getToolCount, getSponsoredTool } from "@/lib/db/tools";
+import { getTopCategories, getTrendingCategories, getCategories } from "@/lib/db/categories";
 import { getSettings } from "@/lib/db/settings";
 import ToolCard from "@/components/tool-card";
 import CategoryCard from "@/components/category-card";
@@ -41,7 +41,7 @@ export default async function HomePage() {
   const featuredCount = (settings.featured_count as number) || 6;
   const trendingCount = 12;
 
-  const [featuredTools, trendingTools, trendingCategories, categories, toolCount, ecosystems, playbooks] = await Promise.all([
+  const [featuredTools, trendingTools, trendingCategories, categories, toolCount, ecosystems, playbooks, allCategories, sponsoredTool] = await Promise.all([
     getFeaturedTools(featuredCount),
     getTrendingTools(trendingCount),
     getTrendingCategories(10),
@@ -49,7 +49,11 @@ export default async function HomePage() {
     getToolCount(),
     getEcosystemsWithPreview(5),
     getPublishedPlaybooks(3),
+    getCategories(),
+    getSponsoredTool(),
   ]);
+
+  const parentCategories = allCategories.filter(cat => !cat.parent_id);
 
   const homeSchema = {
     "@context": "https://schema.org",
@@ -71,7 +75,7 @@ export default async function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeSchema) }} />
-      <HomeHero toolCount={toolCount} categoryCount={categories.length} />
+      <HomeHero toolCount={toolCount} categoryCount={categories.length} allCategories={allCategories} sponsoredTool={sponsoredTool} />
 
       <section className="section-padding section-border-t">
         <div className="container-main">

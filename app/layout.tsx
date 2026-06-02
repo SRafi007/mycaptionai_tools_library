@@ -4,6 +4,7 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import PageViewTracker from "@/components/analytics/page-view-tracker";
 import { SITE_NAME, SITE_URL, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
+import { AuthProvider } from "@/components/auth/auth-provider";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -71,9 +72,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+  }: Readonly<{
+    children: React.ReactNode;
+  }>) {
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -99,11 +100,13 @@ export default function RootLayout({
       <body className={`${spaceGrotesk.variable}`}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
-        <Header />
-        <main style={{ paddingTop: "var(--header-height)", minHeight: "100vh" }}>
-          {children}
-        </main>
-        <Footer />
+        <AuthProvider>
+          <Header />
+          <main style={{ paddingTop: "var(--header-height)", minHeight: "100vh" }}>
+            {children}
+          </main>
+          <Footer />
+        </AuthProvider>
         <PageViewTracker />
       </body>
     </html>

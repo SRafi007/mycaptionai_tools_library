@@ -9,6 +9,7 @@ export interface Category {
     tool_count: number;
     seo_title: string | null;
     seo_description: string | null;
+    parent_group?: string;
     created_at: string;
     updated_at: string;
 }

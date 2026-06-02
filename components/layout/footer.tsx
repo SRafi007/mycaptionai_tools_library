@@ -15,6 +15,7 @@ const columns = [
         links: [
             { href: "/submit", label: "Submit a Tool" },
             { href: "/about", label: "About" },
+            { href: "/contact", label: "Contact Us" },
         ],
     },
     {

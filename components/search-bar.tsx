@@ -12,7 +12,7 @@ interface Suggestion {
 
 export default function SearchBar({
     defaultValue = "",
-    placeholder = "Search AI tools...",
+    placeholder = "Search...",
 }: {
     defaultValue?: string;
     placeholder?: string;
@@ -26,10 +26,13 @@ export default function SearchBar({
     const inputRef = useRef<HTMLInputElement>(null);
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Keyboard shortcut: press / to focus
+    // Keyboard shortcut: press / or Ctrl+K to focus
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
-            if (e.key === "/" && document.activeElement?.tagName !== "INPUT") {
+            const isK = e.key === "k" || e.key === "K";
+            const isCtrl = e.ctrlKey || e.metaKey;
+            
+            if ((e.key === "/" || (isCtrl && isK)) && document.activeElement?.tagName !== "INPUT") {
                 e.preventDefault();
                 inputRef.current?.focus();
             }
@@ -94,41 +97,45 @@ export default function SearchBar({
     }
 
     return (
-        <div style={{ position: "relative" }}>
+        <div style={{ position: "relative", width: "100%" }}>
             <form
                 onSubmit={handleSubmit}
-                className={`search-bar ${focused ? "search-bar-focused" : ""}`}
+                className="search-bar-form-inspiration"
             >
-                <svg
-                    className="search-bar-icon"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                >
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="M21 21l-4.35-4.35" />
-                </svg>
-                <input
-                    ref={inputRef}
-                    type="text"
-                    value={query}
-                    onChange={(e) => handleChange(e.target.value)}
-                    onFocus={() => { setFocused(true); if (suggestions.length > 0) setShowSuggestions(true); }}
-                    onBlur={() => { setFocused(false); setTimeout(() => setShowSuggestions(false), 200); }}
-                    onKeyDown={handleKeyDown}
-                    placeholder={placeholder}
-                    className="search-bar-input"
-                    autoComplete="off"
-                />
-                <kbd className="search-bar-kbd">/</kbd>
+                <div className={`search-input-container-inspiration ${focused ? "search-container-focused" : ""}`}>
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        value={query}
+                        onChange={(e) => handleChange(e.target.value)}
+                        onFocus={() => { setFocused(true); if (suggestions.length > 0) setShowSuggestions(true); }}
+                        onBlur={() => { setFocused(false); setTimeout(() => setShowSuggestions(false), 200); }}
+                        onKeyDown={handleKeyDown}
+                        placeholder={placeholder}
+                        className="search-input-inspiration"
+                        autoComplete="off"
+                    />
+                    <kbd className="search-kbd-inspiration">Ctrl + K</kbd>
+                </div>
+                
+                <button type="submit" className="search-submit-btn-inspiration" aria-label="Search">
+                    <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                    >
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" />
+                    </svg>
+                </button>
             </form>
 
             {/* Suggestions Dropdown */}
             {showSuggestions && (
-                <div className="search-suggestions">
+                <div className="search-suggestions search-suggestions-inspiration">
                     {suggestions.map((s, i) => (
                         <Link
                             key={s.slug}

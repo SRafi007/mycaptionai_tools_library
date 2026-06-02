@@ -351,3 +351,34 @@ export async function getToolCount(): Promise<number> {
     if (error) return 0;
     return count || 0;
 }
+
+// ─── Sponsored Tool (with featured fallback) ───
+export async function getSponsoredTool(): Promise<Tool | null> {
+    const { data, error } = await supabase
+        .from("tools")
+        .select("*")
+        .eq("status", "active")
+        .eq("is_sponsored", true)
+        .order("sponsored_rank", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+    if (error) {
+        console.error("Error fetching sponsored tool:", error);
+        return null;
+    }
+
+    if (!data) {
+        // Fallback to a featured tool
+        const { data: featured } = await supabase
+            .from("tools")
+            .select("*")
+            .eq("status", "active")
+            .eq("is_featured", true)
+            .limit(1)
+            .maybeSingle();
+        return featured as Tool | null;
+    }
+
+    return data as Tool;
+}
