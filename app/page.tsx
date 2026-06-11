@@ -1,17 +1,13 @@
 import { Metadata } from "next";
-import { getFeaturedTools, getTrendingTools, getToolCount, getSponsoredTool } from "@/lib/db/tools";
-import { getTopCategories, getTrendingCategories, getCategories } from "@/lib/db/categories";
+import { getFeaturedTools, getTrendingTools, getToolCount, getSponsoredTool, getTopToolsByCategory } from "@/lib/db/tools";
+import { getTrendingCategories, getCategories } from "@/lib/db/categories";
 import { getSettings } from "@/lib/db/settings";
 import ToolCard from "@/components/tool-card";
-import CategoryCard from "@/components/category-card";
 import BackToTop from "@/components/back-to-top";
 import Link from "next/link";
 import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
-import { getEcosystemsWithPreview } from "@/lib/db/ecosystems";
-import { getPublishedPlaybooks } from "@/lib/db/playbooks";
-import EcosystemCard from "@/components/ecosystem-card";
-import PlaybookCard from "@/components/playbook-card";
 import HomeHero from "@/components/home-hero";
+import HomeSidebarDiscovery from "@/components/home-sidebar-discovery";
 
 export const revalidate = 60;
 
@@ -41,19 +37,25 @@ export default async function HomePage() {
   const featuredCount = (settings.featured_count as number) || 6;
   const trendingCount = 12;
 
-  const [featuredTools, trendingTools, trendingCategories, categories, toolCount, ecosystems, playbooks, allCategories, sponsoredTool] = await Promise.all([
+  const [featuredTools, trendingTools, trendingCategories, toolCount, allCategories, sponsoredTool] = await Promise.all([
     getFeaturedTools(featuredCount),
     getTrendingTools(trendingCount),
     getTrendingCategories(10),
-    getTopCategories(12),
     getToolCount(),
-    getEcosystemsWithPreview(5),
-    getPublishedPlaybooks(3),
     getCategories(),
     getSponsoredTool(),
   ]);
 
-  const parentCategories = allCategories.filter(cat => !cat.parent_id);
+  // Pre-fetch top 8 tools for each trending category (server-side, no loading states)
+  const categoriesWithTools = await Promise.all(
+    trendingCategories.map(async (cat) => ({
+      id: cat.id,
+      name: cat.name,
+      slug: cat.slug,
+      tool_count: cat.tool_count,
+      tools: await getTopToolsByCategory(cat.id, 8),
+    }))
+  );
 
   const homeSchema = {
     "@context": "https://schema.org",
@@ -72,122 +74,80 @@ export default async function HomePage() {
     },
   };
 
-  return (
+  // Build server-rendered content panels for each tab
+  const contentPanels = (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeSchema) }} />
-      <HomeHero toolCount={toolCount} categoryCount={categories.length} allCategories={allCategories} sponsoredTool={sponsoredTool} />
-
-      <section className="section-padding section-border-t">
-        <div className="container-main">
-          <div className="discovery-layout trending-discovery-layout">
-            <aside className="popular-categories-panel">
-              <div className="popular-categories-head">
-                <h2 className="section-title">Most Popular Categories</h2>
-              </div>
-              <div className="popular-categories-list">
-                {trendingCategories.map((cat) => (
-                  <Link key={cat.id} href={`/category/${cat.slug}`} className="popular-category-item">
-                    <span className="popular-category-name">{cat.name}</span>
-                    <span className="popular-category-arrow" aria-hidden="true">
-                      &rarr;
-                    </span>
-                  </Link>
-                ))}
-              </div>
-              <Link href="/ai-tools" className="popular-categories-cta">
-                View all categories &rarr;
-              </Link>
-            </aside>
-
-            <div className="discovery-main">
-              <div className="section-header">
-                <h2 className="section-title">Trending Now</h2>
-                <span className="section-count">By upvotes</span>
-              </div>
-
-              {trendingTools.length > 0 ? (
-                <div className="tools-grid trending-tools-grid">
-                  {trendingTools.map((tool) => (
-                    <ToolCard key={tool.id} tool={tool} showVisitButton />
-                  ))}
-                </div>
-              ) : (
-                <div className="empty-state">
-                  <div className="empty-state-icon">&#128200;</div>
-                  <p className="empty-state-text">No trending tools yet.</p>
-                </div>
-              )}
-            </div>
+      {/* Trending Now panel */}
+      <div className="sidebar-content-panel sidebar-panel-active" data-sidebar-panel="trending">
+        <div className="sidebar-content-header">
+          <div>
+            <h2 className="section-title">Trending Now</h2>
+            <span className="section-count">By upvotes</span>
           </div>
         </div>
-      </section>
-
-      {/* Ecosystems & Playbooks */}
-      <section className="section-padding ecosystem-section">
-        <div className="container-main">
-          <div className="section-header ecosystem-home-header">
-            <h2 className="section-title">Explore AI Ecosystems</h2>
-            <Link href="/ecosystems" className="btn-ghost">
-              All ecosystems &rarr;
-            </Link>
-          </div>
-
-          <div className="ecosystem-grid">
-            {ecosystems.slice(0, 4).map((eco) => (
-              <EcosystemCard key={eco.id} ecosystem={eco} />
+        {trendingTools.length > 0 ? (
+          <div className="tools-grid sidebar-tools-grid">
+            {trendingTools.map((tool) => (
+              <ToolCard key={tool.id} tool={tool} showVisitButton />
             ))}
           </div>
+        ) : (
+          <div className="empty-state">
+            <div className="empty-state-icon">&#128200;</div>
+            <p className="empty-state-text">No trending tools yet.</p>
+          </div>
+        )}
+      </div>
 
-          {playbooks.length > 0 && (
-            <div className="ecosystem-playbooks">
-              <div className="section-header">
-                <h2 className="section-title">Trending Tech Stacks</h2>
-                <Link href="/playbooks" className="btn-ghost">
-                  All playbooks &rarr;
-                </Link>
-              </div>
-              <div className="tools-grid playbook-grid">
-                {playbooks.map((playbook) => (
-                  <PlaybookCard key={playbook.id} playbook={playbook} />
-                ))}
-              </div>
+      {/* Category panels */}
+      {categoriesWithTools.map((cat) => (
+        <div key={cat.id} className="sidebar-content-panel" data-sidebar-panel={cat.id}>
+          <div className="sidebar-content-header">
+            <div>
+              <h2 className="section-title">{cat.name}</h2>
+              <span className="section-count">By popularity score</span>
+            </div>
+            <Link href={`/category/${cat.slug}`} className="btn-ghost">
+              View all {cat.tool_count} tools &rarr;
+            </Link>
+          </div>
+          {cat.tools.length > 0 ? (
+            <div className="tools-grid sidebar-tools-grid">
+              {cat.tools.map((tool) => (
+                <ToolCard key={tool.id} tool={tool} showVisitButton />
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <div className="empty-state-icon">&#128200;</div>
+              <p className="empty-state-text">No tools found in this category yet.</p>
             </div>
           )}
         </div>
-      </section>
+      ))}
+    </>
+  );
 
-      <section className="section-padding section-border-t">
-        <div className="container-main">
-          <div className="section-header">
-            <h2 className="section-title">Browse by Category</h2>
-            <Link href="/ai-tools" className="btn-ghost">
-              All categories &rarr;
-            </Link>
-          </div>
-          <div className="categories-grid">
-            {categories.map((cat) => (
-              <CategoryCard key={cat.id} category={cat} />
-            ))}
-          </div>
-        </div>
-      </section>
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeSchema) }} />
+      <HomeHero toolCount={toolCount} categoryCount={allCategories.length} allCategories={allCategories} sponsoredTool={sponsoredTool} />
 
-      <section className="cross-grid section-padding section-border-t">
-        <div className="container-main" style={{ textAlign: "center" }}>
-          <h2
-            style={{
-              fontSize: "24px",
-              fontWeight: 700,
-              color: "var(--text-primary)",
-              letterSpacing: "-0.03em",
-              margin: "0 0 8px",
-            }}
-          >
-            Know an AI tool we&apos;re missing?
-          </h2>
-          <p style={{ fontSize: "14px", color: "var(--text-secondary)", margin: "0 0 24px" }}>
-            Submit it and get listed in front of thousands of creators.
-          </p>
+      <HomeSidebarDiscovery
+        trendingCount={trendingTools.length}
+        categories={categoriesWithTools.map((c) => ({
+          id: c.id,
+          name: c.name,
+          slug: c.slug,
+          tool_count: c.tool_count,
+        }))}
+        panels={contentPanels}
+      />
+
+      <section className="section-padding section-border-t" style={{ background: "var(--bg-secondary)" }}>
+        <div className="container-main cta-footer-block">
+          <h2>Know an AI tool we&apos;re missing?</h2>
+          <p>Submit it and get listed in front of thousands of creators.</p>
           <Link href="/submit" className="btn-primary">
             Submit Tool &rarr;
           </Link>

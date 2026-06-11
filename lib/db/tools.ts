@@ -123,6 +123,47 @@ export async function getToolsByCategory(
     return { tools: (data as Tool[]) || [], total: count || 0 };
 }
 
+// ─── Top Tools by Category (ranked by upvotes × rating) ───
+export async function getTopToolsByCategory(
+    categoryId: string,
+    limit: number = 8
+): Promise<Tool[]> {
+    // Get tool IDs for this category
+    const { data: relations } = await supabase
+        .from("tool_categories")
+        .select("tool_id")
+        .eq("category_id", categoryId);
+
+    if (!relations || relations.length === 0) return [];
+
+    const toolIds = relations.map((r) => r.tool_id);
+
+    // Fetch a generous batch sorted by rating to start with quality tools
+    const { data, error } = await supabase
+        .from("tools")
+        .select("*")
+        .in("id", toolIds)
+        .eq("status", "active")
+        .order("rating_score", { ascending: false })
+        .limit(50);
+
+    if (error) {
+        console.error("Error fetching top tools by category:", error);
+        return [];
+    }
+
+    const tools = (data as Tool[]) || [];
+
+    // Sort by popularity score: upvotes × rating_score (descending)
+    tools.sort((a, b) => {
+        const scoreA = (a.upvotes || 0) * (a.rating_score || 0);
+        const scoreB = (b.upvotes || 0) * (b.rating_score || 0);
+        return scoreB - scoreA;
+    });
+
+    return tools.slice(0, limit);
+}
+
 // ─── Featured Tools ───
 export async function getFeaturedTools(limit: number = 6): Promise<Tool[]> {
     const { data, error } = await supabase
