@@ -8,6 +8,10 @@ import Link from "next/link";
 import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 import HomeHero from "@/components/home-hero";
 import HomeSidebarDiscovery from "@/components/home-sidebar-discovery";
+import { getEcosystemsWithPreview } from "@/lib/db/ecosystems";
+import { getPublishedPlaybooks } from "@/lib/db/playbooks";
+import EcosystemCard from "@/components/ecosystem-card";
+import PlaybookCard from "@/components/playbook-card";
 
 export const revalidate = 60;
 
@@ -37,13 +41,15 @@ export default async function HomePage() {
   const featuredCount = (settings.featured_count as number) || 6;
   const trendingCount = 12;
 
-  const [featuredTools, trendingTools, trendingCategories, toolCount, allCategories, sponsoredTool] = await Promise.all([
+  const [featuredTools, trendingTools, trendingCategories, toolCount, allCategories, sponsoredTool, ecosystems, playbooks] = await Promise.all([
     getFeaturedTools(featuredCount),
     getTrendingTools(trendingCount),
     getTrendingCategories(10),
     getToolCount(),
     getCategories(),
     getSponsoredTool(),
+    getEcosystemsWithPreview(5),
+    getPublishedPlaybooks(3),
   ]);
 
   // Pre-fetch top 8 tools for each trending category (server-side, no loading states)
@@ -143,6 +149,43 @@ export default async function HomePage() {
         }))}
         panels={contentPanels}
       />
+
+      {(ecosystems.length > 0 || playbooks.length > 0) && (
+        <section className="section-padding ecosystem-section">
+          <div className="container-main">
+            <div className="section-header ecosystem-home-header">
+              <h2 className="section-title">Explore AI Ecosystems</h2>
+              <Link href="/ecosystems" className="btn-ghost">
+                All ecosystems &rarr;
+              </Link>
+            </div>
+
+            {ecosystems.length > 0 && (
+              <div className="ecosystem-grid">
+                {ecosystems.slice(0, 4).map((ecosystem) => (
+                  <EcosystemCard key={ecosystem.id} ecosystem={ecosystem} />
+                ))}
+              </div>
+            )}
+
+            {playbooks.length > 0 && (
+              <div className="ecosystem-playbooks">
+                <div className="section-header">
+                  <h2 className="section-title">Trending Tech Stacks</h2>
+                  <Link href="/playbooks" className="btn-ghost">
+                    All playbooks &rarr;
+                  </Link>
+                </div>
+                <div className="tools-grid playbook-grid">
+                  {playbooks.map((playbook) => (
+                    <PlaybookCard key={playbook.id} playbook={playbook} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       <section className="section-padding section-border-t" style={{ background: "var(--bg-secondary)" }}>
         <div className="container-main cta-footer-block">

@@ -2541,6 +2541,14 @@ a {
 }
 
 @media (max-width: 640px) {
+  .ecosystem-section {
+    overflow-x: hidden;
+  }
+
+  .ecosystem-home-header {
+    margin-bottom: 14px;
+  }
+
   .ecosystem-section .section-header {
     display: grid;
     grid-template-columns: 1fr;
@@ -2554,14 +2562,60 @@ a {
   .ecosystem-grid,
   .playbook-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
+    max-width: calc(100vw - 32px);
+    width: 100%;
   }
   .ecosystem-card {
     min-height: auto;
+    max-width: calc(100vw - 32px);
+    padding: 14px;
+    width: 100%;
+  }
+  .ecosystem-card-desc {
+    -webkit-line-clamp: 3;
+  }
+  .ecosystem-card-tool-row {
+    flex-wrap: nowrap;
+    min-height: 32px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .ecosystem-card-tool-row::-webkit-scrollbar {
+    display: none;
+  }
+  .ecosystem-card-tool {
+    flex: 0 0 auto;
+    max-width: 190px;
+  }
+  .ecosystem-playbooks {
+    margin-top: 28px;
+    padding-top: 24px;
+  }
+  .playbook-card {
+    max-width: calc(100vw - 32px);
+    min-height: auto;
+    width: 100%;
+  }
+  .playbook-card-cover {
+    aspect-ratio: 16 / 10;
+  }
+  .playbook-card-title-overlay {
+    border-radius: 10px !important;
+    bottom: 10px !important;
+    left: 10px !important;
+    padding: 10px 12px !important;
+    right: 10px !important;
+  }
+  .playbook-card-content {
+    padding: 14px;
   }
   .ecosystem-card-footer,
   .playbook-card-footer {
     justify-content: flex-start;
     gap: 8px;
+    min-height: 38px;
   }
   .ecosystem-card-arrow,
   .playbook-card-arrow {
