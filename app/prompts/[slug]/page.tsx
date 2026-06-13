@@ -85,16 +85,6 @@ export default async function PromptDetailPage({ params }: PromptPageProps) {
     // Detect template variables like {{topic}} or [topic] in prompt_body
     const templateVars = prompt.prompt_body.match(/\{\{([^}]+)\}\}|\[([^\]]+)\]/g)?.map(v => v.replace(/[{}[\]]/g, '')) || [];
 
-    // Build "How to use" steps dynamically
-    const howToUse = [
-        "Copy the prompt using the copy button inside the prompt box.",
-        templateVars.length > 0
-            ? `Fill in the template variables: ${templateVars.map(v => `[${v.toUpperCase()}]`).join(", ")}.`
-            : null,
-        `Open your preferred AI tool (${prompt.tool_tags?.slice(0, 3).join(", ") || "ChatGPT, Claude, etc."}).`,
-        "Paste the prompt and generate your content.",
-        "Refine the output by adjusting your variables or adding context.",
-    ].filter(Boolean) as string[];
 
     // Helper to highlight variables in prompt text
     const renderFormattedPrompt = (text: string) => {
@@ -200,6 +190,20 @@ export default async function PromptDetailPage({ params }: PromptPageProps) {
 
                 {/* ── Information Cards ── */}
                 <div className="prompt-info-cards-wrapper">
+                    {/* Card 2: Tips for this prompt */}
+                    {prompt.tips && Array.isArray(prompt.tips) && prompt.tips.length > 0 && (
+                        <div className="prompt-info-card">
+                            <h2 className="prompt-info-card-title">Tips for this prompt</h2>
+                            <div className="prompt-info-card-list">
+                                {(prompt.tips as string[]).map((tip, idx) => (
+                                    <div key={idx} className="prompt-info-card-item prompt-bullet-diamond">
+                                        {tip}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Card 1: What this prompt does */}
                     <div className="prompt-info-card">
                         <h2 className="prompt-info-card-title">What this prompt does</h2>
@@ -219,33 +223,6 @@ export default async function PromptDetailPage({ params }: PromptPageProps) {
                                     Works best with {prompt.tool_tags.join(", ")}.
                                 </div>
                             )}
-                        </div>
-                    </div>
-
-                    {/* Card 2: Tips for this prompt */}
-                    {prompt.tips && Array.isArray(prompt.tips) && prompt.tips.length > 0 && (
-                        <div className="prompt-info-card">
-                            <h2 className="prompt-info-card-title">Tips for this prompt</h2>
-                            <div className="prompt-info-card-list">
-                                {(prompt.tips as string[]).map((tip, idx) => (
-                                    <div key={idx} className="prompt-info-card-item prompt-bullet-diamond">
-                                        {tip}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Card 3: How to use the prompt */}
-                    <div className="prompt-info-card">
-                        <h2 className="prompt-info-card-title">How to use the prompt</h2>
-                        <div className="prompt-info-card-list">
-                            {howToUse.map((step, idx) => (
-                                <div key={idx} className="prompt-info-card-item prompt-step-item">
-                                    <span className="prompt-step-label">Step {idx + 1}:</span>
-                                    <span className="prompt-step-text">{step}</span>
-                                </div>
-                            ))}
                         </div>
                     </div>
                 </div>
