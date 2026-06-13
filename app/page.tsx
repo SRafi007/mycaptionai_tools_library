@@ -12,6 +12,9 @@ import { getEcosystemsWithPreview } from "@/lib/db/ecosystems";
 import { getPublishedPlaybooks } from "@/lib/db/playbooks";
 import EcosystemCard from "@/components/ecosystem-card";
 import PlaybookCard from "@/components/playbook-card";
+import HomePromptsSection from "@/components/home-prompts-section";
+import PromptCard from "@/components/prompt-card";
+import { getPromptTypeCounts, getTopPromptsByType } from "@/lib/db/prompts";
 
 export const revalidate = 60;
 
@@ -41,7 +44,7 @@ export default async function HomePage() {
   const featuredCount = (settings.featured_count as number) || 6;
   const trendingCount = 12;
 
-  const [featuredTools, trendingTools, trendingCategories, toolCount, allCategories, sponsoredTool, ecosystems, playbooks] = await Promise.all([
+  const [featuredTools, trendingTools, trendingCategories, toolCount, allCategories, sponsoredTool, ecosystems, playbooks, promptTypes] = await Promise.all([
     getFeaturedTools(featuredCount),
     getTrendingTools(trendingCount),
     getTrendingCategories(10),
@@ -50,6 +53,7 @@ export default async function HomePage() {
     getSponsoredTool(),
     getEcosystemsWithPreview(5),
     getPublishedPlaybooks(3),
+    getPromptTypeCounts(),
   ]);
 
   // Pre-fetch top 8 tools for each trending category (server-side, no loading states)
@@ -60,6 +64,14 @@ export default async function HomePage() {
       slug: cat.slug,
       tool_count: cat.tool_count,
       tools: await getTopToolsByCategory(cat.id, 8),
+    }))
+  );
+
+  // Pre-fetch top 9 prompts for each prompt type
+  const promptPanelsData = await Promise.all(
+    promptTypes.map(async (pt) => ({
+      type: pt.type,
+      prompts: await getTopPromptsByType(pt.type, 9),
     }))
   );
 
@@ -134,6 +146,36 @@ export default async function HomePage() {
     </>
   );
 
+  const promptPanels = (
+    <>
+      {promptPanelsData.map((panel) => (
+        <div key={panel.type} className="sidebar-content-panel" data-prompt-panel={panel.type}>
+          <div className="sidebar-content-header">
+            <div>
+              <h2 className="section-title" style={{ textTransform: "capitalize" }}>{panel.type} Prompts</h2>
+              <span className="section-count">Top prompts</span>
+            </div>
+            <Link href={`/prompts?type=${panel.type}`} className="btn-ghost">
+              View all &rarr;
+            </Link>
+          </div>
+          {panel.prompts.length > 0 ? (
+            <div className="tools-grid sidebar-tools-grid">
+              {panel.prompts.map((prompt) => (
+                <PromptCard key={prompt.id} prompt={prompt} />
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <div className="empty-state-icon">&#128200;</div>
+              <p className="empty-state-text">No prompts found for this category yet.</p>
+            </div>
+          )}
+        </div>
+      ))}
+    </>
+  );
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeSchema) }} />
@@ -149,6 +191,10 @@ export default async function HomePage() {
         }))}
         panels={contentPanels}
       />
+
+      {promptTypes.length > 0 && (
+        <HomePromptsSection promptTypes={promptTypes} panels={promptPanels} />
+      )}
 
       {(ecosystems.length > 0 || playbooks.length > 0) && (
         <section className="section-padding ecosystem-section">
