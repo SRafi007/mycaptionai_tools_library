@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { PromptType } from "@/types/prompt";
 
@@ -16,17 +16,18 @@ interface HomePromptsSectionProps {
 }
 
 const promptTypeIcons: Record<string, string> = {
-  chat: "💬",
-  image: "🎨",
-  video: "🎬",
-  code: "💻",
-  seo: "🔍",
-  business: "💼",
-  marketing: "📈",
-  caption: "📝",
-  agent: "🤖",
-  workflow: "⚙️",
-  other: "✨",
+  chat: "chat_bubble",
+  image: "image",
+  video: "movie",
+  code: "code",
+  seo: "search",
+  business: "business_center",
+  marketing: "campaign",
+  caption: "closed_caption",
+  agent: "smart_toy",
+  workflow: "account_tree",
+  education: "school",
+  other: "auto_awesome",
 };
 
 export default function HomePromptsSection({
@@ -77,13 +78,12 @@ export default function HomePromptsSection({
                     onClick={() => setActiveTab(tab.type)}
                     aria-current={isActive ? "page" : undefined}
                   >
-                    <span className="sidebar-nav-icon">
-                      {promptTypeIcons[tab.type] || "✨"}
+                    <span className="sidebar-nav-icon sidebar-nav-material-icon" aria-hidden="true">
+                      {promptTypeIcons[tab.type] || "auto_awesome"}
                     </span>
                     <span className="sidebar-nav-label" style={{ textTransform: "capitalize" }}>
                       {tab.type}
                     </span>
-                    <span className="sidebar-nav-count">{tab.count}</span>
                   </button>
                 );
               })}

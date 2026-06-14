@@ -182,7 +182,6 @@ export default async function HomePage() {
       <HomeHero toolCount={toolCount} categoryCount={allCategories.length} allCategories={allCategories} sponsoredTool={sponsoredTool} />
 
       <HomeSidebarDiscovery
-        trendingCount={trendingTools.length}
         categories={categoriesWithTools.map((c) => ({
           id: c.id,
           name: c.name,

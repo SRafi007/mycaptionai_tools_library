@@ -9,6 +9,9 @@ const EXPECTED_CHILD_SITEMAPS = [
     "/sitemaps/categories.xml",
     "/sitemaps/blog.xml",
     "/sitemaps/use-cases.xml",
+    "/sitemaps/ecosystems.xml",
+    "/sitemaps/playbooks.xml",
+    "/sitemaps/prompts.xml",
 ];
 
 function parseArgs(argv) {
@@ -291,6 +294,9 @@ async function run() {
     const categoriesUrls = childSitemapUrls["/sitemaps/categories.xml"] || [];
     const blogUrls = childSitemapUrls["/sitemaps/blog.xml"] || [];
     const useCaseUrls = childSitemapUrls["/sitemaps/use-cases.xml"] || [];
+    const ecosystemsUrls = childSitemapUrls["/sitemaps/ecosystems.xml"] || [];
+    const playbooksUrls = childSitemapUrls["/sitemaps/playbooks.xml"] || [];
+    const promptsUrls = childSitemapUrls["/sitemaps/prompts.xml"] || [];
 
     assertCondition(
         state,
@@ -312,12 +318,30 @@ async function run() {
         useCaseUrls.some((url) => new URL(url).pathname.startsWith("/best/")),
         "use-cases sitemap includes /best/ URLs"
     );
+    assertCondition(
+        state,
+        ecosystemsUrls.every((url) => new URL(url).pathname.startsWith("/ecosystems/")),
+        "ecosystems sitemap contains only /ecosystems/ URLs"
+    );
+    assertCondition(
+        state,
+        playbooksUrls.every((url) => new URL(url).pathname.startsWith("/playbooks/")),
+        "playbooks sitemap contains only /playbooks/ URLs"
+    );
+    assertCondition(
+        state,
+        promptsUrls.every((url) => new URL(url).pathname.startsWith("/prompts/")),
+        "prompts sitemap contains only /prompts/ URLs"
+    );
 
     const indexableSamples = [
         ...sampleUrls(toolsUrls, sampleSize).map((url) => remapToBaseOrigin(url, baseUrl)),
         ...sampleUrls(categoriesUrls, sampleSize).map((url) => remapToBaseOrigin(url, baseUrl)),
         ...sampleUrls(blogUrls, sampleSize).map((url) => remapToBaseOrigin(url, baseUrl)),
         ...sampleUrls(useCaseUrls, sampleSize).map((url) => remapToBaseOrigin(url, baseUrl)),
+        ...sampleUrls(ecosystemsUrls, sampleSize).map((url) => remapToBaseOrigin(url, baseUrl)),
+        ...sampleUrls(playbooksUrls, sampleSize).map((url) => remapToBaseOrigin(url, baseUrl)),
+        ...sampleUrls(promptsUrls, sampleSize).map((url) => remapToBaseOrigin(url, baseUrl)),
     ];
 
     const seen = new Set();

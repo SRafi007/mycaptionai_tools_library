@@ -10,6 +10,7 @@ const CHILD_SITEMAPS = [
     `${SITE_URL}/sitemaps/use-cases.xml`,
     `${SITE_URL}/sitemaps/ecosystems.xml`,
     `${SITE_URL}/sitemaps/playbooks.xml`,
+    `${SITE_URL}/sitemaps/prompts.xml`,
 ];
 
 export async function GET() {

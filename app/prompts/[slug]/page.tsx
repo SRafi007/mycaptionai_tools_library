@@ -6,7 +6,7 @@ import CopyButton from "@/components/copy-button";
 import PromptCard from "@/components/prompt-card";
 import Breadcrumbs from "@/components/breadcrumbs";
 import BackToTop from "@/components/back-to-top";
-import { absoluteUrl } from "@/lib/seo";
+import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH, localCanonicalUrl } from "@/lib/seo";
 
 export const revalidate = 60;
 
@@ -19,6 +19,13 @@ interface PromptPageProps {
     params: Promise<{ slug: string }>;
 }
 
+function formatPromptType(value: string): string {
+    return value
+        .split("-")
+        .join(" ")
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 export async function generateMetadata({ params }: PromptPageProps): Promise<Metadata> {
     const { slug } = await params;
     const prompt = await getPromptBySlug(slug);
@@ -27,17 +34,29 @@ export async function generateMetadata({ params }: PromptPageProps): Promise<Met
         return { title: "Prompt Not Found" };
     }
 
+    const typeLabel = formatPromptType(prompt.prompt_type);
+    const title = prompt.seo_title || `${prompt.title} - ${typeLabel} AI Prompt | ${SITE_NAME}`;
+    const description = prompt.seo_description || prompt.description || `Use this high-quality ${typeLabel.toLowerCase()} AI prompt: ${prompt.title}. Copy, customize, and integrate it into your workflow.`;
+    const canonical = localCanonicalUrl(prompt.canonical_url, `/prompts/${prompt.slug}`);
+    const socialImage = prompt.cover_url || absoluteUrl(DEFAULT_OG_IMAGE_PATH);
+
     return {
-        title: `${prompt.title} - AI Prompt | MyCaptionAI`,
-        description: prompt.description || `Use this ${prompt.prompt_type} prompt: ${prompt.title}`,
+        title,
+        description,
         alternates: {
-            canonical: absoluteUrl(`/prompts/${prompt.slug}`),
+            canonical,
         },
         openGraph: {
-            title: prompt.title,
-            description: prompt.description || "",
-            url: absoluteUrl(`/prompts/${prompt.slug}`),
-            images: prompt.cover_url ? [prompt.cover_url] : [],
+            title,
+            description,
+            url: canonical,
+            images: [{ url: socialImage, alt: `${prompt.title} AI prompt listing on ${SITE_NAME}` }],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: [socialImage],
         },
     };
 }
@@ -104,8 +123,36 @@ export default async function PromptDetailPage({ params }: PromptPageProps) {
         });
     };
 
+    const canonical = localCanonicalUrl(prompt.canonical_url, `/prompts/${prompt.slug}`);
+
+    const creativeWorkSchema = {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        name: prompt.title,
+        description: prompt.description || prompt.title,
+        text: prompt.prompt_body,
+        genre: "AI Prompt",
+        learningResourceType: "Prompt",
+        audience: {
+            "@type": "Audience",
+            audienceType: prompt.difficulty,
+        },
+        keywords: prompt.tags?.join(", ") || "",
+        datePublished: prompt.published_at || prompt.created_at,
+        dateModified: prompt.updated_at,
+        publisher: {
+            "@type": "Organization",
+            name: SITE_NAME,
+            url: absoluteUrl("/"),
+        },
+    };
+
     return (
         <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(creativeWorkSchema) }}
+            />
             <div className="container-main prompt-detail-container" style={{ paddingTop: "1.5rem", paddingBottom: "5rem" }}>
                 {/* Breadcrumbs */}
                 <Breadcrumbs

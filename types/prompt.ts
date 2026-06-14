@@ -1,15 +1,23 @@
-export type PromptType =
-  | 'chat'
-  | 'image'
-  | 'video'
-  | 'code'
-  | 'seo'
-  | 'business'
-  | 'marketing'
-  | 'caption'
-  | 'agent'
-  | 'workflow'
-  | 'other';
+export const PROMPT_TYPES = [
+  'chat',
+  'image',
+  'video',
+  'code',
+  'seo',
+  'business',
+  'marketing',
+  'caption',
+  'agent',
+  'workflow',
+  'education',
+  'other',
+] as const;
+
+export type PromptType = typeof PROMPT_TYPES[number];
+
+export function isPromptType(value: string | null | undefined): value is PromptType {
+  return Boolean(value && (PROMPT_TYPES as readonly string[]).includes(value));
+}
 
 export type PromptFormat = 'text' | 'markdown' | 'json' | 'chat_messages' | 'workflow';
 export type PromptDifficulty = 'beginner' | 'intermediate' | 'advanced';

@@ -5,23 +5,68 @@ import PromptCard from "@/components/prompt-card";
 import Pagination from "@/components/pagination";
 import BackToTop from "@/components/back-to-top";
 import { absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
-import { PromptType } from "@/types/prompt";
+import { isPromptType, PromptType } from "@/types/prompt";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-    title: "AI Prompt Library - Find the Best Prompts",
-    description: "Discover, copy, and use the best AI prompts for ChatGPT, Midjourney, Claude, and more. Filter by use case and format.",
-    alternates: {
-        canonical: absoluteUrl("/prompts"),
-    },
-    openGraph: {
-        title: "AI Prompt Library - Find the Best Prompts",
-        description: "Discover, copy, and use the best AI prompts for ChatGPT, Midjourney, Claude, and more.",
-        url: absoluteUrl("/prompts"),
-        images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
-    },
-};
+interface PromptsPageProps {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+function formatPromptType(value: string): string {
+    return value
+        .split("-")
+        .join(" ")
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+export async function generateMetadata({ searchParams }: PromptsPageProps): Promise<Metadata> {
+    const params = await searchParams;
+    const rawPage = typeof params.page === "string" ? params.page : undefined;
+    const rawType = typeof params.type === "string" ? params.type : undefined;
+    const page = rawPage ? parseInt(rawPage, 10) || 1 : 1;
+    
+    const hasKnownType = isPromptType(rawType);
+    const title = hasKnownType
+        ? `${formatPromptType(rawType)} AI Prompts`
+        : "AI Prompt Library - Find the Best Prompts";
+    const description = hasKnownType
+        ? `Discover, copy, and use ${formatPromptType(rawType).toLowerCase()} AI prompts for practical workflows.`
+        : "Discover, copy, and use the best AI prompts for ChatGPT, Midjourney, Claude, and more. Filter by use case and format.";
+
+    // Determine canonical & indexation rules
+    let canonical = absoluteUrl("/prompts");
+    let isIndexable = page === 1;
+
+    if (rawType) {
+        if (hasKnownType) {
+            canonical = absoluteUrl(`/prompts?type=${rawType}`);
+        } else {
+            isIndexable = false; // invalid type filter
+        }
+    }
+
+    return {
+        title,
+        description,
+        alternates: { canonical },
+        openGraph: {
+            title,
+            description,
+            url: canonical,
+            images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: [absoluteUrl(DEFAULT_OG_IMAGE_PATH)],
+        },
+        robots: isIndexable
+            ? { index: true, follow: true }
+            : { index: false, follow: true },
+    };
+}
 
 const promptTypeIcons: Record<string, string> = {
     chat: "💬",

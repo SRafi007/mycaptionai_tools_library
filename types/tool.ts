@@ -6,9 +6,16 @@ export interface Tool {
     short_description: string | null;
     long_description: string | null;
     url: string | null;
+    affiliate_url: string | null;
+    canonical_url: string | null;
+    seo_title: string | null;
+    seo_description: string | null;
     image_url: string | null;
     icon_url: string | null;
     pricing_type: "Free" | "Freemium" | "Paid" | "Free-Trial" | "Contact" | null;
+    starting_price: number | null;
+    starting_price_text: string | null;
+    currency_code: string | null;
     is_verified: boolean;
     is_featured: boolean;
     rating_score: number;

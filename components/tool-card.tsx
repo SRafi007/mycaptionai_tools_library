@@ -45,7 +45,9 @@ export default function ToolCard({
     revalidatePaths = [],
 }: ToolCardProps) {
     const hasVisualIcon = Boolean(tool.image_url || tool.icon_url);
-    const hasDualActions = showUpvoteButton && showVisitButton && Boolean(tool.url);
+    const visitUrl = tool.affiliate_url || tool.url;
+    const visitRel = tool.affiliate_url ? "sponsored noopener noreferrer" : "noopener noreferrer";
+    const hasDualActions = showUpvoteButton && showVisitButton && Boolean(visitUrl);
     const pathsToRevalidate = revalidatePaths.filter((path, index, arr) => path.startsWith("/") && arr.indexOf(path) === index);
 
     async function upvoteTool() {
@@ -131,8 +133,8 @@ export default function ToolCard({
                             </button>
                         </form>
                     )}
-                    {showVisitButton && tool.url && (
-                        <a href={tool.url} target="_blank" rel="noopener noreferrer" className="btn-secondary btn-sm">
+                    {showVisitButton && visitUrl && (
+                        <a href={visitUrl} target="_blank" rel={visitRel} className="btn-secondary btn-sm">
                             Visit
                         </a>
                     )}

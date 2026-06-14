@@ -19,6 +19,7 @@ const promptTypeIcons: Record<string, string> = {
   caption: "📝",
   agent: "🤖",
   workflow: "⚙️",
+  education: "EDU",
   other: "✨",
 };
 

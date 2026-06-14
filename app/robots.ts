@@ -19,6 +19,7 @@ export default function robots(): MetadataRoute.Robots {
             `${SITE_URL}/sitemaps/use-cases.xml`,
             `${SITE_URL}/sitemaps/ecosystems.xml`,
             `${SITE_URL}/sitemaps/playbooks.xml`,
+            `${SITE_URL}/sitemaps/prompts.xml`,
         ],
     };
 }

@@ -9,6 +9,7 @@ export const revalidate = 3600;
 const CORE_ENTRIES: Array<{ path: string; changefreq: SitemapUrlEntry["changefreq"]; priority: number }> = [
     { path: "/", changefreq: "daily", priority: 1.0 },
     { path: "/ai-tools", changefreq: "daily", priority: 0.95 },
+    { path: "/prompts", changefreq: "daily", priority: 0.90 },
     { path: "/ecosystems", changefreq: "weekly", priority: 0.88 },
     { path: "/playbooks", changefreq: "weekly", priority: 0.88 },
     { path: "/ai-by-country", changefreq: "weekly", priority: 0.85 },

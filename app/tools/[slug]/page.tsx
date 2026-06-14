@@ -13,7 +13,7 @@ import ToolCard from "@/components/tool-card";
 import BackToTop from "@/components/back-to-top";
 import ToolDetailVisual from "@/components/tool-detail-visual";
 import Link from "next/link";
-import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
+import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH, localCanonicalUrl } from "@/lib/seo";
 
 interface PageProps {
     params: Promise<{ slug: string }>;
@@ -33,12 +33,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     const pricing = tool.pricing_type || "Free";
     const category = tool.categories?.[0]?.name || "AI";
-    const title = `${tool.name} Review, Pricing & Features | ${SITE_NAME}`;
-    const description = tool.short_description
+    const title = tool.seo_title || `${tool.name} Review, Pricing & Features`;
+    const description = tool.seo_description
+        || tool.short_description
         || tool.description
         || `${tool.name} is a ${pricing.toLowerCase()} ${category.toLowerCase()} AI tool. Compare features, pricing, ratings, and alternatives on ${SITE_NAME}.`;
-    const canonical = absoluteUrl(`/tools/${tool.slug}`);
-    const socialImage = tool.image_url || absoluteUrl(DEFAULT_OG_IMAGE_PATH);
+    const canonical = localCanonicalUrl(tool.canonical_url, `/tools/${tool.slug}`);
+    const socialImage = tool.image_url || tool.icon_url || absoluteUrl(DEFAULT_OG_IMAGE_PATH);
+    const socialImageAlt = `${tool.name} AI tool listing on ${SITE_NAME}`;
 
     return {
         title,
@@ -48,7 +50,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
             title,
             description,
             url: canonical,
-            images: [socialImage],
+            images: [{ url: socialImage, alt: socialImageAlt }],
         },
         twitter: {
             card: "summary_large_image",
@@ -100,6 +102,10 @@ export default async function ToolDetailPage({ params }: PageProps) {
     const cons = sanitizeList(tool.pros_cons?.cons, 5);
     const pricingLabel = formatPricingLabel(tool.pricing_type);
     const summary = tool.short_description || tool.description || `${tool.name} overview and feature breakdown.`;
+    const canonical = localCanonicalUrl(tool.canonical_url, `/tools/${tool.slug}`);
+    const socialImage = tool.image_url || tool.icon_url || undefined;
+    const visitUrl = tool.affiliate_url || tool.url;
+    const visitRel = tool.affiliate_url ? "sponsored noopener noreferrer" : "noopener noreferrer";
     const faq = [
         {
             q: `What is ${tool.name} used for?`,
@@ -137,15 +143,20 @@ export default async function ToolDetailPage({ params }: PageProps) {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         name: tool.name,
-        description: tool.description || tool.short_description,
-        url: tool.url,
+        description: summary,
+        url: tool.url || canonical,
+        mainEntityOfPage: canonical,
+        image: socialImage,
         applicationCategory: tool.categories?.[0]?.name || "AI Tool",
-        offers: {
-            "@type": "Offer",
-            price: tool.pricing_type === "Free" ? "0" : undefined,
-            priceCurrency: "USD",
-        },
-        aggregateRating: tool.rating_score > 0
+        operatingSystem: "Web",
+        offers: tool.pricing_type === "Free"
+            ? {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: tool.currency_code || "USD",
+            }
+            : undefined,
+        aggregateRating: tool.rating_score > 0 && tool.rating_count > 0
             ? {
                 "@type": "AggregateRating",
                 ratingValue: tool.rating_score.toString(),
@@ -236,8 +247,8 @@ export default async function ToolDetailPage({ params }: PageProps) {
                                         Upvote ({tool.upvotes || 0})
                                     </button>
                                 </form>
-                                {tool.url && (
-                                    <a href={tool.url} target="_blank" rel="noopener noreferrer" className="btn-primary btn-sm tool-detail-action-btn">
+                                {visitUrl && (
+                                    <a href={visitUrl} target="_blank" rel={visitRel} className="btn-primary btn-sm tool-detail-action-btn">
                                         Visit Tool -&gt;
                                     </a>
                                 )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 interface CategoryTab {
@@ -12,54 +12,52 @@ interface CategoryTab {
 
 interface HomeSidebarDiscoveryProps {
   categories: CategoryTab[];
-  trendingCount: number;
   /** Pre-rendered server content panels, each wrapped in a div with data-sidebar-panel attribute */
   panels: React.ReactNode;
 }
 
 const categoryIcons: Record<string, string> = {
-  "text-generators": "✍️",
-  "image-generators": "🎨",
-  "video-generators": "🎬",
-  "audio-generators": "🎵",
-  "code-generators": "💻",
-  "chatbots": "💬",
-  "marketing": "📈",
-  "productivity": "⚡",
-  "writing": "📝",
-  "design": "🎯",
-  "education": "📚",
-  "research": "🔬",
-  "business": "💼",
-  "social-media": "📱",
-  "seo": "🔍",
-  "automation": "🤖",
-  "analytics": "📊",
-  "e-commerce": "🛒",
-  "healthcare": "🏥",
-  "finance": "💰",
-  "customer-service": "🎧",
-  "hr": "👥",
-  "legal": "⚖️",
-  "music": "🎶",
-  "gaming": "🎮",
-  "photo-editing": "📸",
-  "presentation": "📊",
-  "transcription": "📋",
-  "translation": "🌐",
-  "email": "📧",
+  "text-generators": "article",
+  "image-generators": "image",
+  "video-generators": "movie",
+  "audio-generators": "music_note",
+  "code-generators": "code",
+  chatbots: "forum",
+  marketing: "campaign",
+  productivity: "bolt",
+  writing: "edit",
+  design: "design_services",
+  education: "school",
+  research: "science",
+  business: "business_center",
+  "social-media": "share",
+  seo: "search",
+  automation: "smart_toy",
+  analytics: "analytics",
+  "e-commerce": "shopping_cart",
+  healthcare: "local_hospital",
+  finance: "payments",
+  "customer-service": "support_agent",
+  hr: "groups",
+  legal: "gavel",
+  music: "music_note",
+  gaming: "sports_esports",
+  "photo-editing": "photo_camera",
+  presentation: "slideshow",
+  transcription: "description",
+  translation: "translate",
+  email: "mail",
 };
 
 function getCategoryIcon(slug: string): string {
   for (const [key, icon] of Object.entries(categoryIcons)) {
     if (slug.includes(key)) return icon;
   }
-  return "🔧";
+  return "category";
 }
 
 export default function HomeSidebarDiscovery({
   categories,
-  trendingCount,
   panels,
 }: HomeSidebarDiscoveryProps) {
   const [activeTab, setActiveTab] = useState<string>("trending");
@@ -96,9 +94,10 @@ export default function HomeSidebarDiscovery({
                 onClick={() => setActiveTab("trending")}
                 aria-current={activeTab === "trending" ? "page" : undefined}
               >
-                <span className="sidebar-nav-icon">🔥</span>
+                <span className="sidebar-nav-icon sidebar-nav-material-icon" aria-hidden="true">
+                  local_fire_department
+                </span>
                 <span className="sidebar-nav-label">Trending Now</span>
-                <span className="sidebar-nav-count">{trendingCount}</span>
               </button>
 
               {/* Category tabs */}
@@ -111,11 +110,10 @@ export default function HomeSidebarDiscovery({
                     onClick={() => setActiveTab(cat.id)}
                     aria-current={isActive ? "page" : undefined}
                   >
-                    <span className="sidebar-nav-icon">
+                    <span className="sidebar-nav-icon sidebar-nav-material-icon" aria-hidden="true">
                       {getCategoryIcon(cat.slug)}
                     </span>
                     <span className="sidebar-nav-label">{cat.name}</span>
-                    <span className="sidebar-nav-count">{cat.tool_count}</span>
                   </button>
                 );
               })}
@@ -126,7 +124,7 @@ export default function HomeSidebarDiscovery({
             </Link>
           </aside>
 
-          {/* Main Content Area — server-rendered panels, visibility toggled via useEffect */}
+          {/* Main Content Area - server-rendered panels, visibility toggled via useEffect */}
           <div className="sidebar-content-area" ref={contentRef}>
             {panels}
           </div>
