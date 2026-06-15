@@ -3027,6 +3027,131 @@ a {
 }
 
 /* ═══════════════════════════════════════════════
+   Page Info Trigger Button & Creative Popover
+   ═══════════════════════════════════════════════ */
+
+.page-info-trigger-btn {
+  vertical-align: middle;
+  transform-origin: center;
+  line-height: 1;
+}
+
+.page-info-trigger-btn:hover {
+  color: var(--accent) !important;
+  transform: scale(1.15) rotate(5deg);
+  background: var(--bg-secondary);
+}
+
+.page-info-trigger-btn.active {
+  transform: scale(1.15);
+  background: var(--accent-subtle);
+}
+
+.page-subtitle-creative-popover {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  z-index: 100;
+  width: min(420px, 92vw);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: 16px 20px 16px 16px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 20px 40px -4px rgba(11, 20, 36, 0.12),
+    0 0 0 1px rgba(53, 133, 232, 0.05);
+  animation: creativePopoverReveal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: normal;
+  display: flex;
+  gap: 12px;
+  overflow: hidden;
+  text-align: left;
+}
+
+/* Dark theme compatibility */
+@media (prefers-color-scheme: dark) {
+  .page-subtitle-creative-popover {
+    background: rgba(15, 23, 42, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.popover-decor-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--secondary-accent) 100%);
+}
+
+.popover-content {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.popover-icon {
+  font-size: 20px;
+  line-height: 1.2;
+  animation: bounceSlow 3s infinite ease-in-out;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.popover-text {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.popover-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition);
+}
+
+.popover-close-btn:hover {
+  color: var(--accent);
+}
+
+@keyframes creativePopoverReveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes bounceSlow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* ═══════════════════════════════════════════════
    Responsive Fine-Tuning
    ═══════════════════════════════════════════════ */
 
@@ -4016,33 +4141,21 @@ a {
   text-align: center;
 }
 
-.sidebar-nav-material-icon {
+.sidebar-nav-lucide-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: "Material Symbols Rounded";
-  font-size: 20px;
-  font-style: normal;
-  font-weight: normal;
-  letter-spacing: normal;
-  text-transform: none;
   color: var(--text-muted);
-  direction: ltr;
-  white-space: nowrap;
-  word-wrap: normal;
-  font-feature-settings: "liga";
-  -webkit-font-feature-settings: "liga";
-  -webkit-font-smoothing: antialiased;
-  font-variation-settings: "FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24;
+  transition: color 200ms ease, stroke-width 200ms ease;
 }
 
-.sidebar-nav-item:hover .sidebar-nav-material-icon {
+.sidebar-nav-item:hover .sidebar-nav-lucide-icon {
   color: var(--accent);
 }
 
-.sidebar-nav-item-active .sidebar-nav-material-icon {
+.sidebar-nav-item-active .sidebar-nav-lucide-icon {
   color: var(--accent);
-  font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24;
+  stroke-width: 2.5px;
 }
 
 .sidebar-nav-label {
@@ -6800,22 +6913,22 @@ a {
   gap: 20px;
 }
 
-/* ── Prompt Cards (Sleek Dark Theme) ── */
+/* ── Prompt Cards (Aligned to Global Color Standards) ── */
 .prompt-card {
-  background: #12121c !important; /* Premium Dark Background override */
-  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-default) !important;
   border-radius: 16px !important;
   padding: 0 !important; /* Remove card padding for full width cover image */
-  color: #ffffff !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--shadow-soft) !important;
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
   overflow: hidden; /* Force children to respect border-radius */
 }
 
 .prompt-card:hover {
   transform: translateY(-5px) !important;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3) !important;
-  border-color: rgba(255, 255, 255, 0.18) !important;
+  box-shadow: var(--shadow-hover) !important;
+  border-color: var(--border-hover) !important;
 }
 
 .prompt-card-media {
@@ -6825,7 +6938,7 @@ a {
   border-bottom-right-radius: 0 !important;
   border: none !important; /* Remove internal border outline */
   margin-bottom: 0 !important; /* Remove bottom margin to make flush with body */
-  background-color: #07070b !important;
+  background-color: var(--bg-secondary) !important;
 }
 
 .prompt-card-body {
@@ -6836,13 +6949,14 @@ a {
 }
 
 .prompt-card-fallback-cover {
-  background: linear-gradient(135deg, #111827 0%, #1e1b4b 100%) !important;
+  background: var(--bg-secondary) !important;
   font-size: 1.15rem !important;
   opacity: 0.95;
+  color: var(--text-primary) !important;
 }
 
 .prompt-card .tool-card-title {
-  color: #ffffff !important;
+  color: var(--text-primary) !important;
   font-size: 1.15rem !important;
   font-weight: 700 !important;
   line-height: 1.35 !important;
@@ -6859,7 +6973,7 @@ a {
 }
 
 .prompt-card .tool-card-description {
-  color: #9ea4b0 !important;
+  color: var(--text-secondary) !important;
   font-size: 0.88rem !important;
   line-height: 1.5 !important;
   margin: 0 0 16px !important;
@@ -6876,7 +6990,7 @@ a {
   align-items: center !important;
   margin-top: auto !important;
   padding-top: 12px !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border-top: 1px solid var(--border-subtle) !important;
 }
 
 .prompt-card-tags {
@@ -6890,18 +7004,18 @@ a {
   display: inline-flex;
   align-items: center;
   padding: 3px 8px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #d1d5db;
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--border-subtle) !important;
+  color: var(--text-secondary) !important;
   font-size: 0.72rem;
   font-weight: 500;
   border-radius: 6px;
 }
 
 .prompt-card-tag-yellow {
-  background: rgba(245, 158, 11, 0.12) !important;
-  border-color: rgba(245, 158, 11, 0.25) !important;
-  color: #fbbf24 !important;
+  background: color-mix(in srgb, var(--highlight-accent) 12%, transparent) !important;
+  border-color: color-mix(in srgb, var(--highlight-accent) 25%, transparent) !important;
+  color: var(--highlight-accent) !important;
   font-weight: 600 !important;
 }
 
@@ -6909,7 +7023,7 @@ a {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  color: #8b8f9e;
+  color: var(--text-muted) !important;
   font-size: 0.78rem;
   flex-shrink: 0;
 }

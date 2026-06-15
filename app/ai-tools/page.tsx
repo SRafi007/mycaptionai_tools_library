@@ -5,6 +5,9 @@ import { getToolsByCategory } from "@/lib/db/tools";
 import BackToTop from "@/components/back-to-top";
 import { USE_CASES } from "@/lib/seo/usecases";
 import { absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
+import PageHeader from "@/components/page-header";
+import ToolCard from "@/components/tool-card";
+import BrowseCategoriesSidebar from "@/components/browse-categories-sidebar";
 
 export const revalidate = 60;
 
@@ -34,8 +37,8 @@ export default async function BrowsePage() {
     const totalTools = categories.reduce((sum, category) => sum + (category.tool_count || 0), 0);
     const categoryRows = await Promise.all(
         categories.map(async (category) => {
-            const { tools } = await getToolsByCategory(category.id, 1, 5, "rating", "all");
-            return { category, tools: tools.slice(0, 5) };
+            const { tools } = await getToolsByCategory(category.id, 1, 12, "rating", "all");
+            return { category, tools: tools.slice(0, 12) };
         })
     );
     const browseSchema = {
@@ -57,63 +60,52 @@ export default async function BrowsePage() {
     return (
         <div className="container-main browse-page">
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(browseSchema) }} />
-            <div className="page-header browse-page-header">
-                <p className="browse-page-kicker">AI Tools Explorer</p>
-                <h1 className="page-title">Browse All Categories</h1>
-                <p className="page-subtitle">
-                    Explore {categories.length} categories, preview top tools in each one, and open the full category list.
-                </p>
-                <div className="browse-page-metrics">
-                    <span className="browse-page-metric">{categories.length.toLocaleString()} Categories</span>
-                    <span className="browse-page-metric">{totalTools.toLocaleString()} Tools Indexed</span>
-                </div>
+            <PageHeader
+                title="Browse All Categories"
+                subtitle={`Explore ${categories.length} categories, preview top tools in each one, and open the full category list.`}
+            />
+            <div className="browse-page-metrics" style={{ marginTop: "16px", marginBottom: "8px" }}>
+                <span className="browse-page-metric">{categories.length.toLocaleString()} Categories</span>
+                <span className="browse-page-metric">{totalTools.toLocaleString()} Tools Indexed</span>
             </div>
 
-            <div className="section-padding">
-                <div className="card browse-table-shell">
-                    <table className="browse-category-table">
-                        <thead>
-                            <tr>
-                                <th>Category</th>
-                                <th>Top Tools (Up to 5)</th>
-                                <th>Total</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {categoryRows.map(({ category, tools }) => (
-                                <tr key={category.id}>
-                                    <td>
-                                        <Link href={`/category/${category.slug}`} className="browse-category-link">
-                                            {category.name}
+            <div className="section-padding" style={{ padding: 0 }}>
+                <BrowseCategoriesSidebar 
+                    categories={categories} 
+                    panels={
+                        <>
+                            {categoryRows.map(({ category, tools }, idx) => (
+                                <div 
+                                    key={category.id} 
+                                    className={`sidebar-content-panel${idx === 0 ? " sidebar-panel-active" : ""}`} 
+                                    data-sidebar-panel={category.id}
+                                >
+                                    <div className="sidebar-content-header">
+                                        <div>
+                                            <h2 className="section-title">{category.name}</h2>
+                                            <span className="section-count">Top tools by rating</span>
+                                        </div>
+                                        <Link href={`/category/${category.slug}`} className="btn-ghost">
+                                            View all {category.tool_count} tools &rarr;
                                         </Link>
-                                    </td>
-                                    <td>
-                                        {tools.length > 0 ? (
-                                            <div className="browse-page-tool-list">
-                                                {tools.map((tool) => (
-                                                    <Link key={tool.id} href={`/tools/${tool.slug}`} className="tool-detail-cat-link browse-tool-pill">
-                                                        {tool.name}
-                                                    </Link>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <span className="browse-page-empty">No tools yet</span>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <span className="browse-category-total">{category.tool_count.toLocaleString()}</span>
-                                    </td>
-                                    <td>
-                                        <Link href={`/category/${category.slug}`} className="btn-ghost btn-sm browse-show-all-btn">
-                                            Show all
-                                        </Link>
-                                    </td>
-                                </tr>
+                                    </div>
+                                    {tools.length > 0 ? (
+                                        <div className="tools-grid sidebar-tools-grid">
+                                            {tools.map((tool) => (
+                                                <ToolCard key={tool.id} tool={tool} showVisitButton />
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="empty-state">
+                                            <div className="empty-state-icon">&#128200;</div>
+                                            <p className="empty-state-text">No tools found in this category yet.</p>
+                                        </div>
+                                    )}
+                                </div>
                             ))}
-                        </tbody>
-                    </table>
-                </div>
+                        </>
+                    } 
+                />
             </div>
 
             <section className="section-padding section-border-t">

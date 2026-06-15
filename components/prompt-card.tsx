@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Prompt } from "@/types/prompt";
+import { Copy, Eye } from "lucide-react";
 
 interface PromptCardProps {
   prompt: Prompt;
@@ -54,7 +55,7 @@ export default function PromptCard({ prompt }: PromptCardProps) {
             position: "relative",
             width: "100%",
             aspectRatio: "16/9",
-            backgroundColor: "var(--border-color)",
+            backgroundColor: "var(--bg-secondary)",
             overflow: "hidden",
             borderTopLeftRadius: "15px",
             borderTopRightRadius: "15px",
@@ -97,17 +98,14 @@ export default function PromptCard({ prompt }: PromptCardProps) {
               style={{
                 width: "100%",
                 height: "100%",
-                background: "linear-gradient(135deg, #111827 0%, #1e1b4b 100%)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 padding: "1.5rem",
                 textAlign: "center",
-                color: "#ffffff",
                 fontWeight: 600,
                 fontSize: "1.25rem",
                 lineHeight: 1.3,
-                textShadow: "0 2px 4px rgba(0,0,0,0.2)",
               }}
             >
               {prompt.title}
@@ -141,11 +139,13 @@ export default function PromptCard({ prompt }: PromptCardProps) {
             </div>
 
             <div className="prompt-card-stats">
-              <span title="Copy Count">
-                📋 {prompt.copy_count}
+              <span title="Copy Count" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                <Copy size={16} />
+                {prompt.copy_count}
               </span>
-              <span title="View Count">
-                👁️ {prompt.view_count}
+              <span title="View Count" style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                <Eye size={16} />
+                {prompt.view_count}
               </span>
             </div>
           </div>

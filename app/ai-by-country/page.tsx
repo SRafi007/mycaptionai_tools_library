@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import AiCountryMap from "@/components/ai-country-map";
 import BackToTop from "@/components/back-to-top";
 import { absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
+import PageHeader from "@/components/page-header";
 import landscapeRaw from "@/data/global_ai_landscape.json";
 import { aggregateLandscapeByCountry, type AiLandscapeRow } from "@/lib/ai-landscape";
 
@@ -46,27 +47,24 @@ export default function AiByCountryPage() {
         <div className="container-main country-map-page">
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pageSchema) }} />
 
-            <div className="country-hero">
-                <div className="country-hero-eyebrow">Global AI Landscape</div>
-                <h1 className="country-hero-title">Where AI Innovation Starts</h1>
-                <p className="country-hero-lede">
-                    A curated atlas of the countries shaping modern AI — explore the companies and tools driving each ecosystem.
-                </p>
-                <dl className="country-hero-stats">
-                    <div className="country-hero-stat">
-                        <dt>Countries</dt>
-                        <dd>{totalCountries}</dd>
-                    </div>
-                    <div className="country-hero-stat">
-                        <dt>Companies</dt>
-                        <dd>{totalCompanies}</dd>
-                    </div>
-                    <div className="country-hero-stat">
-                        <dt>Tools tracked</dt>
-                        <dd>{totalTools}</dd>
-                    </div>
-                </dl>
-            </div>
+            <PageHeader
+                title="Where AI Innovation Starts"
+                subtitle="A curated atlas of the countries shaping modern AI — explore the companies and tools driving each ecosystem."
+            />
+            <dl className="country-hero-stats" style={{ marginTop: "16px", marginBottom: "28px" }}>
+                <div className="country-hero-stat">
+                    <dt>Countries</dt>
+                    <dd>{totalCountries}</dd>
+                </div>
+                <div className="country-hero-stat">
+                    <dt>Companies</dt>
+                    <dd>{totalCompanies}</dd>
+                </div>
+                <div className="country-hero-stat">
+                    <dt>Tools tracked</dt>
+                    <dd>{totalTools}</dd>
+                </div>
+            </dl>
 
             <AiCountryMap />
             <BackToTop />

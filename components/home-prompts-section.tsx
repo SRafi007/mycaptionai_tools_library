@@ -3,10 +3,26 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { PromptType } from "@/types/prompt";
+import {
+  TrendingUp,
+  MessageSquare,
+  Image,
+  Film,
+  Code,
+  Search,
+  Briefcase,
+  Megaphone,
+  Subtitles,
+  Bot,
+  Network,
+  GraduationCap,
+  Sparkles,
+  LucideIcon
+} from "lucide-react";
 
 interface PromptTypeTab {
-  type: PromptType;
-  count: number;
+  type: string;
+  count?: number;
 }
 
 interface HomePromptsSectionProps {
@@ -15,19 +31,36 @@ interface HomePromptsSectionProps {
   panels: React.ReactNode;
 }
 
-const promptTypeIcons: Record<string, string> = {
-  chat: "chat_bubble",
-  image: "image",
-  video: "movie",
-  code: "code",
-  seo: "search",
-  business: "business_center",
-  marketing: "campaign",
-  caption: "closed_caption",
-  agent: "smart_toy",
-  workflow: "account_tree",
-  education: "school",
-  other: "auto_awesome",
+const promptTypeIcons: Record<string, LucideIcon> = {
+  trending: TrendingUp,
+  chat: MessageSquare,
+  image: Image,
+  video: Film,
+  code: Code,
+  seo: Search,
+  business: Briefcase,
+  marketing: Megaphone,
+  caption: Subtitles,
+  agent: Bot,
+  workflow: Network,
+  education: GraduationCap,
+  other: Sparkles,
+};
+
+const promptTypeLabels: Record<string, string> = {
+  trending: "Trending Now",
+  chat: "Chat",
+  image: "Image",
+  video: "Video",
+  code: "Code",
+  seo: "SEO",
+  business: "Business",
+  marketing: "Marketing",
+  caption: "Caption",
+  agent: "Agent",
+  workflow: "Workflow",
+  education: "Education",
+  other: "Other",
 };
 
 export default function HomePromptsSection({
@@ -36,7 +69,7 @@ export default function HomePromptsSection({
 }: HomePromptsSectionProps) {
   // If there are prompt types available, default to the first one
   const [activeTab, setActiveTab] = useState<string>(
-    promptTypes.length > 0 ? promptTypes[0].type : "chat"
+    promptTypes.length > 0 ? promptTypes[0].type : "trending"
   );
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -56,21 +89,19 @@ export default function HomePromptsSection({
   return (
     <section className="section-padding section-border-t">
       <div className="container-main">
-        <div className="section-header">
-          <h2 className="section-title">Prompt Library</h2>
-          <p className="section-subtitle">Discover ready-to-use prompts for top AI models.</p>
-        </div>
+
 
         <div className="sidebar-discovery" style={{ marginTop: "2rem" }}>
           {/* Sidebar Navigation */}
           <aside className="sidebar-discovery-nav" role="navigation" aria-label="Prompt types navigation">
             <div className="sidebar-nav-header">
-              <h2 className="sidebar-nav-title">Use Cases</h2>
+              <h2 className="sidebar-nav-title">Prompt Library</h2>
             </div>
 
             <nav className="sidebar-nav-list">
               {promptTypes.map((tab) => {
                 const isActive = activeTab === tab.type;
+                const label = promptTypeLabels[tab.type] || tab.type;
                 return (
                   <button
                     key={tab.type}
@@ -78,11 +109,12 @@ export default function HomePromptsSection({
                     onClick={() => setActiveTab(tab.type)}
                     aria-current={isActive ? "page" : undefined}
                   >
-                    <span className="sidebar-nav-icon sidebar-nav-material-icon" aria-hidden="true">
-                      {promptTypeIcons[tab.type] || "auto_awesome"}
-                    </span>
-                    <span className="sidebar-nav-label" style={{ textTransform: "capitalize" }}>
-                      {tab.type}
+                    {(() => {
+                      const IconComp = promptTypeIcons[tab.type] || Sparkles;
+                      return <IconComp className="sidebar-nav-icon sidebar-nav-lucide-icon" size={20} aria-hidden="true" />;
+                    })()}
+                    <span className="sidebar-nav-label">
+                      {label}
                     </span>
                   </button>
                 );

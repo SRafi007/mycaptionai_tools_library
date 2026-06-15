@@ -5,6 +5,7 @@ import BackToTop from "@/components/back-to-top";
 import Link from "next/link";
 import Image from "next/image";
 import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
+import PageHeader from "@/components/page-header";
 
 interface PageProps {
     searchParams: Promise<{ page?: string }>;
@@ -63,12 +64,10 @@ export default async function BlogPage({ searchParams }: PageProps) {
     return (
         <div className="container-main">
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogSchema) }} />
-            <div className="page-header">
-                <h1 className="page-title">AI News and Insights</h1>
-                <p className="page-subtitle">
-                    The latest AI trends, tool reviews, and industry analysis for creators and developers.
-                </p>
-            </div>
+            <PageHeader
+                title="AI News and Insights"
+                subtitle="The latest AI trends, tool reviews, and industry analysis for creators and developers."
+            />
 
             <div className="section-padding">
                 {posts.length > 0 ? (

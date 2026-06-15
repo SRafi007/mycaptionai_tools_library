@@ -14,7 +14,7 @@ import EcosystemCard from "@/components/ecosystem-card";
 import PlaybookCard from "@/components/playbook-card";
 import HomePromptsSection from "@/components/home-prompts-section";
 import PromptCard from "@/components/prompt-card";
-import { getPromptTypeCounts, getTopPromptsByType } from "@/lib/db/prompts";
+import { getTrendingPrompts, getTopPromptsByType } from "@/lib/db/prompts";
 
 export const revalidate = 60;
 
@@ -44,7 +44,7 @@ export default async function HomePage() {
   const featuredCount = (settings.featured_count as number) || 6;
   const trendingCount = 12;
 
-  const [featuredTools, trendingTools, trendingCategories, toolCount, allCategories, sponsoredTool, ecosystems, playbooks, promptTypes] = await Promise.all([
+  const [featuredTools, trendingTools, trendingCategories, toolCount, allCategories, sponsoredTool, ecosystems, playbooks] = await Promise.all([
     getFeaturedTools(featuredCount),
     getTrendingTools(trendingCount),
     getTrendingCategories(10),
@@ -53,7 +53,6 @@ export default async function HomePage() {
     getSponsoredTool(),
     getEcosystemsWithPreview(5),
     getPublishedPlaybooks(3),
-    getPromptTypeCounts(),
   ]);
 
   // Pre-fetch top 8 tools for each trending category (server-side, no loading states)
@@ -67,12 +66,33 @@ export default async function HomePage() {
     }))
   );
 
-  // Pre-fetch top 9 prompts for each prompt type
+  const promptTypesList = [
+    "trending",
+    "image",
+    "video",
+    "code",
+    "education",
+    "marketing",
+    "seo",
+    "business",
+  ];
+
+  const promptTypes = promptTypesList.map((type) => ({ type }));
+
+  // Pre-fetch top 9 prompts for each prompt type/section
   const promptPanelsData = await Promise.all(
-    promptTypes.map(async (pt) => ({
-      type: pt.type,
-      prompts: await getTopPromptsByType(pt.type, 9),
-    }))
+    promptTypesList.map(async (type) => {
+      let prompts;
+      if (type === "trending") {
+        prompts = await getTrendingPrompts(6);
+      } else {
+        prompts = await getTopPromptsByType(type as any, 6);
+      }
+      return {
+        type,
+        prompts,
+      };
+    })
   );
 
   const homeSchema = {
@@ -148,31 +168,46 @@ export default async function HomePage() {
 
   const promptPanels = (
     <>
-      {promptPanelsData.map((panel) => (
-        <div key={panel.type} className="sidebar-content-panel" data-prompt-panel={panel.type}>
-          <div className="sidebar-content-header">
-            <div>
-              <h2 className="section-title" style={{ textTransform: "capitalize" }}>{panel.type} Prompts</h2>
-              <span className="section-count">Top prompts</span>
+      {promptPanelsData.map((panel, idx) => {
+        const isTrending = panel.type === "trending";
+        const title = isTrending
+          ? "Trending Now"
+          : panel.type === "seo"
+            ? "SEO Prompts"
+            : `${panel.type.charAt(0).toUpperCase() + panel.type.slice(1)} Prompts`;
+        const viewAllHref = isTrending ? "/prompts" : `/prompts?type=${panel.type}`;
+        const sectionCount = isTrending ? "Most copied prompts" : "Top prompts";
+
+        return (
+          <div
+            key={panel.type}
+            className={`sidebar-content-panel${idx === 0 ? " sidebar-panel-active" : ""}`}
+            data-prompt-panel={panel.type}
+          >
+            <div className="sidebar-content-header">
+              <div>
+                <h2 className="section-title">{title}</h2>
+                <span className="section-count">{sectionCount}</span>
+              </div>
+              <Link href={viewAllHref} className="btn-ghost">
+                View all &rarr;
+              </Link>
             </div>
-            <Link href={`/prompts?type=${panel.type}`} className="btn-ghost">
-              View all &rarr;
-            </Link>
+            {panel.prompts.length > 0 ? (
+              <div className="tools-grid sidebar-tools-grid">
+                {panel.prompts.map((prompt) => (
+                  <PromptCard key={prompt.id} prompt={prompt} />
+                ))}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <div className="empty-state-icon">&#128200;</div>
+                <p className="empty-state-text">No prompts found for this category yet.</p>
+              </div>
+            )}
           </div>
-          {panel.prompts.length > 0 ? (
-            <div className="tools-grid sidebar-tools-grid">
-              {panel.prompts.map((prompt) => (
-                <PromptCard key={prompt.id} prompt={prompt} />
-              ))}
-            </div>
-          ) : (
-            <div className="empty-state">
-              <div className="empty-state-icon">&#128200;</div>
-              <p className="empty-state-text">No prompts found for this category yet.</p>
-            </div>
-          )}
-        </div>
-      ))}
+        );
+      })}
     </>
   );
 

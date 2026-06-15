@@ -31,7 +31,6 @@ import {
   Presentation,
   Languages,
   Mail,
-  Flame,
   FolderOpen,
   LucideIcon
 } from "lucide-react";
@@ -43,7 +42,7 @@ interface CategoryTab {
   tool_count: number;
 }
 
-interface HomeSidebarDiscoveryProps {
+interface BrowseCategoriesSidebarProps {
   categories: CategoryTab[];
   /** Pre-rendered server content panels, each wrapped in a div with data-sidebar-panel attribute */
   panels: React.ReactNode;
@@ -89,11 +88,14 @@ function getCategoryIcon(slug: string): LucideIcon {
   return FolderOpen;
 }
 
-export default function HomeSidebarDiscovery({
+export default function BrowseCategoriesSidebar({
   categories,
   panels,
-}: HomeSidebarDiscoveryProps) {
-  const [activeTab, setActiveTab] = useState<string>("trending");
+}: BrowseCategoriesSidebarProps) {
+  // Default to the first category if available
+  const [activeTab, setActiveTab] = useState<string>(
+    categories.length > 0 ? categories[0].id : ""
+  );
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Toggle panel visibility based on activeTab
@@ -111,55 +113,40 @@ export default function HomeSidebarDiscovery({
   }, [activeTab]);
 
   return (
-    <section className="section-padding section-border-t">
-      <div className="container-main">
-        <div className="sidebar-discovery">
-          {/* Sidebar Navigation */}
-          <aside className="sidebar-discovery-nav" role="navigation" aria-label="Category navigation">
-            <div className="sidebar-nav-header">
-              <h2 className="sidebar-nav-title">Explore</h2>
-            </div>
-
-            <nav className="sidebar-nav-list">
-              {/* Trending Now tab */}
-              <button
-                className={`sidebar-nav-item${activeTab === "trending" ? " sidebar-nav-item-active" : ""}`}
-                onClick={() => setActiveTab("trending")}
-                aria-current={activeTab === "trending" ? "page" : undefined}
-              >
-                <Flame className="sidebar-nav-icon sidebar-nav-lucide-icon" size={20} aria-hidden="true" />
-                <span className="sidebar-nav-label">Trending Now</span>
-              </button>
-
-              {/* Category tabs */}
-              {categories.map((cat) => {
-                const isActive = activeTab === cat.id;
-                const IconComp = getCategoryIcon(cat.slug);
-                return (
-                  <button
-                    key={cat.id}
-                    className={`sidebar-nav-item${isActive ? " sidebar-nav-item-active" : ""}`}
-                    onClick={() => setActiveTab(cat.id)}
-                    aria-current={isActive ? "page" : undefined}
-                  >
-                    <IconComp className="sidebar-nav-icon sidebar-nav-lucide-icon" size={20} aria-hidden="true" />
-                    <span className="sidebar-nav-label">{cat.name}</span>
-                  </button>
-                );
-              })}
-            </nav>
-
-            <Link href="/ai-tools" className="sidebar-nav-cta">
-              View all categories &rarr;
-            </Link>
-          </aside>
-
-          {/* Main Content Area - server-rendered panels, visibility toggled via useEffect */}
-          <div className="sidebar-content-area" ref={contentRef}>
-            {panels}
-          </div>
+    <div className="sidebar-discovery" style={{ marginTop: "2rem" }}>
+      {/* Sidebar Navigation */}
+      <aside className="sidebar-discovery-nav" role="navigation" aria-label="Category navigation">
+        <div className="sidebar-nav-header">
+          <h2 className="sidebar-nav-title">CATEGORIES</h2>
         </div>
+
+        <nav className="sidebar-nav-list">
+          {/* Category tabs */}
+          {categories.map((cat) => {
+            const isActive = activeTab === cat.id;
+            const IconComp = getCategoryIcon(cat.slug);
+            return (
+              <button
+                key={cat.id}
+                className={`sidebar-nav-item${isActive ? " sidebar-nav-item-active" : ""}`}
+                onClick={() => setActiveTab(cat.id)}
+                aria-current={isActive ? "page" : undefined}
+              >
+                <IconComp className="sidebar-nav-icon sidebar-nav-lucide-icon" size={20} aria-hidden="true" />
+                <span className="sidebar-nav-label" style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+                  <span>{cat.name}</span>
+                  <span className="sidebar-nav-count" style={{ fontSize: "11px", opacity: 0.7, marginLeft: "8px" }}>({cat.tool_count})</span>
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+      </aside>
+
+      {/* Main Content Area - server-rendered panels, visibility toggled via useEffect */}
+      <div className="sidebar-content-area" ref={contentRef}>
+        {panels}
       </div>
-    </section>
+    </div>
   );
 }

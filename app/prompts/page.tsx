@@ -5,7 +5,23 @@ import PromptCard from "@/components/prompt-card";
 import Pagination from "@/components/pagination";
 import BackToTop from "@/components/back-to-top";
 import { absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
+import PageHeader from "@/components/page-header";
 import { isPromptType, PromptType } from "@/types/prompt";
+import {
+  MessageSquare,
+  Image,
+  Film,
+  Code,
+  Search,
+  Briefcase,
+  Megaphone,
+  Subtitles,
+  Bot,
+  Network,
+  GraduationCap,
+  Sparkles,
+  LucideIcon
+} from "lucide-react";
 
 export const revalidate = 60;
 
@@ -68,18 +84,19 @@ export async function generateMetadata({ searchParams }: PromptsPageProps): Prom
     };
 }
 
-const promptTypeIcons: Record<string, string> = {
-    chat: "💬",
-    image: "🎨",
-    video: "🎬",
-    code: "💻",
-    seo: "🔍",
-    business: "💼",
-    marketing: "📈",
-    caption: "📝",
-    agent: "🤖",
-    workflow: "⚙️",
-    other: "✨",
+const promptTypeIcons: Record<string, LucideIcon> = {
+    chat: MessageSquare,
+    image: Image,
+    video: Film,
+    code: Code,
+    seo: Search,
+    business: Briefcase,
+    marketing: Megaphone,
+    caption: Subtitles,
+    agent: Bot,
+    workflow: Network,
+    education: GraduationCap,
+    other: Sparkles,
 };
 
 interface PromptsPageProps {
@@ -104,7 +121,10 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
 
     return (
         <div className="container-main browse-page">
-            <h1 className="page-title">Discover the Best AI Prompts</h1>
+            <PageHeader
+                title="Discover the Best AI Prompts"
+                subtitle="Discover, copy, and use the best AI prompts for ChatGPT, Midjourney, Claude, and more. Filter by use case and format."
+            />
 
 
 
@@ -120,23 +140,26 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
                                 href="/prompts"
                                 className={`sidebar-nav-item ${typeFilter === "all" ? "sidebar-nav-item-active" : ""}`}
                             >
-                                <span className="sidebar-nav-icon">✨</span>
+                                <Sparkles className="sidebar-nav-icon sidebar-nav-lucide-icon" size={20} aria-hidden="true" />
                                 <span className="sidebar-nav-label">All Prompts</span>
                                 <span className="sidebar-nav-count">{totalPrompts}</span>
                             </Link>
-                            {typesData.map((t) => (
-                                <Link
-                                    key={t.type}
-                                    href={`/prompts?type=${t.type}`}
-                                    className={`sidebar-nav-item ${typeFilter === t.type ? "sidebar-nav-item-active" : ""}`}
-                                >
-                                    <span className="sidebar-nav-icon">{promptTypeIcons[t.type] || "✨"}</span>
-                                    <span className="sidebar-nav-label" style={{ textTransform: "capitalize" }}>
-                                        {t.type}
-                                    </span>
-                                    <span className="sidebar-nav-count">{t.count}</span>
-                                </Link>
-                            ))}
+                            {typesData.map((t) => {
+                                const IconComp = promptTypeIcons[t.type] || Sparkles;
+                                return (
+                                    <Link
+                                        key={t.type}
+                                        href={`/prompts?type=${t.type}`}
+                                        className={`sidebar-nav-item ${typeFilter === t.type ? "sidebar-nav-item-active" : ""}`}
+                                    >
+                                        <IconComp className="sidebar-nav-icon sidebar-nav-lucide-icon" size={20} aria-hidden="true" />
+                                        <span className="sidebar-nav-label">
+                                            {t.type === "seo" ? "SEO" : t.type.charAt(0).toUpperCase() + t.type.slice(1)}
+                                        </span>
+                                        <span className="sidebar-nav-count">{t.count}</span>
+                                    </Link>
+                                );
+                            })}
                         </nav>
                     </aside>
 

@@ -29,6 +29,26 @@ export async function getPromptTypeCounts(): Promise<{ type: PromptType; count: 
 }
 
 /**
+ * Get trending prompts sorted by copy_count
+ */
+export async function getTrendingPrompts(limit: number = 9): Promise<Prompt[]> {
+    const { data, error } = await supabase
+        .from("prompts")
+        .select("*")
+        .eq("status", "published")
+        .order("copy_count", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(limit);
+
+    if (error) {
+        console.error("Error fetching trending prompts:", error);
+        return [];
+    }
+
+    return (data as Prompt[]) || [];
+}
+
+/**
  * Get top prompts by category, sorted by copy_count or created_at
  */
 export async function getTopPromptsByType(

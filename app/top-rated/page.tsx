@@ -3,6 +3,7 @@ import { getTopUpvotedTools } from "@/lib/db/tools";
 import ToolCard from "@/components/tool-card";
 import BackToTop from "@/components/back-to-top";
 import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
+import PageHeader from "@/components/page-header";
 
 export const metadata: Metadata = {
     title: `Top AI Tools Ranked by Upvotes | ${SITE_NAME}`,
@@ -43,12 +44,10 @@ export default async function TopRatedPage() {
     return (
         <div className="container-main">
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
-            <div className="page-header">
-                <h1 className="page-title">Top Rated AI Tools</h1>
-                <p className="page-subtitle">
-                    Compare the highest-upvoted AI tools across major categories and open each profile for pricing, features, and alternatives.
-                </p>
-            </div>
+            <PageHeader
+                title="Top Rated AI Tools"
+                subtitle="Compare the highest-upvoted AI tools across major categories and open each profile for pricing, features, and alternatives."
+            />
 
             <div className="section-padding">
                 {tools.length > 0 ? (

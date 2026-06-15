@@ -46,13 +46,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .from("user_profiles")
         .select("*")
         .eq("id", userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching user profile:", error.message);
         setProfile(null);
       } else {
-        setProfile(data as UserProfile);
+        setProfile(data as UserProfile | null);
       }
     } catch (err) {
       console.error("Failed to load user profile:", err);
