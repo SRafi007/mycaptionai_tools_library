@@ -48,7 +48,7 @@ const promptTypeIcons: Record<string, LucideIcon> = {
 };
 
 const promptTypeLabels: Record<string, string> = {
-  trending: "Trending Now",
+  trending: "Popular",
   chat: "Chat",
   image: "Image",
   video: "Video",

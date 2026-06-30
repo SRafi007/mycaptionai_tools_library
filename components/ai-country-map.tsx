@@ -15,19 +15,19 @@ const MAP_WIDTH = 1000;
 const MAP_HEIGHT = 500;
 
 const COUNTRY_ACCENTS: Record<string, string> = {
-    US: "#39d0ff",
-    CA: "#7c4dff",
-    GB: "#00e6a3",
-    FR: "#ff5dc8",
-    DE: "#ff9a3d",
-    NL: "#59f0ff",
-    NO: "#77ddff",
-    IL: "#f1c40f",
-    AE: "#00d1ff",
-    IN: "#ff6d6d",
-    CN: "#00f5d4",
-    KR: "#7d7dff",
-    JP: "#ff55b9",
+    US: "#2563EB",
+    CA: "#2563EB",
+    GB: "#2563EB",
+    FR: "#2563EB",
+    DE: "#2563EB",
+    NL: "#2563EB",
+    NO: "#2563EB",
+    IL: "#2563EB",
+    AE: "#2563EB",
+    IN: "#2563EB",
+    CN: "#2563EB",
+    KR: "#2563EB",
+    JP: "#2563EB",
 };
 
 const LABEL_POSITIONS: Record<string, "top" | "bottom" | "left" | "right"> = {
@@ -47,7 +47,7 @@ const LABEL_POSITIONS: Record<string, "top" | "bottom" | "left" | "right"> = {
 };
 
 function getAccent(iso: string): string {
-    return COUNTRY_ACCENTS[iso] || "#5ad8ff";
+    return COUNTRY_ACCENTS[iso] || "#2563EB";
 }
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -57,7 +57,7 @@ function hexToRgba(hex: string, alpha: number): string {
         : normalized;
     const int = Number.parseInt(expanded, 16);
     if (Number.isNaN(int)) {
-        return `rgba(90, 216, 255, ${alpha})`;
+        return `rgba(37, 99, 235, ${alpha})`;
     }
     const r = (int >> 16) & 255;
     const g = (int >> 8) & 255;

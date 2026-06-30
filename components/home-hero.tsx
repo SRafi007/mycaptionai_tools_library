@@ -51,14 +51,24 @@ export default function HomeHero({
     <section className="hero hero-v3-inspiration">
       <div className="hero-content">
         
-        {/* Main Title (Inspired by TAAFT) */}
+        {/* Main Title (Title Case) */}
         <h1 className="hero-title-inspiration">
-          BEST AI TOOLS DIRECTORY
+          Best AI Tools Directory
         </h1>
+
+        {/* Positioning Subtitle */}
+        <p className="hero-subtitle">
+          Discover AI Tools, Prompts, and Workflows. Find the right AI tools, ready-to-use prompts, ecosystem guides, and practical AI playbooks in one place.
+        </p>
+
+        {/* Search Input Bar row (Primary visual element) */}
+        <div className="hero-search-row-single">
+          <SearchBar placeholder="Search for AI tools, prompts, or workflows..." />
+        </div>
         
-        {/* Categories Parent Group cloud */}
+        {/* Categories Parent Group chips (Horizontal Scroll on Mobile) */}
         <div className="hero-parent-groups">
-          {parentGroups.map((group, idx) => {
+          {parentGroups.slice(0, 7).map((group, idx) => {
             const emoji = parentGroupEmojis[group.name] || "🏷️";
             return (
               <Link 
@@ -75,17 +85,17 @@ export default function HomeHero({
           })}
         </div>
 
-        {/* View All Sections Toggle Button */}
+        {/* View All Sections Toggle Link */}
         <div className="hero-toggle-row">
-          <Link href="/ai-tools" className="btn-outline hero-view-all-btn">
-            View all sections
+          <Link href="/ai-tools" className="hero-view-all-btn">
+            View all sections &rarr;
           </Link>
         </div>
 
-        {/* Sponsor Banner */}
+        {/* Featured Banner (Relocated below categories) */}
         {sponsoredTool && (
           <div className="hero-sponsor-wrapper">
-            <span className="hero-sponsor-badge">Sponsor</span>
+            <span className="hero-sponsor-badge">Featured</span>
             <Link href={`/tools/${sponsoredTool.slug}`} className="hero-sponsor-banner">
               {sponsoredTool.icon_url && (
                 <img 
@@ -103,16 +113,6 @@ export default function HomeHero({
             </Link>
           </div>
         )}
-
-        {/* Search Input Bar row */}
-        <div className="hero-search-row-single">
-          <SearchBar placeholder="Search..." />
-        </div>
-
-        {/* Sub-tagline below Search */}
-        <p className="hero-tagline-sub">
-          #1 directory for AI tools. Used by thousands of creators &amp; developers.
-        </p>
 
         {/* Home page metrics */}
         <div className="hero-stats">
@@ -132,7 +132,7 @@ export default function HomeHero({
           <span className="hero-stat-divider" aria-hidden="true" />
           <div className="hero-stat">
             <div className="hero-stat-value">Free</div>
-            <div className="hero-stat-label">To Use</div>
+            <div className="hero-stat-label">To Browse</div>
           </div>
         </div>
       </div>

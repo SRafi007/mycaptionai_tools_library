@@ -43,75 +43,56 @@ export default function PromptCard({ prompt }: PromptCardProps) {
 
   return (
     <div
-      className="tool-card prompt-card"
+      className={`tool-card prompt-card${showFallback ? " prompt-card-no-image" : ""}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href={`/prompts/${prompt.slug}`} className="tool-card-content" style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-        {/* Media Header (Always present for consistent grid) */}
-        <div
-          className="tool-card-media prompt-card-media"
-          style={{
-            position: "relative",
-            width: "100%",
-            aspectRatio: "16/9",
-            backgroundColor: "var(--bg-secondary)",
-            overflow: "hidden",
-            borderTopLeftRadius: "15px",
-            borderTopRightRadius: "15px",
-            borderBottomLeftRadius: "0",
-            borderBottomRightRadius: "0",
-            marginBottom: "1rem",
-          }}
-        >
-          {/* Show cover image by default, or if no video is hovered */}
-          {hasValidCover && !showVideo && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={prompt.cover_url!}
-              alt={prompt.title}
-              onError={() => setImageError(true)}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          )}
-          
-          {/* Show Video if hovered, or if it's the only media available */}
-          {(showVideo || (!hasValidCover && videoId)) && (
-            <iframe
-              width="100%"
-              height="100%"
-              src={`https://www.youtube.com/embed/${videoId}?autoplay=${
-                isHovered ? 1 : 0
-              }&mute=1&controls=0`}
-              title="YouTube video player"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              style={{ position: "absolute", top: 0, left: 0 }}
-            ></iframe>
-          )}
-
-          {/* Fallback Text Cover */}
-          {showFallback && (
-            <div
-              className="prompt-card-fallback-cover"
-              style={{
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "1.5rem",
-                textAlign: "center",
-                fontWeight: 600,
-                fontSize: "1.25rem",
-                lineHeight: 1.3,
-              }}
-            >
-              {prompt.title}
-            </div>
-          )}
-        </div>
+      <Link href={`/prompts/${prompt.slug}`} className="tool-card-content" style={{ display: "flex", flexDirection: "column" }}>
+        {/* Media Header (Only shown if has image/video) */}
+        {!showFallback && (
+          <div
+            className="tool-card-media prompt-card-media"
+            style={{
+              position: "relative",
+              width: "100%",
+              aspectRatio: "16/9",
+              backgroundColor: "var(--bg-secondary)",
+              overflow: "hidden",
+              borderTopLeftRadius: "13px", // Standardized to match card radius minus border
+              borderTopRightRadius: "13px",
+              borderBottomLeftRadius: "0",
+              borderBottomRightRadius: "0",
+              marginBottom: "1rem",
+            }}
+          >
+            {/* Show cover image by default, or if no video is hovered */}
+            {hasValidCover && !showVideo && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={prompt.cover_url!}
+                alt={prompt.title}
+                onError={() => setImageError(true)}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            )}
+            
+            {/* Show Video if hovered, or if it's the only media available */}
+            {(showVideo || (!hasValidCover && videoId)) && (
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${videoId}?autoplay=${
+                  isHovered ? 1 : 0
+                }&mute=1&controls=0`}
+                title="YouTube video player"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                style={{ position: "absolute", top: 0, left: 0 }}
+              ></iframe>
+            )}
+          </div>
+        )}
 
         <div className="prompt-card-body">
           <div className="tool-card-header">

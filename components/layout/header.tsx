@@ -9,11 +9,10 @@ import UserAvatarMenu from "@/components/auth/user-avatar-menu";
 
 const navLinks = [
     { href: "/ai-tools", label: "AI Tools" },
-    { href: "/ai-by-country", label: "AI by Country" },
-    { href: "/top-rated", label: "Top Rated" },
     { href: "/prompts", label: "Prompts" },
+    { href: "/playbooks", label: "Playbooks" },
+    { href: "/ecosystems", label: "Ecosystems" },
     { href: "/blog", label: "Blog" },
-    { href: "/search", label: "Search" },
 ];
 
 export default function Header() {

@@ -76,7 +76,7 @@ export default function PlaybookCard({ playbook }: { playbook: Playbook }) {
             <div className="playbook-card-content">
                 <p className="playbook-card-desc">{getShortDescription(playbook.description)}</p>
                 <div className="playbook-card-footer">
-                    <span>View stack</span>
+                    <span>View playbook</span>
                     <span aria-hidden="true" className="playbook-card-arrow">&rarr;</span>
                 </div>
             </div>

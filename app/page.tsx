@@ -13,8 +13,10 @@ import { getPublishedPlaybooks } from "@/lib/db/playbooks";
 import EcosystemCard from "@/components/ecosystem-card";
 import PlaybookCard from "@/components/playbook-card";
 import HomePromptsSection from "@/components/home-prompts-section";
-import PromptCard from "@/components/prompt-card";
 import { getTrendingPrompts, getTopPromptsByType } from "@/lib/db/prompts";
+import { PromptType } from "@/types/prompt";
+import PromptCard from "@/components/prompt-card";
+import HomeCountryDirectory from "@/components/home-country-directory";
 
 export const revalidate = 60;
 
@@ -86,7 +88,7 @@ export default async function HomePage() {
       if (type === "trending") {
         prompts = await getTrendingPrompts(6);
       } else {
-        prompts = await getTopPromptsByType(type as any, 6);
+        prompts = await getTopPromptsByType(type as PromptType, 6);
       }
       return {
         type,
@@ -119,7 +121,7 @@ export default async function HomePage() {
       <div className="sidebar-content-panel sidebar-panel-active" data-sidebar-panel="trending">
         <div className="sidebar-content-header">
           <div>
-            <h2 className="section-title">Trending Now</h2>
+            <h2 className="section-title">Trending AI Tools</h2>
             <span className="section-count">By upvotes</span>
           </div>
         </div>
@@ -171,7 +173,7 @@ export default async function HomePage() {
       {promptPanelsData.map((panel, idx) => {
         const isTrending = panel.type === "trending";
         const title = isTrending
-          ? "Trending Now"
+          ? "Popular Prompts"
           : panel.type === "seo"
             ? "SEO Prompts"
             : `${panel.type.charAt(0).toUpperCase() + panel.type.slice(1)} Prompts`;
@@ -194,7 +196,7 @@ export default async function HomePage() {
               </Link>
             </div>
             {panel.prompts.length > 0 ? (
-              <div className="tools-grid sidebar-tools-grid">
+              <div className="prompt-masonry-grid">
                 {panel.prompts.map((prompt) => (
                   <PromptCard key={prompt.id} prompt={prompt} />
                 ))}
@@ -251,7 +253,7 @@ export default async function HomePage() {
             {playbooks.length > 0 && (
               <div className="ecosystem-playbooks">
                 <div className="section-header">
-                  <h2 className="section-title">Trending Tech Stacks</h2>
+                  <h2 className="section-title">Trending AI Playbooks</h2>
                   <Link href="/playbooks" className="btn-ghost">
                     All playbooks &rarr;
                   </Link>
@@ -266,6 +268,8 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      <HomeCountryDirectory />
 
       <section className="section-padding section-border-t" style={{ background: "var(--bg-secondary)" }}>
         <div className="container-main cta-footer-block">
