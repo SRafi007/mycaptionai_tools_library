@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Plus, Mail } from "lucide-react";
 import { getFeaturedTools, getTrendingTools, getToolCount, getSponsoredTool, getTopToolsByCategory } from "@/lib/db/tools";
 import { getTrendingCategories, getCategories } from "@/lib/db/categories";
 import { getSettings } from "@/lib/db/settings";
@@ -272,12 +273,34 @@ export default async function HomePage() {
       <HomeCountryDirectory />
 
       <section className="section-padding section-border-t" style={{ background: "var(--bg-secondary)" }}>
-        <div className="container-main cta-footer-block">
-          <h2>Know an AI tool we&apos;re missing?</h2>
-          <p>Submit it and get listed in front of thousands of creators.</p>
-          <Link href="/submit" className="btn-primary">
-            Submit Tool &rarr;
-          </Link>
+        <div className="container-main">
+          <div className="cta-footer-split">
+            <div className="cta-door-card door-submit">
+              <h2 className="cta-door-title">Submit Your AI Tool</h2>
+              <p className="cta-door-desc">
+                Add your AI tool to our library and get listed in front of creators and developers.
+              </p>
+              <Link href="/submit" className="btn-tag-style btn-primary-tag">
+                <span className="btn-tag-icon-box">
+                  <Plus size={14} />
+                </span>
+                <span>Submit Tool</span>
+              </Link>
+            </div>
+            
+            <div className="cta-door-card door-contact">
+              <h2 className="cta-door-title">Get in Touch</h2>
+              <p className="cta-door-desc">
+                Contact us directly for feedback, partnerships, custom integrations, or sponsorships.
+              </p>
+              <Link href="/contact" className="btn-tag-style btn-secondary-tag">
+                <span className="btn-tag-icon-box">
+                  <Mail size={14} />
+                </span>
+                <span>Contact Us</span>
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 

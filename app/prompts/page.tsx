@@ -176,7 +176,7 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
 
                         {prompts.length > 0 ? (
                             <>
-                                <div className="tools-grid sidebar-tools-grid">
+                                <div className="prompt-masonry-grid">
                                     {prompts.map((prompt) => (
                                         <PromptCard key={prompt.id} prompt={prompt} />
                                     ))}

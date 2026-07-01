@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { Plus } from "lucide-react";
 import { useAuth } from "@/lib/auth/hooks";
 import SignInModal from "@/components/auth/sign-in-modal";
 import UserAvatarMenu from "@/components/auth/user-avatar-menu";
@@ -62,8 +63,9 @@ export default function Header() {
                             </button>
                         )}
 
-                        <Link href="/submit" className="btn-primary btn-sm">
-                            Submit Tool
+                        <Link href="/submit" className="btn-tag-style btn-primary-tag">
+                            <span className="btn-tag-icon-box"><Plus size={13} /></span>
+                            <span>Submit Tool</span>
                         </Link>
                     </nav>
 

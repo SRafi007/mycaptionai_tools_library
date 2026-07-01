@@ -36,8 +36,20 @@ export async function POST(request: NextRequest) {
     const submitterEmail = normalizeFormValue(formData, "email");
     const rawOfficialUrl = normalizeFormValue(formData, "url");
     const officialUrl = normalizeHttpUrl(rawOfficialUrl);
+    const submittedBy = normalizeFormValue(formData, "submitted_by");
+    const relationshipToCompany = normalizeFormValue(formData, "relationship_to_company");
+    const description = normalizeFormValue(formData, "description");
+    const note = normalizeFormValue(formData, "note");
+    const companyContact = normalizeFormValue(formData, "company_contact");
 
-    if (!toolName || !submitterEmail || !officialUrl || !isValidEmail(submitterEmail)) {
+    if (
+        !toolName ||
+        !submitterEmail ||
+        !officialUrl ||
+        !isValidEmail(submitterEmail) ||
+        !submittedBy ||
+        !relationshipToCompany
+    ) {
         return redirectToSubmit(request, "error=invalid");
     }
 
@@ -45,6 +57,11 @@ export async function POST(request: NextRequest) {
         toolName,
         submitterEmail,
         officialUrl,
+        submittedBy,
+        relationshipToCompany,
+        description,
+        note,
+        companyContact,
     });
 
     if (!created) {

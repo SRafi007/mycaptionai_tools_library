@@ -6,6 +6,11 @@ interface CreateToolSubmissionInput {
     toolName: string;
     officialUrl: string;
     submitterEmail: string;
+    submittedBy: string;
+    relationshipToCompany: string;
+    description?: string;
+    note?: string;
+    companyContact?: string;
 }
 
 export async function createToolSubmission(input: CreateToolSubmissionInput): Promise<boolean> {
@@ -13,6 +18,11 @@ export async function createToolSubmission(input: CreateToolSubmissionInput): Pr
         tool_name: input.toolName,
         official_url: input.officialUrl,
         submitter_email: input.submitterEmail,
+        submitted_by: input.submittedBy,
+        relationship_to_company: input.relationshipToCompany,
+        description: input.description || null,
+        note: input.note || null,
+        company_contact: input.companyContact || null,
     });
 
     if (error) {

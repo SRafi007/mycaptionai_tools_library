@@ -2,6 +2,7 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { Tool } from "@/types/tool";
 import { incrementToolUpvotes } from "@/lib/db/tools";
+import { ExternalLink } from "lucide-react";
 
 function getPricingBadgeClass(pricingType: Tool["pricing_type"]): string {
     switch (pricingType) {
@@ -134,8 +135,11 @@ export default function ToolCard({
                         </form>
                     )}
                     {showVisitButton && visitUrl && (
-                        <a href={visitUrl} target="_blank" rel={visitRel} className="btn-secondary btn-sm">
-                            Visit
+                        <a href={visitUrl} target="_blank" rel={visitRel} className="btn-tag-style btn-secondary-tag btn-sm">
+                            <span className="btn-tag-icon-box">
+                                <ExternalLink size={10} />
+                            </span>
+                            <span>Visit</span>
                         </a>
                     )}
                 </div>

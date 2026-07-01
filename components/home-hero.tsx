@@ -25,13 +25,13 @@ const parentGroupEmojis: Record<string, string> = {
   "Misc AI Tools": "🏷️",
 };
 
-export default function HomeHero({ 
-  toolCount, 
-  categoryCount, 
+export default function HomeHero({
+  toolCount,
+  categoryCount,
   allCategories,
   sponsoredTool
 }: HomeHeroProps) {
-  
+
   // Group categories by parent_group and sum their tool counts
   const groupsMap = new Map<string, number>();
   allCategories.forEach((cat) => {
@@ -50,30 +50,25 @@ export default function HomeHero({
   return (
     <section className="hero hero-v3-inspiration">
       <div className="hero-content">
-        
+
         {/* Main Title (Title Case) */}
         <h1 className="hero-title-inspiration">
           Best AI Tools Directory
         </h1>
 
-        {/* Positioning Subtitle */}
-        <p className="hero-subtitle">
-          Discover AI Tools, Prompts, and Workflows. Find the right AI tools, ready-to-use prompts, ecosystem guides, and practical AI playbooks in one place.
-        </p>
-
         {/* Search Input Bar row (Primary visual element) */}
         <div className="hero-search-row-single">
           <SearchBar placeholder="Search for AI tools, prompts, or workflows..." />
         </div>
-        
+
         {/* Categories Parent Group chips (Horizontal Scroll on Mobile) */}
         <div className="hero-parent-groups">
           {parentGroups.slice(0, 7).map((group, idx) => {
             const emoji = parentGroupEmojis[group.name] || "🏷️";
             return (
-              <Link 
-                key={group.name} 
-                href={`/search?q=${encodeURIComponent(group.name)}`} 
+              <Link
+                key={group.name}
+                href={`/search?q=${encodeURIComponent(group.name)}`}
                 className="hero-parent-group-pill"
               >
                 {idx === 0 && <span className="hero-pill-badge-new">New</span>}
@@ -98,9 +93,9 @@ export default function HomeHero({
             <span className="hero-sponsor-badge">Featured</span>
             <Link href={`/tools/${sponsoredTool.slug}`} className="hero-sponsor-banner">
               {sponsoredTool.icon_url && (
-                <img 
-                  src={sponsoredTool.icon_url} 
-                  alt="" 
+                <img
+                  src={sponsoredTool.icon_url}
+                  alt=""
                   className="hero-sponsor-icon"
                   onError={(e) => {
                     (e.target as HTMLElement).style.display = "none";

@@ -25,25 +25,23 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
     return (
-        <div className="container-main">
-            <div className="contact-container">
-                <div className="contact-header">
-                    <h1 className="contact-title">Contact Us</h1>
-                    <p className="contact-subtitle">
-                        Have questions, feedback, or inquiries about sponsorship, partnerships, or reporting issues? We'd love to hear from you.
-                    </p>
-                </div>
-                
-                <ContactForm />
-                
-                <div style={{ marginTop: "40px", textAlign: "center", fontSize: "14px", color: "var(--text-secondary)" }}>
-                    <p>
-                        Alternatively, you can email us directly at{" "}
-                        <a href="mailto:support@mycaption.ai" style={{ color: "var(--accent)", fontWeight: 500 }}>
-                            support@mycaption.ai
-                        </a>
-                    </p>
-                </div>
+        <div className="form-page-container">
+            <div className="form-page-header">
+                <h1 className="form-page-title">Contact Us</h1>
+                <p className="form-page-subtitle">
+                    Sponsorships, partnerships, bugs, or general feedback.
+                </p>
+            </div>
+            
+            <ContactForm />
+            
+            <div style={{ marginTop: "40px", textAlign: "center", fontSize: "12px", color: "var(--text-muted)" }}>
+                <p>
+                    Alternatively, email us directly:{" "}
+                    <a href="mailto:support@mycaption.ai" style={{ color: "var(--accent)", fontWeight: 500 }}>
+                        support@mycaption.ai
+                    </a>
+                </p>
             </div>
         </div>
     );
