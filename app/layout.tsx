@@ -7,6 +7,7 @@ import PageViewTracker from "@/components/analytics/page-view-tracker";
 import { SITE_NAME, SITE_URL, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import "./globals.css";
+import "./resources.css";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",

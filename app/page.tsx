@@ -18,6 +18,9 @@ import { getTrendingPrompts, getTopPromptsByType } from "@/lib/db/prompts";
 import { PromptType } from "@/types/prompt";
 import PromptCard from "@/components/prompt-card";
 import HomeCountryDirectory from "@/components/home-country-directory";
+import HomePulseStrip from "@/components/home-pulse-strip";
+import HomeResourceHub from "@/components/home-resource-hub";
+import { getHomepageNews, getHomepageRepos } from "@/lib/db/resources";
 
 export const revalidate = 60;
 
@@ -47,7 +50,7 @@ export default async function HomePage() {
   const featuredCount = (settings.featured_count as number) || 6;
   const trendingCount = 12;
 
-  const [featuredTools, trendingTools, trendingCategories, toolCount, allCategories, sponsoredTool, ecosystems, playbooks] = await Promise.all([
+  const [featuredTools, trendingTools, trendingCategories, toolCount, allCategories, sponsoredTool, ecosystems, playbooks, homepageNews, homepageRepos] = await Promise.all([
     getFeaturedTools(featuredCount),
     getTrendingTools(trendingCount),
     getTrendingCategories(10),
@@ -56,6 +59,8 @@ export default async function HomePage() {
     getSponsoredTool(),
     getEcosystemsWithPreview(5),
     getPublishedPlaybooks(3),
+    getHomepageNews(),
+    getHomepageRepos(),
   ]);
 
   // Pre-fetch top 8 tools for each trending category (server-side, no loading states)
@@ -219,6 +224,8 @@ export default async function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeSchema) }} />
       <HomeHero toolCount={toolCount} categoryCount={allCategories.length} allCategories={allCategories} sponsoredTool={sponsoredTool} />
 
+      <HomePulseStrip news={homepageNews} repos={homepageRepos} />
+
       <HomeSidebarDiscovery
         categories={categoriesWithTools.map((c) => ({
           id: c.id,
@@ -232,6 +239,8 @@ export default async function HomePage() {
       {promptTypes.length > 0 && (
         <HomePromptsSection promptTypes={promptTypes} panels={promptPanels} />
       )}
+
+      <HomeResourceHub news={homepageNews} repos={homepageRepos} />
 
       {(ecosystems.length > 0 || playbooks.length > 0) && (
         <section className="section-padding ecosystem-section">

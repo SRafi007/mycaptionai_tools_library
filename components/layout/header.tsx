@@ -13,6 +13,7 @@ const navLinks = [
     { href: "/prompts", label: "Prompts" },
     { href: "/playbooks", label: "Playbooks" },
     { href: "/ecosystems", label: "Ecosystems" },
+    { href: "/resources", label: "Resources" },
     { href: "/blog", label: "Blog" },
 ];
 

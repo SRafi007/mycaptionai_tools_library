@@ -1,0 +1,63 @@
+export interface AiNews {
+  id: string;
+  source_id: string;
+  title: string;
+  slug: string;
+  original_url: string;
+  canonical_url?: string;
+  source_name: string;
+  author?: string | null;
+  excerpt?: string | null;
+  summary?: string | null;
+  why_it_matters?: string | null;
+  image_url?: string | null;
+  content_hash?: string;
+  company_tags?: string[];
+  topic_tags?: string[];
+  published_at: string;
+  fetched_at?: string;
+  freshness_score: number;
+  importance_score: number;
+  quality_score: number;
+  total_score: number;
+  status: string;
+  review_status: string;
+  seo_title?: string;
+  seo_description?: string;
+}
+
+export interface GithubRepo {
+  id: string;
+  source_id: string;
+  github_id: number;
+  owner: string;
+  repo_name: string;
+  full_name: string;
+  slug: string;
+  description?: string | null;
+  html_url: string;
+  clone_url?: string;
+  homepage_url?: string | null;
+  primary_language?: string | null;
+  license_name?: string | null;
+  topics?: string[];
+  category_tags?: string[];
+  stars_count: number;
+  forks_count: number;
+  watchers_count: number;
+  open_issues_count: number;
+  created_at_github: string;
+  updated_at_github: string;
+  pushed_at_github: string;
+  last_seen_at?: string;
+  trend_score: number;
+  quality_score: number;
+  total_score: number;
+  is_archived: boolean;
+  is_fork: boolean;
+  status: string;
+  review_status: string;
+  seo_title?: string;
+  seo_description?: string;
+  fetched_at?: string;
+}
