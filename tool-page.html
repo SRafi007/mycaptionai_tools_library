@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude — MyCaptionAI</title>
+<style>
+  :root{
+    --bg:#0b0d12;
+    --card:#151821;
+    --card-soft:#191c26;
+    --border:#252a35;
+    --border-soft:#1d212b;
+    --text:#f2f3f6;
+    --text-dim:#9aa1b2;
+    --text-dimmer:#6b7280;
+    --accent:#6d5ef8;
+    --accent-hover:#5b4de8;
+    --accent-soft:rgba(109,94,248,.16);
+    --gold:#f5c451;
+    --green:#4ade80;
+    --green-soft:rgba(74,222,128,.14);
+    --amber:#f5b451;
+    --amber-soft:rgba(245,180,81,.14);
+    --gray-soft:rgba(154,161,178,.14);
+    --rose:#fb7185;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.55;overflow-x:hidden;}
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;display:block;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px;}
+  .skip-link{position:absolute;left:-999px;top:0;background:var(--accent);color:#fff;padding:8px 14px;border-radius:8px;z-index:100;}
+  .skip-link:focus{left:16px;top:16px;}
+
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px 80px;}
+
+  /* sticky visit bar */
+  .sticky-bar{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    background:rgba(11,13,18,.92);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--border);
+    padding:10px 24px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    transform:translateY(-110%);transition:transform .25s ease;
+  }
+  .sticky-bar.show{transform:translateY(0);}
+  .sticky-bar .left{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;min-width:0;}
+  .sticky-bar .left .mini-icon{width:26px;height:26px;border-radius:7px;background:linear-gradient(160deg,#ff8a5c,#e8543a);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
+  .sticky-bar .left span.name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  .crumbs{padding:64px 0 18px;font-size:13px;color:var(--text-dimmer);}
+  .crumbs a{color:var(--text-dim);}
+  .crumbs a:hover{color:var(--text);}
+
+  .hero{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:stretch;}
+  .hero-main{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;display:flex;flex-direction:column;gap:18px;}
+  .hero-top{display:flex;gap:16px;align-items:flex-start;}
+  .tool-icon{width:64px;height:64px;border-radius:16px;background:linear-gradient(160deg,#ff8a5c,#e8543a);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:26px;}
+  .tool-heading{min-width:0;flex:1;}
+  .tool-heading h1{margin:0 0 6px;font-size:28px;font-weight:700;letter-spacing:-.01em;word-break:break-word;}
+  .meta-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;font-size:14px;color:var(--text-dim);}
+  .rating{display:flex;align-items:center;gap:6px;color:var(--gold);font-weight:600;}
+  .rating.unrated{color:var(--text-dimmer);font-weight:400;}
+  .rating .count{color:var(--text-dimmer);font-weight:400;}
+  .upvotes{display:flex;align-items:center;gap:4px;color:var(--text-dim);}
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:var(--green-soft);color:var(--green);}
+  .badge .dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
+  .domain-link{display:inline-flex;align-items:center;gap:5px;color:var(--text-dimmer);font-size:13px;}
+  .domain-link:hover{color:var(--accent);}
+
+  .description{color:var(--text-dim);font-size:15px;max-width:640px;}
+
+  .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:auto;}
+  .btn{border:none;border-radius:10px;padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:var(--accent-hover);}
+  .btn-secondary{background:var(--card-soft);color:var(--text);border:1px solid var(--border);}
+  .btn-secondary:hover{border-color:var(--text-dimmer);}
+  .btn-secondary.active{background:var(--accent-soft);border-color:var(--accent);color:#cabfff;}
+
+  .hero-preview{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;display:flex;align-items:center;justify-content:center;aspect-ratio:16/11;}
+  .hero-preview img{width:100%;height:100%;object-fit:cover;}
+
+  .stat-strip{margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);display:grid;grid-template-columns:repeat(4,1fr);}
+  .stat{padding:18px 22px;border-right:1px solid var(--border);}
+  .stat:last-child{border-right:none;}
+  .stat-label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dimmer);margin-bottom:6px;}
+  .stat-value{font-size:15px;font-weight:600;}
+  .stat-value a{color:var(--accent);}
+  .stat-value a:hover{text-decoration:underline;}
+
+  .quicknav{display:flex;gap:6px;margin-top:20px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .quicknav::-webkit-scrollbar{display:none;}
+  .quicknav a{flex-shrink:0;font-size:13.5px;font-weight:600;color:var(--text-dim);padding:8px 14px;border:1px solid var(--border);border-radius:20px;background:var(--card);}
+  .quicknav a:hover{color:var(--text);border-color:var(--text-dimmer);}
+
+  .section{margin-top:40px;}
+  .section-title{font-size:19px;font-weight:700;margin:0 0 16px;letter-spacing:-.01em;}
+
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .info-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;}
+  .info-card h3{margin:0 0 14px;font-size:15px;font-weight:600;}
+  .info-card ul{margin:0;padding:0;list-style:none;}
+  .info-card li{display:flex;gap:10px;align-items:flex-start;padding:7px 0;font-size:14px;color:var(--text-dim);}
+  .icon-dot{width:7px;height:7px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+  .dot-feature{background:var(--accent);}
+  .dot-pro{background:var(--green);}
+  .dot-con{background:var(--rose);}
+
+  .meta-footer{margin-top:32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding-top:24px;border-top:1px solid var(--border-soft);}
+  .published-by{font-size:14px;color:var(--text-dim);}
+  .published-by b{color:var(--text);}
+  .tags{display:flex;gap:8px;flex-wrap:wrap;}
+  .tag{background:var(--card-soft);border:1px solid var(--border);color:var(--text-dim);font-size:12.5px;padding:5px 12px;border-radius:20px;}
+
+  .faq-item{border:1px solid var(--border);border-radius:var(--radius);background:var(--card);margin-bottom:10px;overflow:hidden;}
+  .faq-q{width:100%;text-align:left;background:none;border:none;color:var(--text);font-size:15px;font-weight:600;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+  .faq-q .chev{color:var(--text-dimmer);transition:transform .2s ease;flex-shrink:0;margin-left:12px;}
+  .faq-item.open .chev{transform:rotate(180deg);}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .25s ease;color:var(--text-dim);font-size:14px;padding:0 20px;}
+  .faq-item.open .faq-a{padding-bottom:18px;}
+
+  @media (max-width:900px){
+    .hero{grid-template-columns:1fr;}
+    .hero-preview{order:-1;}
+    .info-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:600px){
+    .wrap{padding:0 16px 48px;}
+    .crumbs{padding:52px 0 14px;font-size:12.5px;}
+    .section{margin-top:28px;}
+
+    .hero-main{padding:18px;gap:14px;}
+    .hero-top{gap:12px;}
+    .tool-icon{width:48px;height:48px;border-radius:12px;font-size:20px;}
+    .tool-heading h1{font-size:21px;margin-bottom:8px;}
+    .meta-row{font-size:13px;gap:8px 10px;}
+    .description{font-size:14px;}
+
+    .cta-row{flex-direction:column;}
+    .cta-row .btn{width:100%;justify-content:center;}
+
+    .stat-strip{grid-template-columns:repeat(2,1fr);margin-top:14px;}
+    .stat{padding:14px 16px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+    .stat:nth-child(2n){border-right:none;}
+    .stat:nth-last-child(-n+2){border-bottom:none;}
+    .stat-value{font-size:14px;word-break:break-word;}
+
+    .quicknav{margin-top:16px;}
+    .quicknav a{font-size:13px;padding:7px 12px;}
+
+    .info-card{padding:16px 18px;}
+    .info-card li{font-size:13.5px;}
+
+    .meta-footer{flex-direction:column;align-items:flex-start;gap:12px;margin-top:24px;padding-top:20px;}
+
+    .faq-q{font-size:14px;padding:14px 16px;}
+    .faq-a{font-size:13.5px;padding:0 16px;}
+    .faq-item.open .faq-a{padding-bottom:16px;}
+
+    .sticky-bar{padding:8px 16px;}
+    .sticky-bar .left{font-size:13px;gap:8px;}
+    .sticky-bar .left .mini-icon{width:22px;height:22px;font-size:11px;}
+    .sticky-bar .btn{padding:7px 12px;font-size:12.5px;}
+  }
+  @media (max-width:380px){
+    .tool-heading h1{font-size:19px;}
+    .meta-row{font-size:12px;}
+    .stat-strip{grid-template-columns:1fr;}
+    .stat{border-right:none !important;}
+    .stat:not(:last-child){border-bottom:1px solid var(--border);}
+    .sticky-bar .left span.name{max-width:110px;}
+    .sticky-bar .btn .full{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+<div class="sticky-bar" id="stickyBar">
+  <div class="left"><div class="mini-icon" id="sticky-icon"></div><span class="name" id="sticky-name"></span></div>
+  <a class="btn btn-primary" id="sticky-visit" target="_blank" rel="noopener">Visit tool →</a>
+</div>
+
+<main class="wrap" id="main-content">
+
+  <nav class="crumbs" id="crumbs" aria-label="Breadcrumb"></nav>
+
+  <section class="hero" aria-label="Tool overview" id="hero">
+    <div class="hero-main">
+      <div class="hero-top">
+        <div class="tool-icon" id="tool-icon" aria-hidden="true"></div>
+        <div class="tool-heading">
+          <h1 id="tool-name"></h1>
+          <div class="meta-row" id="meta-row"></div>
+        </div>
+      </div>
+      <p class="description" id="tool-desc"></p>
+      <div class="cta-row">
+        <a class="btn btn-primary" id="btn-visit" target="_blank" rel="noopener">Visit tool →</a>
+        <button class="btn btn-secondary" id="btn-upvote" aria-pressed="false"></button>
+      </div>
+    </div>
+    <div class="hero-preview">
+      <img id="tool-preview" alt="">
+    </div>
+  </section>
+
+  <div class="stat-strip" id="stat-strip" aria-label="Quick facts"></div>
+
+  <nav class="quicknav" aria-label="Jump to section">
+    <a href="#features">Features</a>
+    <a href="#proscons">Pros &amp; cons</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+
+  <section class="section" id="features">
+    <h2 class="section-title">What to know</h2>
+    <div class="info-grid" id="info-grid"></div>
+  </section>
+
+  <div class="meta-footer" id="proscons">
+    <div class="published-by" id="published-by"></div>
+    <div class="tags" id="tags"></div>
+  </div>
+
+  <section class="section" id="faq">
+    <h2 class="section-title" id="faq-title"></h2>
+    <div id="faq-list"></div>
+  </section>
+
+
+</main>
+
+<script>
+const TOOL_DATA = {
+  breadcrumb: [
+    { label: "Home", href: "#" },
+    { label: "research", href: "#" },
+    { label: "Claude", href: null }
+  ],
+  name: "Claude",
+  iconEmoji: "✳️",
+  rating: 9.9,
+  reviewCount: 1150,
+  upvotes: 1996,
+  pricingBadge: "Freemium",
+  description: "Claude is Anthropic's AI assistant for individuals and teams, combining conversational reasoning with artifacts, file analysis, web search, integrations, and creative work.",
+  visitUrl: "https://claude.ai",
+  domain: "claude.ai",
+  previewImage: "https://images.unsplash.com/photo-1655720828018-edd2daec9349?q=80&w=800&auto=format&fit=crop",
+  category: "Research",
+  verification: "Community listing",
+  lastUpdated: "Jun 2026",
+  features: ["Chat assistant", "Artifacts", "File analysis", "Web search", "Integrations"],
+  bestFor: ["Writing", "Analysis", "Coding", "Research"],
+  pros: [
+    "Exceptional reasoning, coding, and nuanced writing capabilities",
+    "Industry-leading context window for analyzing massive documents",
+    "Strong emphasis on AI safety through Constitutional AI"
+  ],
+  cons: [
+    "Tendency to over-refuse prompts due to strict safety filters",
+    "Smaller ecosystem of third-party plugins compared to competitors",
+    "Variable availability across different global regions"
+  ],
+  publisher: "Anthropic",
+  tags: ["research", "code assistant", "ai chatbots"],
+  faqs: [
+    { q: "What is Claude used for?", a: "Claude is commonly used for writing, analysis, and coding." },
+    { q: "Is Claude free?", a: "Claude offers a freemium pricing model." },
+    { q: "How do I compare Claude with alternatives?", a: "Review pricing, feature coverage, ratings, and similar tools on this page before visiting the product site." }
+  ]
+};
+
+function starString(rating){
+  const full = Math.round(rating/2);
+  return '★'.repeat(full) + '☆'.repeat(5-full);
+}
+
+function ratingMarkup(rating, count){
+  if(!rating || rating <= 0){
+    return `<span class="rating unrated">☆☆☆☆☆ <span class="count">not yet rated</span></span>`;
+  }
+  return `<span class="rating">${starString(rating)} ${rating} <span class="count">(${count})</span></span>`;
+}
+
+function renderCrumbs(data){
+  document.getElementById('crumbs').innerHTML = data.breadcrumb.map(b =>
+    b.href ? `<a href="${b.href}">${b.label}</a>` : `<span style="color:var(--text)">${b.label}</span>`
+  ).join(' / ');
+}
+
+function renderHero(data){
+  document.getElementById('tool-icon').textContent = data.iconEmoji;
+  document.getElementById('tool-name').textContent = data.name;
+  document.getElementById('tool-desc').textContent = data.description;
+  document.getElementById('tool-preview').src = data.previewImage;
+  document.getElementById('tool-preview').alt = data.name + ' product preview';
+
+  const visitBtn = document.getElementById('btn-visit');
+  visitBtn.href = data.visitUrl;
+
+  const upvoteBtn = document.getElementById('btn-upvote');
+  let upvotes = data.upvotes;
+  let upvoted = false;
+  const setUpvoteLabel = () => upvoteBtn.innerHTML = `${upvoted ? '↑' : '↑'} ${upvoted ? 'Upvoted' : 'Upvote'} (${upvotes.toLocaleString()})`;
+  setUpvoteLabel();
+  upvoteBtn.addEventListener('click', () => {
+    upvoted = !upvoted;
+    upvotes += upvoted ? 1 : -1;
+    upvoteBtn.classList.toggle('active', upvoted);
+    upvoteBtn.setAttribute('aria-pressed', String(upvoted));
+    setUpvoteLabel();
+  });
+
+  document.getElementById('meta-row').innerHTML = `
+    ${ratingMarkup(data.rating, data.reviewCount)}
+    <span class="upvotes">↑ ${data.upvotes.toLocaleString()} upvotes</span>
+    <span class="badge"><span class="dot"></span>${data.pricingBadge}</span>
+    <a class="domain-link" href="${data.visitUrl}" target="_blank" rel="noopener">🔗 ${data.domain}</a>
+  `;
+
+  document.getElementById('sticky-icon').textContent = data.iconEmoji;
+  document.getElementById('sticky-name').textContent = data.name;
+  document.getElementById('sticky-visit').href = data.visitUrl;
+  document.getElementById('sticky-visit').innerHTML = 'Visit<span class="full"> tool</span> →';
+}
+
+function renderStats(data){
+  const stats = [
+    { label: 'Category', value: data.category },
+    { label: 'Website', value: `<a href="${data.visitUrl}" target="_blank" rel="noopener">${data.domain}</a>` },
+    { label: 'Verification', value: data.verification },
+    { label: 'Last updated', value: data.lastUpdated }
+  ];
+  document.getElementById('stat-strip').innerHTML = stats.map(s => `
+    <div class="stat">
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-value">${s.value}</div>
+    </div>
+  `).join('');
+}
+
+function listCard(id, title, items, dotClass){
+  return `
+    <div class="info-card" id="${id}">
+      <h3>${title}</h3>
+      <ul>
+        ${items.map(i => `<li><span class="icon-dot ${dotClass}" aria-hidden="true"></span>${i}</li>`).join('')}
+      </ul>
+    </div>
+  `;
+}
+
+function renderInfoGrid(data){
+  document.getElementById('info-grid').innerHTML =
+    listCard('card-features', 'Key features', data.features, 'dot-feature') +
+    listCard('card-bestfor', 'Best for', data.bestFor, 'dot-feature') +
+    listCard('card-pros', 'Pros', data.pros, 'dot-pro') +
+    listCard('card-cons', 'Cons', data.cons, 'dot-con');
+}
+
+function renderMetaFooter(data){
+  document.getElementById('published-by').innerHTML = `Published by <b>${data.publisher}</b>`;
+  document.getElementById('tags').innerHTML = data.tags.map(t => `<span class="tag">${t}</span>`).join('');
+}
+
+function renderFaq(data){
+  document.getElementById('faq-title').textContent = data.name + ' FAQ';
+  document.getElementById('faq-list').innerHTML = data.faqs.map((f, i) => `
+    <div class="faq-item ${i === 0 ? 'open' : ''}" id="faq-${i}">
+      <button class="faq-q" onclick="toggleFaq(${i})" aria-expanded="${i === 0}" aria-controls="faq-a-${i}">
+        ${f.q}
+        <span class="chev" aria-hidden="true">⌄</span>
+      </button>
+      <div class="faq-a" id="faq-a-${i}">${f.a}</div>
+    </div>
+  `).join('');
+  data.faqs.forEach((_, i) => {
+    if(i === 0){
+      const answer = document.querySelector(`#faq-${i} .faq-a`);
+      requestAnimationFrame(() => answer.style.maxHeight = answer.scrollHeight + 'px');
+    }
+  });
+}
+
+window.toggleFaq = function(i){
+  const item = document.getElementById('faq-'+i);
+  const btn = item.querySelector('.faq-q');
+  const answer = item.querySelector('.faq-a');
+  const isOpen = item.classList.contains('open');
+  item.classList.toggle('open');
+  btn.setAttribute('aria-expanded', String(!isOpen));
+  answer.style.maxHeight = isOpen ? '0px' : answer.scrollHeight + 'px';
+};
+
+function initStickyBar(){
+  const hero = document.getElementById('hero');
+  const bar = document.getElementById('stickyBar');
+  const observer = new IntersectionObserver(([entry]) => {
+    bar.classList.toggle('show', !entry.isIntersecting);
+  }, { threshold: 0 });
+  observer.observe(hero);
+}
+
+function render(data){
+  renderCrumbs(data);
+  renderHero(data);
+  renderStats(data);
+  renderInfoGrid(data);
+  renderMetaFooter(data);
+  renderFaq(data);
+  initStickyBar();
+}
+
+render(TOOL_DATA);
+</script>
+
+</body>
+</html>

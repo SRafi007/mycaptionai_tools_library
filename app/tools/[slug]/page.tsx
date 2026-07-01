@@ -12,6 +12,8 @@ import RatingStars from "@/components/rating-stars";
 import ToolCard from "@/components/tool-card";
 import BackToTop from "@/components/back-to-top";
 import ToolDetailVisual from "@/components/tool-detail-visual";
+import StickyToolBar from "@/components/sticky-tool-bar";
+import ToolPreviewImage from "@/components/tool-preview-image";
 import Link from "next/link";
 import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH, localCanonicalUrl } from "@/lib/seo";
 
@@ -104,7 +106,7 @@ export default async function ToolDetailPage({ params }: PageProps) {
     const summary = tool.short_description || tool.description || `${tool.name} overview and feature breakdown.`;
     const canonical = localCanonicalUrl(tool.canonical_url, `/tools/${tool.slug}`);
     const socialImage = tool.image_url || tool.icon_url || undefined;
-    const visitUrl = tool.affiliate_url || tool.url;
+    const visitUrl = tool.affiliate_url || tool.url || undefined;
     const visitRel = tool.affiliate_url ? "sponsored noopener noreferrer" : "noopener noreferrer";
     const faq = [
         {
@@ -178,6 +180,21 @@ export default async function ToolDetailPage({ params }: PageProps) {
         })),
     };
 
+    const lastUpdatedStr = tool.updated_at
+        ? new Date(tool.updated_at).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+        : "Recent";
+
+    function getInitials(toolName: string): string {
+        const parts = toolName
+            .split(/\s+/)
+            .map((part) => part.trim())
+            .filter(Boolean);
+
+        if (parts.length === 0) return "?";
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+
     return (
         <>
             <script
@@ -188,6 +205,14 @@ export default async function ToolDetailPage({ params }: PageProps) {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
             />
+
+            <StickyToolBar
+                name={tool.name}
+                iconUrl={tool.icon_url}
+                visitUrl={visitUrl}
+                visitRel={visitRel}
+            />
+
             <div className="container-main">
                 <Breadcrumbs
                     items={[
@@ -199,184 +224,218 @@ export default async function ToolDetailPage({ params }: PageProps) {
                     currentPath={`/tools/${tool.slug}`}
                 />
 
-                <div className="tool-detail-layout">
-                    <div className="tool-detail-content">
-                        <div className="tool-detail-header">
-                            <div className="tool-detail-identity">
-                                <ToolDetailVisual
-                                    variant="icon"
-                                    name={tool.name}
-                                    imageUrl={tool.image_url}
-                                    iconUrl={tool.icon_url}
-                                />
-                                <div>
-                                    <h1 className="tool-detail-name">{tool.name}</h1>
-                                    <div className="tool-detail-meta">
-                                        {tool.rating_score > 0 && (
-                                            <RatingStars score={tool.rating_score} count={tool.rating_count} />
-                                        )}
-                                        <span className="tool-card-upvotes" style={{ fontSize: "13px" }}>
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                <path d="M12 19V5M5 12l7-7 7 7" />
-                                            </svg>
-                                            {tool.upvotes || 0} upvotes
-                                        </span>
-                                        {tool.pricing_type && (
-                                            <span className={`badge badge-${tool.pricing_type === "Free" ? "free" : tool.pricing_type === "Paid" ? "paid" : "freemium"}`}>
-                                                {tool.pricing_type}
-                                            </span>
-                                        )}
-                                        {tool.is_verified && (
-                                            <span className="tool-card-verified" style={{ fontSize: "13px" }}>
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                                                </svg>
-                                                Verified
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
+                <section className="tool-hero" id="tool-hero-section" aria-label="Tool overview">
+                    <div className="tool-hero-main">
+                        <div className="tool-hero-top">
+                            <div className="tool-hero-identity-icon" aria-hidden="true">
+                                {tool.icon_url ? (
+                                    <img
+                                        src={tool.icon_url}
+                                        alt={`${tool.name} logo`}
+                                        className="w-full h-full object-cover rounded-xs"
+                                    />
+                                ) : (
+                                    <span style={{ color: "var(--brand)", fontWeight: "bold" }}>
+                                        {getInitials(tool.name)}
+                                    </span>
+                                )}
                             </div>
-
-                            <div className="tool-detail-actions">
-                                <form action={upvoteTool}>
-                                    <button type="submit" className="btn-outline btn-sm tool-upvote-btn tool-detail-action-btn">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <div className="tool-hero-heading">
+                                <h1>{tool.name}</h1>
+                                <div className="tool-meta-row">
+                                    {tool.rating_score > 0 && (
+                                        <span className="tool-meta-item" style={{ color: "var(--highlight-accent)" }}>
+                                            <RatingStars score={tool.rating_score} count={tool.rating_count} />
+                                        </span>
+                                    )}
+                                    <span className="tool-meta-item text-muted">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: "2px" }}>
                                             <path d="M12 19V5M5 12l7-7 7 7" />
                                         </svg>
-                                        Upvote ({tool.upvotes || 0})
-                                    </button>
-                                </form>
-                                {visitUrl && (
-                                    <a href={visitUrl} target="_blank" rel={visitRel} className="btn-primary btn-sm tool-detail-action-btn">
-                                        Visit Tool -&gt;
-                                    </a>
-                                )}
+                                        {tool.upvotes || 0} upvotes
+                                    </span>
+                                    {tool.pricing_type && (
+                                        <span className={`badge badge-${tool.pricing_type === "Free" ? "free" : tool.pricing_type === "Paid" ? "paid" : "freemium"}`}>
+                                            {tool.pricing_type}
+                                        </span>
+                                    )}
+                                    {tool.is_verified && (
+                                        <span className="tool-meta-item" style={{ color: "var(--highlight-accent)", fontSize: "13px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                            </svg>
+                                            Verified
+                                        </span>
+                                    )}
+                                    {visitUrl && (
+                                        <a href={visitUrl} target="_blank" rel={visitRel} className="tool-meta-item text-muted" style={{ textDecoration: "none" }}>
+                                            🔗 {tool.url ? new URL(tool.url).hostname : "website"}
+                                        </a>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
-                        <div className="tool-detail-long-desc">
+                        <div className="tool-hero-desc">
                             {longDescription
                                 .split(/\n+/)
                                 .filter((paragraph) => paragraph.trim().length > 0)
                                 .map((paragraph, index) => (
-                                    <p key={`${tool.id}-desc-${index}`}>{paragraph.trim()}</p>
+                                    <p key={`${tool.id}-desc-${index}`} style={{ margin: "0 0 12px" }}>
+                                        {paragraph.trim()}
+                                    </p>
                                 ))}
                         </div>
 
-                        <section className="card" style={{ padding: "18px", marginTop: "20px" }}>
-                            <h2 className="section-title" style={{ fontSize: "18px", marginBottom: "10px" }}>Tool Snapshot</h2>
-                            <p style={{ margin: "0 0 14px", fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.8 }}>
-                                {summary}
-                            </p>
-                            <div style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
-                                <div className="card" style={{ padding: "14px" }}>
-                                    <p style={{ margin: "0 0 6px", fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Pricing</p>
-                                    <p style={{ margin: 0, fontSize: "15px", color: "var(--text-primary)", fontWeight: 600 }}>{pricingLabel}</p>
-                                </div>
-                                <div className="card" style={{ padding: "14px" }}>
-                                    <p style={{ margin: "0 0 6px", fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Primary category</p>
-                                    <p style={{ margin: 0, fontSize: "15px", color: "var(--text-primary)", fontWeight: 600 }}>{primaryCategory?.name || "AI Tool"}</p>
-                                </div>
-                                <div className="card" style={{ padding: "14px" }}>
-                                    <p style={{ margin: "0 0 6px", fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Publisher</p>
-                                    <p style={{ margin: 0, fontSize: "15px", color: "var(--text-primary)", fontWeight: 600 }}>{tool.publisher || "Not listed"}</p>
-                                </div>
-                                <div className="card" style={{ padding: "14px" }}>
-                                    <p style={{ margin: "0 0 6px", fontSize: "12px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Verification</p>
-                                    <p style={{ margin: 0, fontSize: "15px", color: "var(--text-primary)", fontWeight: 600 }}>{tool.is_verified ? "Verified listing" : "Community listing"}</p>
-                                </div>
-                            </div>
-                        </section>
-
-                        {(featureList.length > 0 || useCaseList.length > 0 || pros.length > 0 || cons.length > 0) && (
-                            <section className="section-padding section-border-t" style={{ marginTop: "28px", paddingTop: "24px" }}>
-                                <div className="section-header">
-                                    <h2 className="section-title">What To Know About {tool.name}</h2>
-                                </div>
-                                <div style={{ display: "grid", gap: "16px", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
-                                    {featureList.length > 0 && (
-                                        <article className="card" style={{ padding: "16px" }}>
-                                            <h3 style={{ margin: "0 0 10px", fontSize: "16px", color: "var(--text-primary)" }}>Key features</h3>
-                                            <ul style={{ margin: 0, paddingLeft: "18px", display: "grid", gap: "8px" }}>
-                                                {featureList.map((feature) => (
-                                                    <li key={feature} style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>{feature}</li>
-                                                ))}
-                                            </ul>
-                                        </article>
-                                    )}
-                                    {useCaseList.length > 0 && (
-                                        <article className="card" style={{ padding: "16px" }}>
-                                            <h3 style={{ margin: "0 0 10px", fontSize: "16px", color: "var(--text-primary)" }}>Best for</h3>
-                                            <ul style={{ margin: 0, paddingLeft: "18px", display: "grid", gap: "8px" }}>
-                                                {useCaseList.map((useCase) => (
-                                                    <li key={useCase} style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>{useCase}</li>
-                                                ))}
-                                            </ul>
-                                        </article>
-                                    )}
-                                    {pros.length > 0 && (
-                                        <article className="card" style={{ padding: "16px" }}>
-                                            <h3 style={{ margin: "0 0 10px", fontSize: "16px", color: "var(--text-primary)" }}>Pros</h3>
-                                            <ul style={{ margin: 0, paddingLeft: "18px", display: "grid", gap: "8px" }}>
-                                                {pros.map((pro) => (
-                                                    <li key={pro} style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>{pro}</li>
-                                                ))}
-                                            </ul>
-                                        </article>
-                                    )}
-                                    {cons.length > 0 && (
-                                        <article className="card" style={{ padding: "16px" }}>
-                                            <h3 style={{ margin: "0 0 10px", fontSize: "16px", color: "var(--text-primary)" }}>Cons</h3>
-                                            <ul style={{ margin: 0, paddingLeft: "18px", display: "grid", gap: "8px" }}>
-                                                {cons.map((con) => (
-                                                    <li key={con} style={{ color: "var(--text-secondary)", lineHeight: 1.7 }}>{con}</li>
-                                                ))}
-                                            </ul>
-                                        </article>
-                                    )}
-                                </div>
-                            </section>
-                        )}
-
-                        {tool.publisher && (
-                            <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: "0 0 16px" }}>
-                                Published by <strong style={{ color: "var(--text-secondary)" }}>{tool.publisher}</strong>
-                            </p>
-                        )}
-
-                        {tool.categories.length > 0 && (
-                            <div className="tool-detail-categories">
-                                {tool.categories.map((cat) => (
-                                    <Link key={cat.id} href={`/category/${cat.slug}`} className="tool-detail-cat-link">
-                                        {cat.name}
-                                    </Link>
-                                ))}
-                            </div>
-                        )}
+                        <div className="tool-cta-row">
+                            {visitUrl && (
+                                <a href={visitUrl} target="_blank" rel={visitRel} className="btn-primary" style={{ padding: "11px 20px", fontSize: "14px", fontWeight: 600 }}>
+                                    Visit Tool →
+                                </a>
+                            )}
+                            <form action={upvoteTool} style={{ display: "inline-block" }}>
+                                <button type="submit" className="btn-secondary" style={{ padding: "11px 20px", fontSize: "14px", fontWeight: 600 }}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: "4px" }}>
+                                        <path d="M12 19V5M5 12l7-7 7 7" />
+                                    </svg>
+                                    Upvote ({tool.upvotes || 0})
+                                </button>
+                            </form>
+                        </div>
                     </div>
 
-                    <ToolDetailVisual
-                        variant="banner"
-                        name={tool.name}
-                        imageUrl={tool.image_url}
-                        iconUrl={tool.icon_url}
-                        pricingLabel={pricingLabel}
-                        category={primaryCategory?.name || "AI Tool"}
-                        isVerified={tool.is_verified}
-                    />
+                    <div className="tool-hero-preview">
+                        <ToolPreviewImage name={tool.name} imageUrl={tool.image_url} />
+                    </div>
+                </section>
+
+                <div className="tool-stat-strip" aria-label="Quick facts">
+                    <div className="tool-stat">
+                        <div className="tool-stat-label">Category</div>
+                        <div className="tool-stat-value">{primaryCategory?.name || "AI Tool"}</div>
+                    </div>
+                    <div className="tool-stat">
+                        <div className="tool-stat-label">Website</div>
+                        <div className="tool-stat-value">
+                            {tool.url ? (
+                                <a href={visitUrl} target="_blank" rel={visitRel}>
+                                    {new URL(tool.url).hostname}
+                                </a>
+                            ) : (
+                                "Not listed"
+                            )}
+                        </div>
+                    </div>
+                    <div className="tool-stat">
+                        <div className="tool-stat-label">Verification</div>
+                        <div className="tool-stat-value">
+                            {tool.is_verified ? "Verified listing" : "Community listing"}
+                        </div>
+                    </div>
+                    <div className="tool-stat">
+                        <div className="tool-stat-label">Last updated</div>
+                        <div className="tool-stat-value">{lastUpdatedStr}</div>
+                    </div>
                 </div>
 
-                <section className="section-padding section-border-t" style={{ marginTop: "28px" }}>
-                    <div className="section-header">
-                        <h2 className="section-title">{tool.name} FAQ</h2>
+                <nav className="tool-quicknav" aria-label="Jump to section">
+                    <a href="#features">Features</a>
+                    <a href="#proscons">Pros &amp; cons</a>
+                    <a href="#faq">FAQ</a>
+                </nav>
+
+                {(featureList.length > 0 || useCaseList.length > 0 || pros.length > 0 || cons.length > 0) && (
+                    <section className="section" id="features">
+                        <h2 className="section-title">What to know</h2>
+                        <div className="tool-info-grid">
+                            {featureList.length > 0 && (
+                                <div className="tool-info-card" id="card-features">
+                                    <h3>Key features</h3>
+                                    <ul>
+                                        {featureList.map((item) => (
+                                            <li key={item}>
+                                                <span className="tool-icon-dot tool-dot-feature" aria-hidden="true" />
+                                                {item}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            {useCaseList.length > 0 && (
+                                <div className="tool-info-card" id="card-bestfor">
+                                    <h3>Best for</h3>
+                                    <ul>
+                                        {useCaseList.map((item) => (
+                                            <li key={item}>
+                                                <span className="tool-icon-dot tool-dot-feature" aria-hidden="true" />
+                                                {item}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            {pros.length > 0 && (
+                                <div className="tool-info-card" id="card-pros">
+                                    <h3>Pros</h3>
+                                    <ul>
+                                        {pros.map((item) => (
+                                            <li key={item}>
+                                                <span className="tool-icon-dot tool-dot-pro" aria-hidden="true" />
+                                                {item}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            {cons.length > 0 && (
+                                <div className="tool-info-card" id="card-cons">
+                                    <h3>Cons</h3>
+                                    <ul>
+                                        {cons.map((item) => (
+                                            <li key={item}>
+                                                <span className="tool-icon-dot tool-dot-con" aria-hidden="true" />
+                                                {item}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+                )}
+
+                <div className="meta-footer" id="proscons">
+                    <div className="published-by">
+                        {tool.publisher ? (
+                            <>
+                                Published by <strong>{tool.publisher}</strong>
+                            </>
+                        ) : (
+                            "Community listing"
+                        )}
                     </div>
-                    <div style={{ display: "grid", gap: "12px" }}>
-                        {faq.map((item) => (
-                            <article key={item.q} className="card" style={{ padding: "14px 16px" }}>
-                                <h3 style={{ margin: "0 0 6px", fontSize: "15px", color: "var(--text-primary)" }}>{item.q}</h3>
-                                <p style={{ margin: 0, fontSize: "14px", color: "var(--text-secondary)", lineHeight: 1.7 }}>{item.a}</p>
-                            </article>
+                    {tool.categories.length > 0 && (
+                        <div className="tags">
+                            {tool.categories.map((cat) => (
+                                <Link key={cat.id} href={`/category/${cat.slug}`} className="tag">
+                                    {cat.name}
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                <section className="section" id="faq">
+                    <h2 className="section-title">{tool.name} FAQ</h2>
+                    <div style={{ display: "grid", gap: "10px" }}>
+                        {faq.map((item, index) => (
+                            <details key={item.q} className="tool-faq-item" open={index === 0}>
+                                <summary className="tool-faq-q">
+                                    <span>{item.q}</span>
+                                    <span className="chev" aria-hidden="true">⌄</span>
+                                </summary>
+                                <div className="tool-faq-a">{item.a}</div>
+                            </details>
                         ))}
                     </div>
                 </section>
