@@ -11,16 +11,21 @@
     "ecosystems:seed": "node scripts/seedEcosystemTools.mjs",
     "playbooks:seed": "node scripts/seedPlaybooks.mjs",
     "landscape:sync": "node scripts/syncLandscapeTools.cjs",
-    "seo:qa": "node scripts/seoQaCheck.mjs"
+    "seo:qa": "node scripts/seoQaCheck.mjs",
+    "sync:ai-resources": "tsx scripts/ai-resources/sync-ai-resources.ts",
+    "sync:ai-news": "tsx scripts/ai-resources/sync-ai-news.ts",
+    "sync:github-repos": "tsx scripts/ai-resources/sync-github-repos.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.95.3",
-    "dotenv": "^17.3.1",
+    "dotenv": "^17.4.2",
     "lucide-react": "^1.18.0",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "rss-parser": "^3.13.0",
+    "slugify": "^1.6.9"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -31,6 +36,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }
