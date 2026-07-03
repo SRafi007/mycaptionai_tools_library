@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Resource Hub</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg:#0a0b0f;
+  --surface:#141520;
+  --surface-hover:#191a27;
+  --border:rgba(255,255,255,0.07);
+  --border-hover:rgba(255,255,255,0.14);
+  --text:#f2f2f5;
+  --muted:#8d8fa0;
+  --muted-dim:#5c5e6d;
+  --purple:#a78bfa;
+  --purple-dim:rgba(167,139,250,0.14);
+  --blue:#818cf8;
+  --gold:#fbbf24;
+  --green:#34d399;
+  --radius:14px;
+}
+
+*{box-sizing:border-box; margin:0; padding:0;}
+
+body{
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(129,140,248,0.10), transparent),
+    radial-gradient(ellipse 700px 500px at 90% 10%, rgba(167,139,250,0.08), transparent),
+    var(--bg);
+  color:var(--text);
+  font-family:'Inter', sans-serif;
+  min-height:100vh;
+  padding:56px 40px 80px;
+}
+
+.wrap{ max-width:1240px; margin:0 auto; }
+
+/* ---------- Header ---------- */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:24px;
+  margin-bottom:52px;
+  opacity:0;
+  animation: rise 0.6s ease forwards;
+}
+
+.eyebrow{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:12px;
+  letter-spacing:0.12em;
+  color:var(--purple);
+  text-transform:uppercase;
+  margin-bottom:14px;
+}
+
+.eyebrow .dot{
+  width:6px; height:6px; border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 0 0 rgba(52,211,153,0.6);
+  animation:pulse-dot 2s infinite;
+}
+
+h1{
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  font-size:38px;
+  letter-spacing:-0.02em;
+  margin-bottom:10px;
+}
+
+header p{
+  color:var(--muted);
+  font-size:15px;
+  max-width:480px;
+}
+
+.view-all{
+  color:var(--text);
+  text-decoration:none;
+  font-size:14px;
+  font-weight:500;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:10px 18px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:var(--surface);
+  white-space:nowrap;
+  transition:border-color .25s ease, transform .25s ease, background .25s ease;
+}
+.view-all:hover{
+  border-color:var(--border-hover);
+  background:var(--surface-hover);
+  transform:translateX(2px);
+}
+.view-all svg{ transition:transform .25s ease; }
+.view-all:hover svg{ transform:translateX(3px); }
+
+/* ---------- Section layout ---------- */
+.grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.55fr);
+  gap:40px;
+  align-items:start;
+}
+
+.section-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:20px;
+  padding-bottom:16px;
+  border-bottom:1px solid var(--border);
+}
+.section-head .icon{
+  width:26px; height:26px;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--purple);
+}
+.section-head h2{
+  font-family:'Space Grotesk', sans-serif;
+  font-size:17px;
+  font-weight:600;
+  letter-spacing:-0.01em;
+}
+.section-head .count{
+  margin-left:auto;
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px;
+  color:var(--muted-dim);
+  border:1px solid var(--border);
+  padding:3px 8px;
+  border-radius:999px;
+}
+
+/* ---------- News cards (rotating stack) ---------- */
+.news-stack{
+  position:relative;
+  height:300px;
+  opacity:0;
+  animation:rise 0.6s cubic-bezier(.22,1,.36,1) forwards;
+}
+
+.news-card{
+  position:absolute;
+  top:0; left:0; right:0;
+  height:230px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  cursor:default;
+  transition:transform .7s cubic-bezier(.22,1,.36,1), opacity .7s ease, box-shadow .5s ease, border-color .5s ease;
+  will-change:transform, opacity;
+}
+.news-card.is-front{
+  border-color:var(--border-hover);
+  box-shadow:0 20px 40px -22px rgba(129,140,248,0.35);
+}
+
+.news-title-area{
+  position:relative;
+  padding:20px 22px 16px;
+  background:
+    linear-gradient(160deg, rgba(167,139,250,0.09), rgba(129,140,248,0.03) 60%),
+    var(--surface-2);
+  border-bottom:1px solid var(--border);
+  overflow:hidden;
+}
+.news-title-area::after{
+  content:"";
+  position:absolute; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:0.5;
+  mix-blend-mode:overlay;
+  pointer-events:none;
+}
+.news-title-area > *{ position:relative; z-index:1; }
+
+.news-body{
+  padding:16px 22px 20px;
+}
+
+.news-meta{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px;
+  color:var(--muted-dim);
+  margin-bottom:12px;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+}
+.source-badge{
+  color:var(--blue);
+  font-weight:500;
+}
+.time-tag{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.time-tag .dot{
+  width:5px; height:5px; border-radius:50%;
+  background:var(--green);
+}
+.time-tag.old .dot{ background:var(--muted-dim); }
+
+.news-card h3{
+  font-family:'Space Grotesk', sans-serif;
+  font-size:17px;
+  font-weight:600;
+  line-height:1.35;
+  letter-spacing:-0.01em;
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+}
+
+.news-card p{
+  color:var(--muted);
+  font-size:13.5px;
+  line-height:1.55;
+  margin-bottom:16px;
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+}
+
+.read-link{
+  color:var(--purple);
+  text-decoration:none;
+  font-size:13px;
+  font-weight:500;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+}
+.read-link svg{ transition:transform .25s ease; }
+.news-card:hover .read-link svg{ transform:translate(3px,-3px); }
+
+.stack-dots{
+  display:flex;
+  justify-content:center;
+  gap:7px;
+  margin-top:16px;
+}
+.stack-dots button{
+  width:6px; height:6px;
+  border-radius:50%;
+  border:none;
+  background:var(--border-hover);
+  cursor:pointer;
+  padding:0;
+  transition:background .3s ease, width .3s ease;
+}
+.stack-dots button.active{
+  background:var(--purple);
+  width:20px;
+  border-radius:4px;
+}
+
+/* ---------- Repo cards ---------- */
+.repo-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+
+.repo-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  opacity:0;
+  transform:translateY(14px);
+  animation:rise 0.55s cubic-bezier(.22,1,.36,1) forwards;
+  transition:border-color .3s ease, transform .3s ease, box-shadow .3s ease;
+}
+.repo-grid .repo-card:nth-child(1){ animation-delay:.1s; }
+.repo-grid .repo-card:nth-child(2){ animation-delay:.2s; }
+.repo-grid .repo-card:nth-child(3){ animation-delay:.3s; }
+.repo-grid .repo-card:nth-child(4){ animation-delay:.4s; }
+
+.repo-card:hover{
+  transform:translateY(-4px);
+  border-color:var(--card-accent, var(--purple));
+  box-shadow:0 14px 30px -18px var(--card-accent, var(--purple));
+}
+
+.repo-top{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+}
+.repo-icon{
+  width:34px; height:34px;
+  border-radius:9px;
+  background:var(--purple-dim);
+  color:var(--purple);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.repo-name{
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:600;
+  font-size:15px;
+  line-height:1.3;
+  word-break:break-word;
+}
+.repo-name .org{ color:var(--muted); font-weight:400; }
+
+.repo-desc{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.55;
+  flex-grow:1;
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+}
+
+.repo-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.repo-tags span{
+  font-family:'JetBrains Mono', monospace;
+  font-size:10.5px;
+  color:var(--blue);
+  background:rgba(129,140,248,0.09);
+  padding:3px 8px;
+  border-radius:6px;
+}
+
+.repo-stats{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding-top:14px;
+  border-top:1px solid var(--border);
+  font-size:12px;
+  color:var(--muted);
+}
+.repo-stats .stat{
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+.repo-stats .stat svg{ width:13px; height:13px; }
+.stat.star{ color:var(--gold); }
+.stat.fork{ color:var(--muted); }
+
+.lang-dot{
+  width:8px; height:8px; border-radius:50%;
+  background:var(--lang-color, var(--purple));
+  display:inline-block;
+}
+
+.repo-link{
+  margin-left:auto;
+  color:var(--text);
+  text-decoration:none;
+  font-weight:500;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+}
+.repo-link svg{ transition:transform .25s ease; }
+.repo-card:hover .repo-link svg{ transform:translate(2px,-2px); }
+
+/* ---------- Animations ---------- */
+@keyframes rise{
+  from{ opacity:0; transform:translateY(14px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+@keyframes pulse-dot{
+  0%{ box-shadow:0 0 0 0 rgba(52,211,153,0.55); }
+  70%{ box-shadow:0 0 0 7px rgba(52,211,153,0); }
+  100%{ box-shadow:0 0 0 0 rgba(52,211,153,0); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width:980px){
+  .grid{ grid-template-columns:1fr; gap:48px; }
+}
+@media (max-width:640px){
+  body{ padding:40px 18px 60px; }
+  header{ flex-direction:column; align-items:flex-start; gap:16px; }
+  h1{ font-size:28px; }
+  .news-stack{ height:320px; }
+  .news-card{ height:260px; }
+  .repo-grid{ grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="eyebrow"><span class="dot"></span> Live feed</div>
+      <h1>AI Resource Hub</h1>
+      <p>Stay updated with official AI news and trending open-source AI projects.</p>
+    </div>
+    <a class="view-all" href="#">
+      View all resources
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </header>
+
+  <div class="grid">
+
+    <!-- NEWS -->
+    <section>
+      <div class="section-head">
+        <span class="icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>
+        </span>
+        <h2>Latest AI News</h2>
+        <span class="count">03</span>
+      </div>
+
+      <div class="news-stack" id="newsStack">
+        <article class="news-card">
+          <div class="news-title-area">
+            <div class="news-meta">
+              <span class="source-badge">NVIDIA Blog</span>
+              <span class="time-tag"><span class="dot"></span>2d ago</span>
+            </div>
+            <h3>NVIDIA BioNeMo Agent Toolkit Brings Accelerated AI to Life Sciences Researchers in Claude Science</h3>
+          </div>
+          <div class="news-body">
+            <p>Life sciences has entered an era of computational scale, and for more than a decade, NVIDIA has built the full GPU-accelerated computing stack...</p>
+            <a class="read-link" href="#">Read source
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="news-card">
+          <div class="news-title-area">
+            <div class="news-meta">
+              <span class="source-badge">TechCrunch AI</span>
+              <span class="time-tag"><span class="dot"></span>10h ago</span>
+            </div>
+            <h3>Microsoft launches its own AI deployment company with $2.5 billion commitment</h3>
+          </div>
+          <div class="news-body">
+            <p>Microsoft follows Amazon, OpenAI, and Anthropic with its new AI deployment group.</p>
+            <a class="read-link" href="#">Read source
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="news-card">
+          <div class="news-title-area">
+            <div class="news-meta">
+              <span class="source-badge">NVIDIA Blog</span>
+              <span class="time-tag old"><span class="dot"></span>3d ago</span>
+            </div>
+            <h3>Claude Meets Blackwell Ultra: Anthropic's Models Now Run on NVIDIA GB300 in Azure</h3>
+          </div>
+          <div class="news-body">
+            <p>Anthropic's Claude models in Microsoft Foundry — hosted on Microsoft Azure and running on NVIDIA GB300 Blackwell Ultra GPUs — are now...</p>
+            <a class="read-link" href="#">Read source
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+            </a>
+          </div>
+        </article>
+      </div>
+      <div class="stack-dots" id="newsDots"></div>
+    </section>
+
+    <!-- REPOS -->
+    <section>
+      <div class="section-head">
+        <span class="icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.09 3.29 9.4 7.86 10.93.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.11-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.39-5.25 5.67.41.36.78 1.08.78 2.17 0 1.57-.01 2.83-.01 3.22 0 .3.2.66.79.55A10.52 10.52 0 0 0 23.5 12c0-6.35-5.15-11.5-11.5-11.5z"/></svg>
+        </span>
+        <h2>Trending GitHub AI Repos</h2>
+        <span class="count">04</span>
+      </div>
+
+      <div class="repo-grid">
+
+        <article class="repo-card" style="--card-accent:#a78bfa66;">
+          <div class="repo-top">
+            <span class="repo-icon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h9a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 4h-9a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h10z"/></svg>
+            </span>
+            <div class="repo-name"><span class="org">langchain-ai /</span><br>langchain</div>
+          </div>
+          <p class="repo-desc">The agent engineering platform.</p>
+          <div class="repo-tags"><span>#llm</span><span>#rag</span><span>#agents</span></div>
+          <div class="repo-stats">
+            <span class="stat star"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg> <span class="cnt" data-target="140800">0</span></span>
+            <span class="stat fork"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="9" r="2.2"/><path d="M6 8.2V15.8M6 15.8C6 11 10 9 15.8 9"/></svg> <span class="cnt" data-target="23400">0</span></span>
+            <span class="lang-dot" style="--lang-color:#3572A5"></span>
+            <a class="repo-link" href="#">Go
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="repo-card" style="--card-accent:#818cf866;">
+          <div class="repo-top">
+            <span class="repo-icon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h9a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 4h-9a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h10z"/></svg>
+            </span>
+            <div class="repo-name"><span class="org">headroomlabs-ai /</span><br>headroom</div>
+          </div>
+          <p class="repo-desc">Compress tool outputs, logs, files, and RAG chunks before they reach the LLM. 60–95% fewer tokens, same answers.</p>
+          <div class="repo-tags"><span>#mcp</span><span>#rag</span><span>#llm</span></div>
+          <div class="repo-stats">
+            <span class="stat star"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg> <span class="cnt" data-target="55800">0</span></span>
+            <span class="stat fork"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="9" r="2.2"/><path d="M6 8.2V15.8M6 15.8C6 11 10 9 15.8 9"/></svg> <span class="cnt" data-target="4000">0</span></span>
+            <span class="lang-dot" style="--lang-color:#3572A5"></span>
+            <a class="repo-link" href="#">Go
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="repo-card" style="--card-accent:#34d39966;">
+          <div class="repo-top">
+            <span class="repo-icon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h9a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 4h-9a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h10z"/></svg>
+            </span>
+            <div class="repo-name"><span class="org">anthropics /</span><br>claude-code</div>
+          </div>
+          <p class="repo-desc">An agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster.</p>
+          <div class="repo-tags"><span>#cli</span><span>#agents</span><span>#dev-tools</span></div>
+          <div class="repo-stats">
+            <span class="stat star"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg> <span class="cnt" data-target="32100">0</span></span>
+            <span class="stat fork"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="9" r="2.2"/><path d="M6 8.2V15.8M6 15.8C6 11 10 9 15.8 9"/></svg> <span class="cnt" data-target="1900">0</span></span>
+            <span class="lang-dot" style="--lang-color:#f1e05a"></span>
+            <a class="repo-link" href="#">TS
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="repo-card" style="--card-accent:#fbbf2466;">
+          <div class="repo-top">
+            <span class="repo-icon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h9a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 4h-9a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h10z"/></svg>
+            </span>
+            <div class="repo-name"><span class="org">run-llama /</span><br>llama_index</div>
+          </div>
+          <p class="repo-desc">The leading framework for building LLM-powered agents over your data with indexing, retrieval, and workflows.</p>
+          <div class="repo-tags"><span>#rag</span><span>#agents</span><span>#data</span></div>
+          <div class="repo-stats">
+            <span class="stat star"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg> <span class="cnt" data-target="38200">0</span></span>
+            <span class="stat fork"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="9" r="2.2"/><path d="M6 8.2V15.8M6 15.8C6 11 10 9 15.8 9"/></svg> <span class="cnt" data-target="5500">0</span></span>
+            <span class="lang-dot" style="--lang-color:#3572A5"></span>
+            <a class="repo-link" href="#">Go
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg>
+            </a>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+// Count-up animation for repo stats, triggered once elements enter view
+function formatCount(n){
+  if(n >= 1000) return (n/1000).toFixed(1).replace(/\.0$/,'') + 'k';
+  return n.toString();
+}
+
+function animateCount(el){
+  const target = parseInt(el.dataset.target, 10);
+  const duration = 1100;
+  const start = performance.now();
+  function step(now){
+    const p = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = formatCount(Math.floor(target * eased));
+    if(p < 1) requestAnimationFrame(step);
+    else el.textContent = formatCount(target);
+  }
+  requestAnimationFrame(step);
+}
+
+const counters = document.querySelectorAll('.cnt');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      animateCount(entry.target);
+      io.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.4 });
+counters.forEach(c => io.observe(c));
+
+// ---- Rotating news card stack ----
+const stack = document.getElementById('newsStack');
+const cards = Array.from(stack.querySelectorAll('.news-card'));
+const dotsWrap = document.getElementById('newsDots');
+let order = cards.map((_, i) => i); // order[stackPosition] = cardIndex
+
+const posStyles = [
+  { y: 0,  scale: 1,    opacity: 1,    z: 3 },
+  { y: 22, scale: 0.94, opacity: 0.6,  z: 2 },
+  { y: 42, scale: 0.88, opacity: 0.32, z: 1 }
+];
+
+cards.forEach((card, i) => {
+  const dot = document.createElement('button');
+  dot.setAttribute('aria-label', 'Show news item ' + (i + 1));
+  dot.addEventListener('click', () => goTo(i));
+  dotsWrap.appendChild(dot);
+});
+const dots = Array.from(dotsWrap.children);
+
+function render(){
+  order.forEach((cardIndex, pos) => {
+    const card = cards[cardIndex];
+    const s = posStyles[pos];
+    card.style.transform = `translateY(${s.y}px) scale(${s.scale})`;
+    card.style.opacity = s.opacity;
+    card.style.zIndex = s.z;
+    card.classList.toggle('is-front', pos === 0);
+  });
+  dots.forEach((d, i) => d.classList.toggle('active', i === order[0]));
+}
+
+function advance(){
+  order.push(order.shift());
+  render();
+}
+
+function goTo(index){
+  const pos = order.indexOf(index);
+  order = order.slice(pos).concat(order.slice(0, pos));
+  render();
+  resetTimer();
+}
+
+const ROTATE_MS = 3800;
+let timer = setInterval(advance, ROTATE_MS);
+function resetTimer(){
+  clearInterval(timer);
+  timer = setInterval(advance, ROTATE_MS);
+}
+stack.addEventListener('mouseenter', () => clearInterval(timer));
+stack.addEventListener('mouseleave', resetTimer);
+
+render();
+</script>
+</body>
+</html>

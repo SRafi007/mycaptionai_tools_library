@@ -159,9 +159,9 @@ export default async function NewsListingPage(props: PageProps) {
                   <div key={item.id} className="news-listing-card card">
                     <div className="news-card-header">
                       <div className="news-card-badges-row">
-                        <span className="badge news-source-badge-large">{item.source_name}</span>
+                        <span className="prompt-card-tag">{item.source_name}</span>
                         {(item.topic_tags || []).slice(0, 2).map((tag) => (
-                          <span key={tag} className="badge topic-tag-badge">
+                          <span key={tag} className="prompt-card-tag">
                             #{tag}
                           </span>
                         ))}
@@ -173,9 +173,9 @@ export default async function NewsListingPage(props: PageProps) {
                     </div>
 
                     <h2 className="news-card-title">
-                      <a href={item.original_url} target="_blank" rel="noopener noreferrer">
+                      <Link href={`/resources/ai-news/${item.slug}`}>
                         {item.title}
-                      </a>
+                      </Link>
                     </h2>
 
                     {item.excerpt && <p className="news-card-summary">{item.excerpt}</p>}

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Flame, Terminal, Cpu, Award } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { AiNews, GithubRepo } from "@/types/resources";
 
 interface HomePulseStripProps {
@@ -39,40 +39,32 @@ export default function HomePulseStrip({ news, repos }: HomePulseStripProps) {
       title: news[0]?.title || "New model update released",
       source: news[0]?.source_name || "Official",
       timeOrStars: news[0] ? formatRelativeTime(news[0].published_at) : "2h ago",
-      href: news[0]?.original_url || "/resources/ai-news",
-      icon: <Flame size={12} className="text-[#a855f7]" />,
-      badgeColor: "rgba(168, 85, 247, 0.15)",
-      badgeText: "rgba(168, 85, 247, 0.8)",
+      href: news[0] ? `/resources/ai-news/${news[0].slug}` : "/resources/ai-news",
+      badgeClass: "badge-pulse-news",
     },
     {
       type: "Trending GitHub Repo",
       title: repos[0] ? `${repos[0].owner}/${repos[0].repo_name}` : "microsoft/autogen",
       source: repos[0]?.primary_language || "GitHub",
       timeOrStars: repos[0] ? `★ ${formatStars(repos[0].stars_count)}` : "★ 45k",
-      href: repos[0]?.html_url || "/resources/github-repos",
-      icon: <Terminal size={12} className="text-[#eab308]" />,
-      badgeColor: "rgba(234, 179, 8, 0.15)",
-      badgeText: "rgba(234, 179, 8, 0.8)",
+      href: repos[0] ? `/resources/github-repos/${repos[0].slug}` : "/resources/github-repos",
+      badgeClass: "badge-pulse-repo",
     },
     {
       type: "Top AI Update",
       title: news[1]?.title || "New AI inference update announced",
       source: news[1]?.source_name || "NVIDIA",
       timeOrStars: news[1] ? formatRelativeTime(news[1].published_at) : "6h ago",
-      href: news[1]?.original_url || "/resources/ai-news",
-      icon: <Cpu size={12} className="text-[#10b981]" />,
-      badgeColor: "rgba(16, 185, 129, 0.15)",
-      badgeText: "rgba(16, 185, 129, 0.8)",
+      href: news[1] ? `/resources/ai-news/${news[1].slug}` : "/resources/ai-news",
+      badgeClass: "badge-pulse-update",
     },
     {
       type: "Developer Pick",
       title: repos[1] ? `${repos[1].owner}/${repos[1].repo_name}` : "trending vector search repo",
       source: repos[1]?.primary_language || "RAG",
       timeOrStars: repos[1] ? `★ ${formatStars(repos[1].stars_count)}` : "★ 12k",
-      href: repos[1]?.html_url || "/resources/github-repos",
-      icon: <Award size={12} className="text-[#06b6d4]" />,
-      badgeColor: "rgba(6, 182, 212, 0.15)",
-      badgeText: "rgba(6, 182, 212, 0.8)",
+      href: repos[1] ? `/resources/github-repos/${repos[1].slug}` : "/resources/github-repos",
+      badgeClass: "badge-pulse-pick",
     },
   ];
 
@@ -97,22 +89,13 @@ export default function HomePulseStrip({ news, repos }: HomePulseStripProps) {
         {/* Pulse Grid / Horizontal Scroll */}
         <div className="pulse-cards-container">
           {pulseItems.map((item, idx) => (
-            <a
+            <Link
               key={idx}
               href={item.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="pulse-card"
+              className="card pulse-card"
             >
               <div className="pulse-card-top">
-                <span
-                  className="pulse-card-badge"
-                  style={{
-                    backgroundColor: item.badgeColor,
-                    color: item.badgeText,
-                  }}
-                >
-                  {item.icon}
+                <span className={`badge ${item.badgeClass}`}>
                   {item.type}
                 </span>
                 <span className="pulse-card-arrow-box">
@@ -123,10 +106,10 @@ export default function HomePulseStrip({ news, repos }: HomePulseStripProps) {
               <h4 className="pulse-card-title">{item.title}</h4>
 
               <div className="pulse-card-footer">
-                <span className="pulse-card-source">[{item.source}]</span>
-                <span className="pulse-card-time">{item.timeOrStars}</span>
+                <span className="prompt-card-tag">{item.source}</span>
+                <span className="prompt-card-tag">{item.timeOrStars}</span>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

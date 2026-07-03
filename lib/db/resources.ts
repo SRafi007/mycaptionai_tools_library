@@ -101,10 +101,10 @@ export async function getHomepageRepos(): Promise<GithubRepo[]> {
     // Diversity filter: max 1 repo from same owner
     if ((ownerCount[owner] || 0) >= 1) continue;
 
-    // Diversity filter: max 2 repos from same category
+    // Diversity filter: max 4 repos from same category
     let categoryLimitExceeded = false;
     for (const cat of categories) {
-      if ((categoryCount[cat] || 0) >= 2) {
+      if ((categoryCount[cat] || 0) >= 4) {
         categoryLimitExceeded = true;
         break;
       }
@@ -268,4 +268,85 @@ export async function getRepoBySlug(slug: string): Promise<GithubRepo | null> {
     return null;
   }
   return data as GithubRepo | null;
+}
+
+// ─── All News Slugs for generateStaticParams ───
+export async function getAllNewsSlugs(): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("ai_resource_news")
+    .select("slug")
+    .eq("status", "published");
+
+  if (error) {
+    console.error("Error fetching all news slugs:", error);
+    return [];
+  }
+  return (data || []).map((row) => row.slug);
+}
+
+// ─── All Repo Slugs for generateStaticParams ───
+export async function getAllRepoSlugs(): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("ai_resource_github_repos")
+    .select("slug")
+    .eq("status", "published");
+
+  if (error) {
+    console.error("Error fetching all repo slugs:", error);
+    return [];
+  }
+  return (data || []).map((row) => row.slug);
+}
+
+// ─── Related News Articles ───
+export async function getRelatedNews(excludeSlug: string, sourceName: string, limit = 3): Promise<AiNews[]> {
+  const { data, error } = await supabase
+    .from("ai_resource_news")
+    .select("*")
+    .eq("status", "published")
+    .neq("slug", excludeSlug)
+    .eq("source_name", sourceName)
+    .order("published_at", { ascending: false })
+    .limit(limit);
+
+  if (error || !data || data.length === 0) {
+    const { data: fallbackData } = await supabase
+      .from("ai_resource_news")
+      .select("*")
+      .eq("status", "published")
+      .neq("slug", excludeSlug)
+      .order("total_score", { ascending: false })
+      .limit(limit);
+    return (fallbackData as AiNews[]) || [];
+  }
+  return data as AiNews[];
+}
+
+// ─── Related GitHub Repositories ───
+export async function getRelatedRepos(excludeSlug: string, primaryLanguage: string | null, limit = 3): Promise<GithubRepo[]> {
+  let query = supabase
+    .from("ai_resource_github_repos")
+    .select("*")
+    .eq("status", "published")
+    .neq("slug", excludeSlug);
+
+  if (primaryLanguage) {
+    query = query.eq("primary_language", primaryLanguage);
+  }
+
+  const { data, error } = await query
+    .order("stars_count", { ascending: false })
+    .limit(limit);
+
+  if (error || !data || data.length === 0) {
+    const { data: fallbackData } = await supabase
+      .from("ai_resource_github_repos")
+      .select("*")
+      .eq("status", "published")
+      .neq("slug", excludeSlug)
+      .order("stars_count", { ascending: false })
+      .limit(limit);
+    return (fallbackData as GithubRepo[]) || [];
+  }
+  return data as GithubRepo[];
 }

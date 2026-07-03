@@ -168,9 +168,9 @@ export default async function GithubReposListingPage(props: PageProps) {
                         <BookOpen size={13} className="text-[#a855f7]" />
                       </span>
                       <h4 className="repo-card-name">
-                        <a href={repo.html_url} target="_blank" rel="noopener noreferrer">
+                        <Link href={`/resources/github-repos/${repo.slug}`}>
                           {repo.owner}/{repo.repo_name}
-                        </a>
+                        </Link>
                       </h4>
                     </div>
 
@@ -178,7 +178,7 @@ export default async function GithubReposListingPage(props: PageProps) {
 
                     <div className="repo-card-topics">
                       {(repo.category_tags || []).slice(0, 4).map((tag) => (
-                        <span key={tag} className="repo-topic-pill">
+                        <span key={tag} className="prompt-card-tag">
                           #{tag}
                         </span>
                       ))}
@@ -186,16 +186,16 @@ export default async function GithubReposListingPage(props: PageProps) {
 
                     <div className="repo-card-footer">
                       <div className="repo-stats-row">
-                        <span className="repo-stat-item" title="Stars">
+                        <span className="prompt-card-tag" title="Stars">
                           <span className="star-dot">★</span>
                           {formatStars(repo.stars_count)}
                         </span>
-                        <span className="repo-stat-item" title="Forks">
-                          <GitFork size={11} className="text-muted mr-1" />
+                        <span className="prompt-card-tag" title="Forks">
+                          <GitFork size={11} className="text-muted" />
                           {formatStars(repo.forks_count)}
                         </span>
                         {repo.primary_language && (
-                          <span className="repo-lang-badge">
+                          <span className="prompt-card-tag">
                             {repo.primary_language}
                           </span>
                         )}
