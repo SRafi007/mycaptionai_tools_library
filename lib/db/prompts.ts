@@ -3,6 +3,8 @@ import { Prompt, PromptType } from "@/types/prompt";
 
 const supabase = supabaseAdmin;
 
+export const PROMPT_LIST_FIELDS = "id, slug, title, description, cover_url, youtube_url, prompt_type, prompt_format, difficulty, copy_count, view_count, tool_tags, tags";
+
 /**
  * Get aggregated counts of published prompts grouped by prompt type.
  */
@@ -34,7 +36,7 @@ export async function getPromptTypeCounts(): Promise<{ type: PromptType; count: 
 export async function getTrendingPrompts(limit: number = 9): Promise<Prompt[]> {
     const { data, error } = await supabase
         .from("prompts")
-        .select("*")
+        .select(PROMPT_LIST_FIELDS)
         .eq("status", "published")
         .order("copy_count", { ascending: false })
         .order("created_at", { ascending: false })
@@ -45,7 +47,7 @@ export async function getTrendingPrompts(limit: number = 9): Promise<Prompt[]> {
         return [];
     }
 
-    return (data as Prompt[]) || [];
+    return (data as unknown as Prompt[]) || [];
 }
 
 /**
@@ -57,7 +59,7 @@ export async function getTopPromptsByType(
 ): Promise<Prompt[]> {
     const { data, error } = await supabase
         .from("prompts")
-        .select("*")
+        .select(PROMPT_LIST_FIELDS)
         .eq("status", "published")
         .eq("prompt_type", promptType)
         .order("copy_count", { ascending: false })
@@ -69,7 +71,7 @@ export async function getTopPromptsByType(
         return [];
     }
 
-    return (data as Prompt[]) || [];
+    return (data as unknown as Prompt[]) || [];
 }
 
 export async function getPromptsPaginated(
@@ -82,7 +84,7 @@ export async function getPromptsPaginated(
 
     let query = supabase
         .from("prompts")
-        .select("*", { count: "exact" })
+        .select(PROMPT_LIST_FIELDS, { count: "exact" })
         .eq("status", "published");
 
     if (type && type !== "all") {
@@ -99,7 +101,7 @@ export async function getPromptsPaginated(
         return { prompts: [], total: 0 };
     }
 
-    return { prompts: (data as Prompt[]) || [], total: count || 0 };
+    return { prompts: (data as unknown as Prompt[]) || [], total: count || 0 };
 }
 
 export async function getPromptBySlug(slug: string): Promise<Prompt | null> {
@@ -142,7 +144,7 @@ export async function getRelatedPrompts(
 ): Promise<Prompt[]> {
     const { data, error } = await supabase
         .from("prompts")
-        .select("*")
+        .select(PROMPT_LIST_FIELDS)
         .eq("status", "published")
         .eq("prompt_type", promptType)
         .neq("slug", currentSlug)
@@ -155,5 +157,5 @@ export async function getRelatedPrompts(
         return [];
     }
 
-    return (data as Prompt[]) || [];
+    return (data as unknown as Prompt[]) || [];
 }

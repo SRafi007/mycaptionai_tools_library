@@ -22,7 +22,7 @@ import HomePulseStrip from "@/components/home-pulse-strip";
 import HomeResourceHub from "@/components/home-resource-hub";
 import { getHomepageNews, getHomepageRepos } from "@/lib/db/resources";
 
-export const revalidate = 60;
+export const revalidate = 21600; // Cache for 6 hours
 
 export const metadata: Metadata = {
   title: "Best AI Tools Directory for Creators, Marketers, and Teams",

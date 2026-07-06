@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     },
 };
 
-export const revalidate = 60;
+export const revalidate = 21600; // Cache for 6 hours
 
 export default async function PlaybooksPage() {
     const playbooks = await getPublishedPlaybooks();

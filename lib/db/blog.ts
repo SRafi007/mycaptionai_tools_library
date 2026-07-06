@@ -34,6 +34,8 @@ export type BlogContentBlock =
 
 const supabase = supabaseAdmin;
 
+export const BLOG_POST_LIST_FIELDS = "id, title, slug, excerpt, cover_image_url, author, tags, status, published_at, is_featured";
+
 // ─── Published Posts (paginated) ───
 export async function getPublishedPosts(
     page: number = 1,
@@ -44,7 +46,7 @@ export async function getPublishedPosts(
 
     const { data, error, count } = await supabase
         .from("blog_posts")
-        .select("*", { count: "exact" })
+        .select(BLOG_POST_LIST_FIELDS, { count: "exact" })
         .eq("status", "published")
         .order("published_at", { ascending: false })
         .range(from, to);
@@ -54,7 +56,7 @@ export async function getPublishedPosts(
         return { posts: [], total: 0 };
     }
 
-    return { posts: (data as BlogPost[]) || [], total: count || 0 };
+    return { posts: (data as unknown as BlogPost[]) || [], total: count || 0 };
 }
 
 // ─── Single Post by Slug ───
@@ -85,17 +87,17 @@ export async function getAllPostSlugs(): Promise<string[]> {
 export async function getFeaturedPosts(limit: number = 3): Promise<BlogPost[]> {
     const { data, error } = await supabase
         .from("blog_posts")
-        .select("*")
+        .select(BLOG_POST_LIST_FIELDS)
         .eq("status", "published")
         .eq("is_featured", true)
         .order("published_at", { ascending: false })
         .limit(limit);
 
     if (error) return [];
-    return (data as BlogPost[]) || [];
+    return (data as unknown as BlogPost[]) || [];
 }
 
-// â”€â”€â”€ Related Posts (tag+recency weighted) â”€â”€â”€
+// ─── Related Posts (tag+recency weighted) ───
 export async function getRelatedPosts(
     slug: string,
     tags: string[] = [],
@@ -106,14 +108,14 @@ export async function getRelatedPosts(
 
     const { data, error } = await supabase
         .from("blog_posts")
-        .select("*")
+        .select(BLOG_POST_LIST_FIELDS)
         .eq("status", "published")
         .neq("slug", slug)
         .order("published_at", { ascending: false })
         .limit(candidatePoolSize);
 
     if (error || !data) return [];
-    const candidates = data as BlogPost[];
+    const candidates = data as unknown as BlogPost[];
 
     const scored = candidates.map((post) => {
         const sharedTagCount = post.tags.reduce((count, tag) => {

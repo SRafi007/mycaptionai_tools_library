@@ -3,6 +3,10 @@ import { AiNews, GithubRepo } from "@/types/resources";
 
 const supabase = supabaseAdmin;
 
+export const NEWS_LIST_FIELDS = "id, source_id, title, slug, original_url, canonical_url, source_name, author, excerpt, image_url, company_tags, topic_tags, published_at, freshness_score, importance_score, quality_score, total_score, status, review_status";
+
+export const REPO_LIST_FIELDS = "id, source_id, github_id, owner, repo_name, full_name, slug, description, html_url, clone_url, homepage_url, primary_language, license_name, topics, category_tags, stars_count, forks_count, watchers_count, open_issues_count, created_at_github, updated_at_github, pushed_at_github, trend_score, quality_score, total_score, is_archived, is_fork, status, review_status";
+
 // ─── Homepage News (with diversity filtering) ───
 export async function getHomepageNews(): Promise<AiNews[]> {
   const fourteenDaysAgo = new Date();
@@ -10,7 +14,7 @@ export async function getHomepageNews(): Promise<AiNews[]> {
 
   const { data, error } = await supabase
     .from("ai_resource_news")
-    .select("*")
+    .select(NEWS_LIST_FIELDS)
     .eq("status", "published")
     .gte("published_at", fourteenDaysAgo.toISOString())
     .order("total_score", { ascending: false })
@@ -26,7 +30,7 @@ export async function getHomepageNews(): Promise<AiNews[]> {
   const sourceCount: Record<string, number> = {};
   const titles = new Set<string>();
 
-  for (const item of (data as AiNews[]) || []) {
+  for (const item of (data as unknown as AiNews[]) || []) {
     if (selected.length >= 4) break;
 
     const source = item.source_name;
@@ -46,13 +50,13 @@ export async function getHomepageNews(): Promise<AiNews[]> {
   if (selected.length < 4) {
     const { data: fallbackData } = await supabase
       .from("ai_resource_news")
-      .select("*")
+      .select(NEWS_LIST_FIELDS)
       .eq("status", "published")
       .order("total_score", { ascending: false })
       .order("published_at", { ascending: false })
       .limit(20);
 
-    for (const item of (fallbackData as AiNews[]) || []) {
+    for (const item of (fallbackData as unknown as AiNews[]) || []) {
       if (selected.length >= 4) break;
 
       const source = item.source_name;
@@ -75,7 +79,7 @@ export async function getHomepageNews(): Promise<AiNews[]> {
 export async function getHomepageRepos(): Promise<GithubRepo[]> {
   const { data, error } = await supabase
     .from("ai_resource_github_repos")
-    .select("*")
+    .select(REPO_LIST_FIELDS)
     .eq("status", "published")
     .eq("is_archived", false)
     .eq("is_fork", false)
@@ -92,7 +96,7 @@ export async function getHomepageRepos(): Promise<GithubRepo[]> {
   const ownerCount: Record<string, number> = {};
   const categoryCount: Record<string, number> = {};
 
-  for (const repo of (data as GithubRepo[]) || []) {
+  for (const repo of (data as unknown as GithubRepo[]) || []) {
     if (selected.length >= 4) break;
 
     const owner = repo.owner;
@@ -135,7 +139,7 @@ export async function getNewsPaginated(options: {
 
   let query = supabase
     .from("ai_resource_news")
-    .select("*", { count: "exact" })
+    .select(NEWS_LIST_FIELDS, { count: "exact" })
     .eq("status", "published");
 
   // Filtering
@@ -176,7 +180,7 @@ export async function getNewsPaginated(options: {
     return { news: [], total: 0 };
   }
 
-  return { news: (data as AiNews[]) || [], total: count || 0 };
+  return { news: (data as unknown as AiNews[]) || [], total: count || 0 };
 }
 
 // ─── Paginated Repos ───
@@ -193,7 +197,7 @@ export async function getReposPaginated(options: {
 
   let query = supabase
     .from("ai_resource_github_repos")
-    .select("*", { count: "exact" })
+    .select(REPO_LIST_FIELDS, { count: "exact" })
     .eq("status", "published")
     .eq("is_archived", false)
     .eq("is_fork", false);
@@ -235,7 +239,7 @@ export async function getReposPaginated(options: {
     return { repos: [], total: 0 };
   }
 
-  return { repos: (data as GithubRepo[]) || [], total: count || 0 };
+  return { repos: (data as unknown as GithubRepo[]) || [], total: count || 0 };
 }
 
 // ─── Single News by Slug ───
@@ -302,7 +306,7 @@ export async function getAllRepoSlugs(): Promise<string[]> {
 export async function getRelatedNews(excludeSlug: string, sourceName: string, limit = 3): Promise<AiNews[]> {
   const { data, error } = await supabase
     .from("ai_resource_news")
-    .select("*")
+    .select(NEWS_LIST_FIELDS)
     .eq("status", "published")
     .neq("slug", excludeSlug)
     .eq("source_name", sourceName)
@@ -312,21 +316,21 @@ export async function getRelatedNews(excludeSlug: string, sourceName: string, li
   if (error || !data || data.length === 0) {
     const { data: fallbackData } = await supabase
       .from("ai_resource_news")
-      .select("*")
+      .select(NEWS_LIST_FIELDS)
       .eq("status", "published")
       .neq("slug", excludeSlug)
       .order("total_score", { ascending: false })
       .limit(limit);
-    return (fallbackData as AiNews[]) || [];
+    return (fallbackData as unknown as AiNews[]) || [];
   }
-  return data as AiNews[];
+  return data as unknown as AiNews[];
 }
 
 // ─── Related GitHub Repositories ───
 export async function getRelatedRepos(excludeSlug: string, primaryLanguage: string | null, limit = 3): Promise<GithubRepo[]> {
   let query = supabase
     .from("ai_resource_github_repos")
-    .select("*")
+    .select(REPO_LIST_FIELDS)
     .eq("status", "published")
     .neq("slug", excludeSlug);
 
@@ -341,12 +345,12 @@ export async function getRelatedRepos(excludeSlug: string, primaryLanguage: stri
   if (error || !data || data.length === 0) {
     const { data: fallbackData } = await supabase
       .from("ai_resource_github_repos")
-      .select("*")
+      .select(REPO_LIST_FIELDS)
       .eq("status", "published")
       .neq("slug", excludeSlug)
       .order("stars_count", { ascending: false })
       .limit(limit);
-    return (fallbackData as GithubRepo[]) || [];
+    return (fallbackData as unknown as GithubRepo[]) || [];
   }
-  return data as GithubRepo[];
+  return data as unknown as GithubRepo[];
 }

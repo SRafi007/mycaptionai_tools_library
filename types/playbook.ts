@@ -17,5 +17,17 @@ export interface Playbook {
 
 export interface PlaybookWithDetails extends Playbook {
     ecosystem?: Ecosystem | null;
-    tools: (Tool & { step_order: number; step_description: string | null })[];
+    tools: (Tool & { 
+        step_order: number; 
+        step_description: string | null;
+        step_title?: string | null;
+        step_goal?: string | null;
+        how_to_use?: string | null;
+        input_needed?: string | null;
+        output_expected?: string | null;
+        why_this_tool?: string | null;
+        step_kind?: string | null;
+        file_name?: string | null;
+        prompt?: string | null;
+    })[];
 }

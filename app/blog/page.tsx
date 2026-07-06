@@ -7,6 +7,8 @@ import Image from "next/image";
 import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 import PageHeader from "@/components/page-header";
 
+export const revalidate = 3600; // Cache for 1 hour
+
 interface PageProps {
     searchParams: Promise<{ page?: string }>;
 }

@@ -2,8 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { trackPageView, trackUserAction } from "@/app/actions/analytics";
-
 const VISITOR_KEY = "mc_visitor_id";
 const SESSION_KEY = "mc_session_id";
 
@@ -13,6 +11,43 @@ function getOrCreateId(storage: Storage, key: string): string {
     const created = crypto.randomUUID();
     storage.setItem(key, created);
     return created;
+}
+
+function postEvent(data: Record<string, any>) {
+    if (typeof window === "undefined") return;
+
+    // Detect client-side automation/headless footprints
+    const isWebdriver = navigator.webdriver || false;
+    const isHeadless = /HeadlessChrome|jsdom|puppeteer/i.test(navigator.userAgent);
+
+    const payload = {
+        ...data,
+        is_webdriver: isWebdriver,
+        is_headless: isHeadless,
+    };
+
+    const jsonString = JSON.stringify(payload);
+
+    // Prefer sendBeacon for fire-and-forget background transmission
+    if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+        try {
+            const blob = new Blob([jsonString], { type: "application/json" });
+            const success = navigator.sendBeacon("/api/track", blob);
+            if (success) return;
+        } catch (e) {
+            console.error("sendBeacon failed, falling back to keepalive fetch:", e);
+        }
+    }
+
+    // Fallback to fetch with keepalive: true so it completes even if the page unloads
+    fetch("/api/track", {
+        method: "POST",
+        body: jsonString,
+        headers: {
+            "Content-Type": "application/json",
+        },
+        keepalive: true,
+    }).catch((e) => console.error("Error reporting event:", e));
 }
 
 export default function PageViewTracker() {
@@ -26,7 +61,8 @@ export default function PageViewTracker() {
             const sessionId = getOrCreateId(window.sessionStorage, SESSION_KEY);
 
             tracked.current = pathname;
-            trackPageView({
+            postEvent({
+                event_type: "page_view",
                 pathname,
                 query_string: window.location.search || undefined,
                 visitor_id: visitorId,
@@ -52,7 +88,8 @@ export default function PageViewTracker() {
             label: string | null,
             element: string | null
         ) => {
-            trackUserAction({
+            postEvent({
+                event_type: "user_action",
                 pathname,
                 query_string: window.location.search || undefined,
                 visitor_id: visitorId,

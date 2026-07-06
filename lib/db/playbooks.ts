@@ -1,10 +1,13 @@
 import { supabaseAdmin as supabase } from "@/lib/supabase/admin";
 import { Playbook, PlaybookWithDetails } from "../../types/playbook";
+import { TOOL_LIST_FIELDS } from "./tools";
+
+export const PLAYBOOK_LIST_FIELDS = "id, title, slug, description, cover_url, ecosystem_id, author_id, is_published, visual_position, created_at";
 
 export async function getPublishedPlaybooks(limit?: number): Promise<Playbook[]> {
     let query = supabase
         .from("playbooks")
-        .select("*")
+        .select(PLAYBOOK_LIST_FIELDS)
         .eq("is_published", true)
         .order("visual_position", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: false });
@@ -20,7 +23,7 @@ export async function getPublishedPlaybooks(limit?: number): Promise<Playbook[]>
         return [];
     }
     
-    return data as Playbook[];
+    return data as unknown as Playbook[];
 }
 
 export async function getPlaybookBySlug(slug: string): Promise<PlaybookWithDetails | null> {
@@ -44,7 +47,16 @@ export async function getPlaybookBySlug(slug: string): Promise<PlaybookWithDetai
         .select(`
             step_order,
             step_description,
-            tools (*)
+            step_title,
+            step_goal,
+            how_to_use,
+            input_needed,
+            output_expected,
+            why_this_tool,
+            step_kind,
+            file_name,
+            prompt,
+            tools (${TOOL_LIST_FIELDS})
         `)
         .eq("playbook_id", playbook.id)
         .order('step_order', { ascending: true });
@@ -56,7 +68,16 @@ export async function getPlaybookBySlug(slug: string): Promise<PlaybookWithDetai
     const tools = junctionData?.map((item: any) => ({
         ...item.tools,
         step_order: item.step_order,
-        step_description: item.step_description
+        step_description: item.step_description,
+        step_title: item.step_title,
+        step_goal: item.step_goal,
+        how_to_use: item.how_to_use,
+        input_needed: item.input_needed,
+        output_expected: item.output_expected,
+        why_this_tool: item.why_this_tool,
+        step_kind: item.step_kind,
+        file_name: item.file_name,
+        prompt: item.prompt
     })) || [];
     
     return {

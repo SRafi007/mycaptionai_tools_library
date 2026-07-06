@@ -15,7 +15,7 @@ interface PageProps {
 }
 
 const PER_PAGE = 24;
-export const revalidate = 60;
+export const revalidate = 3600; // Cache for 1 hour
 
 function toTitleCase(value: string): string {
     return value

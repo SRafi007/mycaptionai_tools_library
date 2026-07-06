@@ -5,6 +5,11 @@ import { Tool, ToolWithCategories } from "@/types/tool";
 // and we need this to work at build time (generateStaticParams)
 const supabase = supabaseAdmin;
 
+export const TOOL_LIST_FIELDS = "id, name, slug, short_description, url, affiliate_url, image_url, icon_url, pricing_type, starting_price, has_free_trial, is_verified, rating_score, rating_count, upvotes";
+
+export const TOOL_DETAIL_FIELDS = "id, name, slug, short_description, long_description, url, affiliate_url, image_url, icon_url, pricing_type, starting_price, has_free_trial, is_verified, status, is_featured, is_sponsored, sponsored_rank, priority_score, upvotes, view_count, click_count, rating_score, rating_count, publisher, launch_year, country, features, pros_cons, use_cases, social_links, source, created_at, updated_at";
+
+
 // ─── All Tools (paginated) ───
 export async function getToolsPaginated(
     page: number = 1,
@@ -15,7 +20,7 @@ export async function getToolsPaginated(
     const from = (page - 1) * perPage;
     const to = from + perPage - 1;
 
-    let query = supabase.from("tools").select("*", { count: "exact" }).eq("status", "active");
+    let query = supabase.from("tools").select(TOOL_LIST_FIELDS, { count: "exact" }).eq("status", "active");
 
     if (pricing && pricing !== "all") {
         query = query.eq("pricing_type", pricing);
@@ -40,14 +45,14 @@ export async function getToolsPaginated(
         return { tools: [], total: 0 };
     }
 
-    return { tools: (data as Tool[]) || [], total: count || 0 };
+    return { tools: (data as unknown as Tool[]) || [], total: count || 0 };
 }
 
 // ─── Single Tool by Slug ───
 export async function getToolBySlug(slug: string): Promise<ToolWithCategories | null> {
     const { data, error } = await supabase
         .from("tools")
-        .select("*")
+        .select(TOOL_DETAIL_FIELDS)
         .eq("slug", slug)
         .eq("status", "active")
         .single();
@@ -67,7 +72,7 @@ export async function getToolBySlug(slug: string): Promise<ToolWithCategories | 
         .map((r: any) => r.categories)
         .filter(Boolean);
 
-    return { ...data, categories } as ToolWithCategories;
+    return { ...data, categories } as unknown as ToolWithCategories;
 }
 
 // ─── Tools by Category (paginated) ───
@@ -95,7 +100,7 @@ export async function getToolsByCategory(
 
     let query = supabase
         .from("tools")
-        .select("*", { count: "exact" })
+        .select(TOOL_LIST_FIELDS, { count: "exact" })
         .in("id", toolIds)
         .eq("status", "active");
 
@@ -120,7 +125,7 @@ export async function getToolsByCategory(
         return { tools: [], total: 0 };
     }
 
-    return { tools: (data as Tool[]) || [], total: count || 0 };
+    return { tools: (data as unknown as Tool[]) || [], total: count || 0 };
 }
 
 // ─── Top Tools by Category (ranked by upvotes × rating) ───
@@ -141,7 +146,7 @@ export async function getTopToolsByCategory(
     // Fetch a generous batch sorted by rating to start with quality tools
     const { data, error } = await supabase
         .from("tools")
-        .select("*")
+        .select(TOOL_LIST_FIELDS)
         .in("id", toolIds)
         .eq("status", "active")
         .order("rating_score", { ascending: false })
@@ -152,7 +157,7 @@ export async function getTopToolsByCategory(
         return [];
     }
 
-    const tools = (data as Tool[]) || [];
+    const tools = (data as unknown as Tool[]) || [];
 
     // Sort by popularity score: upvotes × rating_score (descending)
     tools.sort((a, b) => {
@@ -168,7 +173,7 @@ export async function getTopToolsByCategory(
 export async function getFeaturedTools(limit: number = 6): Promise<Tool[]> {
     const { data, error } = await supabase
         .from("featured_tools")
-        .select("tools!inner(*)")
+        .select(`tools!inner(${TOOL_LIST_FIELDS})`)
         .eq("tools.status", "active")
         .order("display_order", { ascending: true })
         .limit(limit);
@@ -178,14 +183,14 @@ export async function getFeaturedTools(limit: number = 6): Promise<Tool[]> {
         return [];
     }
 
-    return (data || []).map((r: any) => r.tools).filter(Boolean) as Tool[];
+    return (data || []).map((r: any) => r.tools).filter(Boolean) as unknown as Tool[];
 }
 
 // ─── Trending Tools (by display_order) ───
 export async function getTrendingTools(limit: number = 6): Promise<Tool[]> {
     const { data, error } = await supabase
         .from("trending_tools")
-        .select("tools!inner(*)")
+        .select(`tools!inner(${TOOL_LIST_FIELDS})`)
         .eq("tools.status", "active")
         .order("display_order", { ascending: true })
         .limit(limit);
@@ -195,14 +200,14 @@ export async function getTrendingTools(limit: number = 6): Promise<Tool[]> {
         return [];
     }
 
-    return (data || []).map((r: any) => r.tools).filter(Boolean) as Tool[];
+    return (data || []).map((r: any) => r.tools).filter(Boolean) as unknown as Tool[];
 }
 
 // ─── Top Rated Tools ───
 export async function getTopRatedTools(limit: number = 50): Promise<Tool[]> {
     const { data, error } = await supabase
         .from("tools")
-        .select("*")
+        .select(TOOL_LIST_FIELDS)
         .eq("status", "active")
         .gt("rating_score", 0)
         .order("rating_score", { ascending: false })
@@ -214,14 +219,14 @@ export async function getTopRatedTools(limit: number = 50): Promise<Tool[]> {
         return [];
     }
 
-    return (data as Tool[]) || [];
+    return (data as unknown as Tool[]) || [];
 }
 
 // ─── Search (full-text with ilike fallback) ───
 export async function getTopUpvotedTools(limit: number = 50): Promise<Tool[]> {
     const { data, error } = await supabase
         .from("tools")
-        .select("*")
+        .select(TOOL_LIST_FIELDS)
         .eq("status", "active")
         .order("upvotes", { ascending: false })
         .order("rating_score", { ascending: false })
@@ -233,7 +238,7 @@ export async function getTopUpvotedTools(limit: number = 50): Promise<Tool[]> {
         return [];
     }
 
-    return (data as Tool[]) || [];
+    return (data as unknown as Tool[]) || [];
 }
 
 export async function searchTools(
@@ -248,7 +253,7 @@ export async function searchTools(
     const ftsQuery = query.trim().split(/\s+/).join(" & ");
     const { data, error, count } = await supabase
         .from("tools")
-        .select("*", { count: "exact" })
+        .select(TOOL_LIST_FIELDS, { count: "exact" })
         .eq("status", "active")
         .textSearch("search_vector", ftsQuery, { type: "plain", config: "english" })
         .order("rating_score", { ascending: false })
@@ -256,13 +261,13 @@ export async function searchTools(
 
     if (!error && data && data.length > 0) {
         logSearch(query, count || data.length);
-        return { tools: data as Tool[], total: count || 0 };
+        return { tools: data as unknown as Tool[], total: count || 0 };
     }
 
     // 2. Fallback: ilike on name + short_description for partial/fuzzy matches
     const { data: fallback, error: fbErr, count: fbCount } = await supabase
         .from("tools")
-        .select("*", { count: "exact" })
+        .select(TOOL_LIST_FIELDS, { count: "exact" })
         .eq("status", "active")
         .or(`name.ilike.%${query}%,short_description.ilike.%${query}%`)
         .order("rating_score", { ascending: false })
@@ -274,7 +279,7 @@ export async function searchTools(
     }
 
     logSearch(query, fbCount || 0);
-    return { tools: (fallback as Tool[]) || [], total: fbCount || 0 };
+    return { tools: (fallback as unknown as Tool[]) || [], total: fbCount || 0 };
 }
 
 // ─── Quick Search Suggestions (for typeahead) ───
@@ -326,7 +331,7 @@ export async function getSimilarTools(
 
     const { data, error } = await supabase
         .from("tools")
-        .select("*")
+        .select(TOOL_LIST_FIELDS)
         .in("id", toolIds)
         .eq("status", "active")
         .order("rating_score", { ascending: false })
@@ -337,7 +342,7 @@ export async function getSimilarTools(
         return [];
     }
 
-    return (data as Tool[]) || [];
+    return (data as unknown as Tool[]) || [];
 }
 
 // ─── All Tool Slugs (for static generation) ───
@@ -397,7 +402,7 @@ export async function getToolCount(): Promise<number> {
 export async function getSponsoredTool(): Promise<Tool | null> {
     const { data, error } = await supabase
         .from("tools")
-        .select("*")
+        .select(TOOL_LIST_FIELDS)
         .eq("status", "active")
         .eq("is_sponsored", true)
         .order("sponsored_rank", { ascending: true })
@@ -413,13 +418,13 @@ export async function getSponsoredTool(): Promise<Tool | null> {
         // Fallback to a featured tool
         const { data: featured } = await supabase
             .from("tools")
-            .select("*")
+            .select(TOOL_LIST_FIELDS)
             .eq("status", "active")
             .eq("is_featured", true)
             .limit(1)
             .maybeSingle();
-        return featured as Tool | null;
+        return featured as unknown as Tool | null;
     }
 
-    return data as Tool;
+    return data as unknown as Tool;
 }

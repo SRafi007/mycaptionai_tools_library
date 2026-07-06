@@ -8,7 +8,7 @@ import Breadcrumbs from "@/components/breadcrumbs";
 import BackToTop from "@/components/back-to-top";
 import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH, localCanonicalUrl } from "@/lib/seo";
 
-export const revalidate = 60;
+export const revalidate = 3600; // Cache for 1 hour
 
 export async function generateStaticParams() {
   const slugs = await getAllRepoSlugs();

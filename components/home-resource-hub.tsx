@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, ExternalLink, GitFork, Star, Newspaper } from "lucide-react";
 import { Github } from "@/components/icons/github";
 import { AiNews, GithubRepo } from "@/types/resources";
+import AINewsFeed from "@/components/ai-news-feed";
 
 interface HomeResourceHubProps {
   news: AiNews[];
@@ -98,34 +99,7 @@ export default function HomeResourceHub({ news, repos }: HomeResourceHubProps) {
   const displayNews = news.slice(0, 3);
   const displayRepos = repos.slice(0, 4);
 
-  // Rotating Stack State
-  const [order, setOrder] = useState<number[]>([]);
-  const [isHovered, setIsHovered] = useState(false);
-
-  useEffect(() => {
-    if (displayNews.length > 0) {
-      setOrder(Array.from({ length: displayNews.length }, (_, i) => i));
-    }
-  }, [news]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (isHovered || order.length <= 1) return;
-    const interval = setInterval(() => {
-      setOrder((prev) => {
-        const next = [...prev];
-        const first = next.shift();
-        if (first !== undefined) next.push(first);
-        return next;
-      });
-    }, 3800);
-    return () => clearInterval(interval);
-  }, [isHovered, order]);
-
-  const posStyles = [
-    { transform: "translateY(0px) scale(1)", opacity: 1, zIndex: 3 },
-    { transform: "translateY(45px) scale(0.94)", opacity: 0.6, zIndex: 2 },
-    { transform: "translateY(90px) scale(0.88)", opacity: 0.32, zIndex: 1 },
-  ];
+  // Redesigned news feed uses internal rotation and drag gesture state
 
   return (
     <section className="section-padding resource-hub-section">
@@ -146,99 +120,7 @@ export default function HomeResourceHub({ news, repos }: HomeResourceHubProps) {
         <div className="resource-hub-grid">
           {/* Left Column: Latest AI News (Interactive Stack) */}
           <div className="resource-hub-col news-column">
-            <div className="section-head">
-              <span className="icon">
-                <Newspaper size={18} />
-              </span>
-              <h2>Latest AI News</h2>
-              <span className="count">{displayNews.length.toString().padStart(2, "0")}</span>
-            </div>
-
-            <div
-              className="news-stack"
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-            >
-              {displayNews.map((item, idx) => {
-                const pos = order.indexOf(idx);
-                const isFront = pos === 0;
-                const cardStyle =
-                  pos < posStyles.length && pos >= 0
-                    ? posStyles[pos]
-                    : {
-                        transform: "translateY(120px) scale(0.8)",
-                        opacity: 0,
-                        zIndex: 0,
-                        pointerEvents: "none" as const,
-                      };
-
-                const allTags = [
-                  ...(item.topic_tags || []),
-                  ...(item.company_tags || []),
-                ];
-
-                return (
-                  <article
-                    key={item.id}
-                    className={`news-stack-card ${isFront ? "is-front" : ""}`}
-                    style={cardStyle}
-                  >
-                    <div className="news-title-area">
-                      <div className="news-meta">
-                        <span className="source-badge">{item.source_name.toUpperCase()}</span>
-                        <span className="status-dot"></span>
-                        <span className="time-tag">{formatRelativeTime(item.published_at).toUpperCase()}</span>
-                      </div>
-                      <h3>
-                        <Link href={`/resources/ai-news/${item.slug}`}>{item.title}</Link>
-                      </h3>
-                    </div>
-                    <div className="news-body">
-                      {item.excerpt && <p>{truncateWords(item.excerpt, 30)}</p>}
-
-                      {allTags.length > 0 && (
-                        <div className="prompt-card-tags" style={{ marginBottom: "14px" }}>
-                          {allTags.slice(0, 4).map((tag) => (
-                            <span key={tag} className="prompt-card-tag">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      <a
-                        href={item.original_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="read-link"
-                      >
-                        Read source ↗
-                      </a>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-
-            {/* Stack Dots Navigation */}
-            {order.length > 0 && (
-              <div className="stack-dots">
-                {displayNews.map((_, idx) => (
-                  <button
-                    key={idx}
-                    aria-label={`Show news item ${idx + 1}`}
-                    className={order[0] === idx ? "active" : ""}
-                    onClick={() => {
-                      setOrder((prev) => {
-                        const pos = prev.indexOf(idx);
-                        if (pos <= 0) return prev;
-                        return [...prev.slice(pos), ...prev.slice(0, pos)];
-                      });
-                    }}
-                  />
-                ))}
-              </div>
-            )}
+            <AINewsFeed news={displayNews} />
           </div>
 
           {/* Right Column: Trending GitHub AI Repos */}

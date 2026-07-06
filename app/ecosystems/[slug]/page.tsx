@@ -5,7 +5,7 @@ import { absoluteUrl } from "@/lib/seo";
 import EcosystemDetailCard from "@/components/ecosystem-detail-card";
 import EcoCategoryNav from "@/components/ecosystem-category-nav";
 
-export const revalidate = 60;
+export const revalidate = 3600; // Cache for 1 hour
 
 /* ── Brand theming per ecosystem ── */
 const BRAND_THEME: Record<string, { accent: string; gradientFrom: string; gradientTo: string }> = {

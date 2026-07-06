@@ -1,6 +1,7 @@
 import { supabaseAdmin as supabase } from "@/lib/supabase/admin";
 import { Ecosystem, EcosystemWithTools, EcosystemWithPreview, EcosystemPreviewTool } from "../../types/ecosystem";
 import type { Tool } from "@/types/tool";
+import { TOOL_LIST_FIELDS } from "./tools";
 
 export async function getEcosystemsWithPreview(previewLimit = 5): Promise<EcosystemWithPreview[]> {
     const [{ data: ecosystems, error: ecoError }, { data: junction, error: jErr }] = await Promise.all([
@@ -80,7 +81,7 @@ export async function getEcosystemBySlug(slug: string): Promise<EcosystemWithToo
         .from("ecosystem_tools")
         .select(`
             *,
-            tools (*)
+            tools (${TOOL_LIST_FIELDS})
         `)
         .eq("ecosystem_id", ecosystem.id);
         

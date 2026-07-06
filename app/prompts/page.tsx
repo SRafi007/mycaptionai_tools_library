@@ -23,7 +23,7 @@ import {
   LucideIcon
 } from "lucide-react";
 
-export const revalidate = 60;
+export const revalidate = 21600; // Cache for 6 hours
 
 interface PromptsPageProps {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

@@ -9,7 +9,7 @@ import PageHeader from "@/components/page-header";
 import ToolCard from "@/components/tool-card";
 import BrowseCategoriesSidebar from "@/components/browse-categories-sidebar";
 
-export const revalidate = 60;
+export const revalidate = 21600; // Cache for 6 hours
 
 export const metadata: Metadata = {
     title: "Browse AI Tool Categories",

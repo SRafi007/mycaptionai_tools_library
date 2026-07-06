@@ -87,12 +87,72 @@ const playbooks = [
       "https://www.canva.com/canva-ai/",
     ],
     steps: [
-      ["chatgpt", "Write hooks and script options", "Generate multiple hook angles, a tight spoken script, B-roll notes, and caption-safe on-screen text.", "Topic, audience, and platform.", "Script variants and shot notes.", "ChatGPT is fast for testing many hooks before committing to production."],
-      ["elevenlabs", "Generate or localize voiceover", "Create a natural voiceover or use dubbing for localization while preserving emotion and timing.", "Approved script and voice direction.", "Voiceover audio in the target language.", "ElevenLabs is useful for fast narration and multilingual voice workflows."],
-      ["runway", "Generate visual clips", "Use Runway to create text-to-video or image-to-video B-roll, motion scenes, and stylized shots that match the script.", "Shot prompts, reference images, or product imagery.", "Short generated clips for the edit.", "Runway is built around AI video generation and editing, so it fits the generative footage step."],
-      ["capcut", "Edit, caption, and format", "Assemble clips, voiceover, music, captions, pacing, and platform-specific ratios in CapCut.", "Clips, voiceover, logo, and caption copy.", "Final vertical video.", "CapCut is a practical editing layer for fast social video assembly."],
-      ["canva", "Create thumbnail and post creative", "Design the cover frame, carousel companion asset, or ad-safe thumbnail in Canva.", "Final title, video frame, and brand colors.", "Thumbnail and supporting creative.", "Canva gives non-editors quick visual polish around the video."],
-      ["buffer", "Schedule and test copy", "Schedule the finished clip with two or three caption variants and track what angle performs best.", "Video file and post copy.", "Scheduled publishing plan.", "Buffer helps make production repeatable across channels."],
+      [
+        "chatgpt", 
+        "Write hooks and script options", 
+        "Generate multiple hook angles, a tight spoken script, B-roll notes, and caption-safe on-screen text.", 
+        "Topic, audience, and platform.", 
+        "Script variants and shot notes.", 
+        "ChatGPT is fast for testing many hooks before committing to production.",
+        "llm",
+        "script-prompt.txt",
+        "Act as a short-form video scriptwriter.\n\nTopic: {topic}\nPlatform: TikTok / Reels / Shorts\nLength: 30-45 seconds\n\nGive me:\n1. 5 scroll-stopping hook lines (under 8 words each)\n2. A tight spoken script for the strongest hook, ~110 words\n3. B-roll notes every 2-3 sentences\n4. Caption-safe on-screen text overlays\n\nKeep it conversational, avoid clichés, write for a viewer deciding to keep watching in the first 1.5 seconds."
+      ],
+      [
+        "elevenlabs", 
+        "Generate or localize voiceover", 
+        "Create a natural voiceover or use dubbing for localization while preserving emotion and timing.", 
+        "Approved script and voice direction.", 
+        "Voiceover audio in the target language.", 
+        "ElevenLabs is useful for fast narration and multilingual voice workflows.",
+        "audio",
+        "voice-settings.txt",
+        "Voice: warm, confident, mid-pace narrator\nStability: 45%  ·  Similarity: 80%  ·  Style: 25%\n\nInstructions:\n1. Paste the final spoken script from Stage 1.\n2. Generate the English voiceover first and lock the timing.\n3. For localization, use Dubbing (not TTS-from-translation) so pacing and emotion carry over.\n4. Export 48kHz WAV, trim head/tail silence before sending to the edit stage."
+      ],
+      [
+        "runway", 
+        "Generate visual clips", 
+        "Use Runway to create text-to-video or image-to-video B-roll, motion scenes, and stylized shots that match the script.", 
+        "Shot prompts, reference images, or product imagery.", 
+        "Short generated clips for the edit.", 
+        "Runway is built around AI video generation and editing, so it fits the generative footage step.",
+        "video",
+        "clip-prompt.txt",
+        "Generate 4-6 B-roll clips, 4s each, 9:16 vertical ratio.\n\nStyle reference: {moodboard image}\nMotion: slow push-in, handheld micro-shake, natural light\nSubject: {scene description from script}\nAvoid: text artifacts, warped hands, logo-like shapes\n\nUse image-to-video when a brand asset exists; text-to-video for abstract or establishing shots."
+      ],
+      [
+        "capcut", 
+        "Edit, caption, and format", 
+        "Assemble clips, voiceover, music, captions, pacing, and platform-specific ratios in CapCut.", 
+        "Clips, voiceover, logo, and caption copy.", 
+        "Final vertical video.", 
+        "CapCut is a practical editing layer for fast social video assembly.",
+        "edit",
+        "edit-checklist.txt",
+        "CapCut Timeline Editing Checklist:\n1. Drop clips on the timeline in script order, trim to the voiceover audio track.\n2. Add auto-captions, then hand-edit for readability and accuracy (max 4 words per line).\n3. Layer background music at -18dB under voice, ducking background audio by -6dB during speech.\n4. Export: 1080x1920 (Reels/TikTok), 1080x1350 (feed), 1920x1080 (YouTube).\n5. Add a 0.5s black-frame pad at the start for autoplay-crop platforms."
+      ],
+      [
+        "canva", 
+        "Create thumbnail and post creative", 
+        "Design the cover frame, carousel companion asset, or ad-safe thumbnail in Canva.", 
+        "Final title, video frame, and brand colors.", 
+        "Thumbnail and supporting creative.", 
+        "Canva gives non-editors quick visual polish around the video.",
+        "image",
+        "thumbnail-dimensions.txt",
+        "Build a thumbnail or cover frame that matches the hook, for platforms that show one.\n\nDimensions:\n- Instagram Reels: 1080 x 1920 (grid crop: 1080 x 1080 center)\n- YouTube Shorts: 1080 x 1920 (auto-selected or custom)\n- TikTok: 1080 x 1920\n\nEnsure text overlays are centered within the 1:1 safe zone so they don't get cropped in feed grid views."
+      ],
+      [
+        "buffer", 
+        "Schedule and test copy", 
+        "Schedule the finished clip with two or three caption variants and track what angle performs best.", 
+        "Video file and post copy.", 
+        "Scheduled publishing plan.", 
+        "Buffer helps make production repeatable across channels.",
+        "schedule",
+        "buffer-schedule.txt",
+        "Queue the export across platforms at the right local time for each audience.\n\nSchedule guidelines:\n1. Hook-first post copy (max 140 chars for preview safety)\n2. Add custom thumbnail frame on Instagram\n3. Schedule for peak hours: 12 PM and 6 PM local viewer time\n4. Pin the first comment with relevant link calls-to-action"
+      ],
     ],
   },
   {
@@ -508,7 +568,7 @@ async function hasPlaybookEditorialColumns() {
 async function hasPlaybookToolEditorialColumns() {
   const { error } = await supabase
     .from("playbook_tools")
-    .select("step_title,step_goal,how_to_use,input_needed,output_expected,why_this_tool,alternatives,is_required")
+    .select("step_title,step_goal,how_to_use,input_needed,output_expected,why_this_tool,alternatives,is_required,step_kind,file_name,prompt")
     .limit(1);
   return !error;
 }
@@ -560,8 +620,48 @@ function playbookRow(playbook, ecosystemBySlug, includeEditorial, index, cover_u
   };
 }
 
+const TOOL_KIND_MAP = {
+  'chatgpt': 'llm',
+  'claude': 'llm',
+  'claude-code': 'llm',
+  'claude-2': 'llm',
+  'gemini-code-assist': 'llm',
+  'notion-ai': 'llm',
+  'perplexity-search': 'llm',
+  'elevenlabs': 'audio',
+  'adobe-podcast': 'audio',
+  'descript': 'audio',
+  'runway': 'video',
+  'riverside': 'video',
+  'opus-clip': 'video',
+  'capcut': 'edit',
+  'capcut-commerce': 'edit',
+  'canva': 'image',
+  'adobe-firefly': 'image',
+  'dalle': 'image',
+  'midjourney': 'image',
+  'buffer': 'schedule',
+  'hootsuite': 'schedule',
+  'youtube-studio': 'chart',
+  'hubspot': 'chart',
+};
+
 function stepRow(playbookId, toolId, step, index, includeEditorial) {
-  const [, step_title, step_description, input_needed, output_expected, why_this_tool] = step;
+  const toolSlug = step[0];
+  const step_title = step[1];
+  const step_description = step[2];
+  const input_needed = step[3];
+  const output_expected = step[4];
+  const why_this_tool = step[5];
+
+  // Optional columns
+  const explicitKind = step[6];
+  const file_name = step[7] || 'stage.txt';
+  const prompt = step[8] || 'Add step instructions here.';
+
+  const inferredKind = TOOL_KIND_MAP[toolSlug] || 'other';
+  const step_kind = explicitKind || inferredKind;
+
   const base = {
     playbook_id: playbookId,
     tool_id: toolId,
@@ -581,6 +681,9 @@ function stepRow(playbookId, toolId, step, index, includeEditorial) {
     why_this_tool,
     alternatives: [],
     is_required: true,
+    step_kind,
+    file_name,
+    prompt,
   };
 }
 
