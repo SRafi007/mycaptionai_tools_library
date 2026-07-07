@@ -1,6 +1,6 @@
 import "server-only";
 
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { supabaseAnalyticsAdmin } from "@/lib/supabase/analytics-admin";
 import { AnalyticsEvent } from "@/types/analytics";
 
 /**
@@ -8,7 +8,7 @@ import { AnalyticsEvent } from "@/types/analytics";
  * Uses service role on server only, so client code cannot write directly.
  */
 export async function trackEvent(event: Omit<AnalyticsEvent, "id" | "created_at">): Promise<boolean> {
-    const { error } = await supabaseAdmin.from("analytics").insert(event);
+    const { error } = await supabaseAnalyticsAdmin.from("analytics").insert(event);
 
     if (error) {
         console.error("Error tracking event:", error);
