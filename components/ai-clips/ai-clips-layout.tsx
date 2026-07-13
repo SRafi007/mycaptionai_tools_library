@@ -18,7 +18,8 @@ import {
     Tv,
     Languages,
     HelpCircle,
-    Info
+    Info,
+    X
 } from "lucide-react";
 import { AIClip, AIClipsResponse } from "@/types/ai-clip";
 import YoutubeReelPlayer from "./youtube-reel-player";
@@ -102,8 +103,9 @@ export default function AIClipsLayout() {
     const [seed, setSeed] = useState<number | null>(null);
 
     // Audio & playback controls
-    const [isMuted, setIsMuted] = useState<boolean>(true);
+    const [isMuted, setIsMuted] = useState<boolean>(false);
     const [isPlaying, setIsPlaying] = useState<boolean>(true);
+    const [infoOpen, setInfoOpen] = useState<boolean>(false);
 
     // Time sync for captions and bars
     const [currentTime, setCurrentTime] = useState<number>(0);
@@ -146,6 +148,11 @@ export default function AIClipsLayout() {
             document.body.classList.remove("clips-page-body");
         };
     }, []);
+
+    // Close details overlay on active video change
+    useEffect(() => {
+        setInfoOpen(false);
+    }, [currentIdx]);
 
     // 2. Fetch clips when seed is ready
     useEffect(() => {
@@ -234,6 +241,29 @@ export default function AIClipsLayout() {
         setIsPlaying(true);
     }, []);
 
+    const loadMoreClips = useCallback(async () => {
+        if (!hasMore || isLoading || seed === null) return;
+        setIsLoading(true);
+        const nextPage = page + 1;
+        try {
+            const res = await fetch(`/api/ai-clips?page=${nextPage}&seed=${seed}&limit=9`);
+            if (res.ok) {
+                const data: AIClipsResponse = await res.json();
+                setClips(prev => {
+                    const existingIds = new Set(prev.map(c => c.id));
+                    const uniqueNew = data.clips.filter(c => !existingIds.has(c.id));
+                    return [...prev, ...uniqueNew];
+                });
+                setPage(nextPage);
+                setHasMore(data.hasMore);
+            }
+        } catch (err) {
+            console.error("Error loading more clips:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [hasMore, isLoading, page, seed]);
+
     const navigatePrev = useCallback(() => {
         if (clips.length === 0) return;
         setCurrentIdx(prev => (prev - 1 + clips.length) % clips.length);
@@ -242,13 +272,63 @@ export default function AIClipsLayout() {
 
     const navigateNext = useCallback(() => {
         if (clips.length === 0) return;
-        setCurrentIdx(prev => (prev + 1) % clips.length);
-        resetVideoProgress();
-    }, [clips.length, resetVideoProgress]);
+        if (currentIdx === clips.length - 1) {
+            handleRefresh();
+        } else {
+            setCurrentIdx(prev => prev + 1);
+            resetVideoProgress();
+        }
+    }, [clips.length, currentIdx, handleRefresh, resetVideoProgress]);
+
+    // Touch swipe gestures for mobile viewport navigation
+    const touchStartY = useRef<number | null>(null);
+    const touchEndY = useRef<number | null>(null);
+    const hasSwiped = useRef<boolean>(false);
+
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+        touchStartY.current = e.targetTouches[0].clientY;
+        touchEndY.current = e.targetTouches[0].clientY;
+        hasSwiped.current = false;
+    }, []);
+
+    const handleTouchMove = useCallback((e: React.TouchEvent) => {
+        touchEndY.current = e.targetTouches[0].clientY;
+        if (touchStartY.current !== null && Math.abs(touchStartY.current - e.targetTouches[0].clientY) > 10) {
+            hasSwiped.current = true;
+        }
+    }, []);
+
+    const handleTouchEnd = useCallback(() => {
+        if (touchStartY.current === null || touchEndY.current === null) return;
+
+        const diffY = touchStartY.current - touchEndY.current;
+        const minSwipeDistance = 50;
+
+        if (Math.abs(diffY) > minSwipeDistance) {
+            if (diffY > 0) {
+                // Swipe UP -> Next video
+                navigateNext();
+            } else {
+                // Swipe DOWN -> Prev video
+                navigatePrev();
+            }
+        }
+
+        touchStartY.current = null;
+        touchEndY.current = null;
+    }, [navigateNext, navigatePrev]);
 
     const togglePlay = useCallback(() => {
         setIsPlaying(prev => !prev);
     }, []);
+
+    const handleDisplayClick = useCallback((e: React.MouseEvent) => {
+        if (hasSwiped.current) {
+            hasSwiped.current = false;
+            return;
+        }
+        togglePlay();
+    }, [togglePlay]);
 
     const toggleMute = useCallback(() => {
         setIsMuted(prev => {
@@ -395,9 +475,6 @@ export default function AIClipsLayout() {
     return (
         <div className="clips-root">
             {/* Scroll Hint Badges */}
-            <div className="clips-hint mobile-only">
-                Only <b>feed below</b> scrolls
-            </div>
 
             <div className="clips-body">
                 <div className="clips-stage">
@@ -406,7 +483,13 @@ export default function AIClipsLayout() {
                         {renderPeekCard("prev")}
 
                         {/* Center Reels Player Card */}
-                        <div className="clips-display" onClick={togglePlay}>
+                        <div 
+                            className="clips-display" 
+                            onClick={handleDisplayClick}
+                            onTouchStart={handleTouchStart}
+                            onTouchMove={handleTouchMove}
+                            onTouchEnd={handleTouchEnd}
+                        >
                             <YoutubeReelPlayer
                                 videoId={activeClip.youtube_video_id}
                                 isPlaying={isPlaying}
@@ -447,8 +530,58 @@ export default function AIClipsLayout() {
                                         </div>
                                     </div>
                                 )}
-                                <div className="clip-title">{activeClip.title}</div>
+                                <div className="footer-bottom-row">
+                                    <div className="clip-title">{activeClip.title}</div>
+                                    <button 
+                                        className="clip-info-btn"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setInfoOpen(true);
+                                        }}
+                                        aria-label="Show details"
+                                    >
+                                        <Info size={18} />
+                                    </button>
+                                </div>
                             </div>
+
+                            {/* Immersive Video Details Popup Overlay */}
+                            {infoOpen && (
+                                <div className="clip-info-overlay" onClick={(e) => { e.stopPropagation(); setInfoOpen(false); }}>
+                                    <div className="clip-info-panel" onClick={e => e.stopPropagation()}>
+                                        <button className="clip-info-close" onClick={() => setInfoOpen(false)} aria-label="Close details">
+                                            <X size={18} />
+                                        </button>
+                                        
+                                        <div className="clip-info-header">
+                                            <h3>About this Clip</h3>
+                                        </div>
+
+                                        <div className="clip-info-body">
+                                            <h4 className="info-clip-title">{activeClip.title}</h4>
+                                            
+                                            {activeClip.channel_title && (
+                                                <div className="info-channel-row">
+                                                    <span className="info-channel-name">@{activeClip.channel_title}</span>
+                                                    <span className="info-views">· {activeClip.view_count?.toLocaleString()} views</span>
+                                                </div>
+                                            )}
+                                            
+                                            <div className="info-description-box">
+                                                <p>{activeClip.description || activeClip.summary || "No description available for this clip."}</p>
+                                            </div>
+
+                                            {activeClip.tags && activeClip.tags.length > 0 && (
+                                                <div className="info-tags-list">
+                                                    {activeClip.tags.map(tag => (
+                                                        <span key={tag} className="info-tag-pill">#{tag}</span>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Peek Right Card */}
@@ -524,6 +657,18 @@ export default function AIClipsLayout() {
                                 </div>
                             );
                         })}
+
+                        {/* Load More & Refresh feed buttons */}
+                        <div className="explore-actions">
+                            {hasMore && (
+                                <button className="explore-action-btn load-more-btn" onClick={loadMoreClips} disabled={isLoading}>
+                                    {isLoading ? "Loading..." : "Load More"}
+                                </button>
+                            )}
+                            <button className="explore-action-btn refresh-feed-btn" onClick={handleRefresh} disabled={isLoading}>
+                                Refresh Feed
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

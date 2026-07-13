@@ -700,3 +700,241 @@ body.clips-page-body .site-footer {
     white-space: nowrap;
   }
 }
+
+/* ---------- Explore Feed Actions (Load More / Refresh) ---------- */
+.explore-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 10px 0;
+  width: 100%;
+  justify-content: center;
+}
+
+.explore-action-btn {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 12.5px;
+  cursor: pointer;
+  border: 1px solid var(--border-subtle);
+  transition: all 0.2s ease;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.explore-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.load-more-btn {
+  background-color: var(--brand);
+  color: #ffffff;
+  border-color: var(--brand);
+}
+
+.load-more-btn:not(:disabled):hover {
+  background-color: #4a68db; /* darker brand hover */
+  border-color: #4a68db;
+}
+
+.refresh-feed-btn {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.refresh-feed-btn:not(:disabled):hover {
+  background-color: var(--bg-secondary);
+  border-color: var(--text-secondary);
+}
+
+@media (max-width: 767px) {
+  .explore-actions {
+    gap: 8px;
+    margin-top: 10px;
+    padding: 6px 0;
+  }
+
+  .explore-action-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+}
+
+/* ---------- Clip Info Overlay Modal ---------- */
+.clip-info-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  flex-shrink: 0;
+  outline: none;
+  padding: 0;
+}
+
+.clip-info-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.footer-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  width: 100%;
+}
+
+.clip-info-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 30;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.clip-info-panel {
+  background: var(--bg-surface, #161925);
+  border-top: 1px solid var(--border-subtle, #232636);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-height: 70%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  padding: 20px;
+}
+
+.clip-info-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  outline: none;
+  padding: 0;
+}
+
+.clip-info-close:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.clip-info-header {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.clip-info-header h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.clip-info-body {
+  overflow-y: auto;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  padding-right: 4px;
+}
+
+.clip-info-body::-webkit-scrollbar {
+  width: 5px;
+}
+.clip-info-body::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 4px;
+}
+
+.info-clip-title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.info-channel-row {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.info-channel-name {
+  font-weight: 650;
+  color: var(--brand);
+}
+
+.info-description-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.info-description-box p {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.info-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.info-tag-pill {
+  background: var(--brand-subtle);
+  border: 1px solid rgba(91, 124, 250, 0.2);
+  color: var(--brand);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}

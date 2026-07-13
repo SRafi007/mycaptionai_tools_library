@@ -513,7 +513,7 @@
   color: var(--brand-hover);
   text-decoration: underline;
 }
-.repos-grid-preview {
+.repos-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
@@ -1075,7 +1075,8 @@
     scroll-snap-align: start;
     height: 165px;
   }
-  .repos-grid {
+  .repos-grid,
+  .repo-grid {
     grid-template-columns: 1fr !important;
   }
   .repo-card-item {

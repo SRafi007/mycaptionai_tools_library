@@ -17,8 +17,8 @@ export async function getHomepageNews(): Promise<AiNews[]> {
     .select(NEWS_LIST_FIELDS)
     .eq("status", "published")
     .gte("published_at", fourteenDaysAgo.toISOString())
-    .order("total_score", { ascending: false })
     .order("published_at", { ascending: false })
+    .order("total_score", { ascending: false })
     .limit(20);
 
   if (error) {
@@ -52,8 +52,8 @@ export async function getHomepageNews(): Promise<AiNews[]> {
       .from("ai_resource_news")
       .select(NEWS_LIST_FIELDS)
       .eq("status", "published")
-      .order("total_score", { ascending: false })
       .order("published_at", { ascending: false })
+      .order("total_score", { ascending: false })
       .limit(20);
 
     for (const item of (fallbackData as unknown as AiNews[]) || []) {

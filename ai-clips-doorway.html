@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Clips — Doorway Component</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#07070c;
+    --bg-1:#101018;
+    --bg-2:#1b1b26;
+    --indigo:#6366f1;
+    --violet:#8b5cf6;
+    --pink:#ec4899;
+    --text-0:#f5f5f7;
+    --text-1:#9a9ba8;
+    --border:rgba(255,255,255,0.08);
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:var(--bg-0);
+    font-family:'Inter',sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    padding:24px;
+  }
+
+  /* ================= COMPONENT ================= */
+  .clips-portal{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+    max-width:720px;
+    text-decoration:none;
+    padding:clamp(36px, 6vw, 64px) clamp(20px, 5vw, 40px) 0;
+    border-radius:28px;
+    background:linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 70%);
+    border:1px solid var(--border);
+    overflow:hidden;
+  }
+
+  .clips-portal:focus-visible{
+    outline:2px solid var(--indigo);
+    outline-offset:4px;
+  }
+
+  /* ambient glow behind everything */
+  .clips-portal__glow{
+    position:absolute;
+    top:38%;
+    left:50%;
+    width:120%;
+    max-width:640px;
+    aspect-ratio:1/1;
+    transform:translate(-50%,-50%);
+    background:radial-gradient(circle, rgba(139,92,246,0.35) 0%, rgba(99,102,241,0.18) 35%, rgba(7,7,12,0) 70%);
+    filter:blur(10px);
+    z-index:0;
+    pointer-events:none;
+    transition:opacity .5s ease;
+  }
+
+  /* ---------- badge ---------- */
+  .clips-portal__badge{
+    position:relative;
+    z-index:2;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    font-size:12px;
+    font-weight:500;
+    color:var(--text-1);
+    background:var(--bg-2);
+    border:1px solid var(--border);
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:18px;
+  }
+  .clips-portal__badge-dot{
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:#22d3ee;
+    box-shadow:0 0 6px #22d3ee;
+  }
+
+  /* ---------- title ---------- */
+  .clips-portal__title{
+    position:relative;
+    z-index:2;
+    margin:0;
+    text-align:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:clamp(28px, 6vw, 44px);
+    line-height:1.08;
+    color:var(--text-0);
+    letter-spacing:-0.02em;
+  }
+  .clips-portal__title-accent{
+    display:block;
+    background:linear-gradient(90deg, var(--indigo), var(--violet) 55%, var(--pink));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+
+  .clips-portal__sub{
+    position:relative;
+    z-index:2;
+    margin:12px 0 22px;
+    text-align:center;
+    color:var(--text-1);
+    font-size:clamp(14px, 2.4vw, 16px);
+    max-width:34ch;
+  }
+
+  /* ---------- CTA ---------- */
+  .clips-portal__cta{
+    position:relative;
+    z-index:2;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    color:var(--text-0);
+    background:var(--bg-2);
+    border:1px solid rgba(139,92,246,0.4);
+    padding:11px 20px;
+    border-radius:999px;
+    margin-bottom:clamp(28px, 6vw, 48px);
+    transition:border-color .25s ease, background .25s ease;
+  }
+  .clips-portal__cta-arrow{
+    display:flex;
+    transition:transform .25s ease;
+  }
+  .clips-portal:hover .clips-portal__cta{
+    border-color:var(--indigo);
+    background:#22222f;
+  }
+  .clips-portal:hover .clips-portal__cta-arrow{
+    transform:translateX(3px);
+  }
+
+  /* ---------- phone fan ---------- */
+  .clips-portal__phones{
+    position:relative;
+    z-index:1;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    width:100%;
+  }
+
+  /* outer wrapper: handles fan angle + hover spread (transform-driven, no animation on this element) */
+  .clips-portal__phone{
+    position:relative;
+    transition:transform .4s cubic-bezier(.2,.8,.2,1);
+  }
+  .clips-portal__phone--left{ transform:rotate(-13deg) translate(14px, 6px); z-index:1; }
+  .clips-portal__phone--right{ transform:rotate(13deg) translate(-14px, 6px); z-index:1; }
+  .clips-portal__phone--center{ transform:translateY(-14px) scale(1.04); z-index:2; }
+
+  .clips-portal:hover .clips-portal__phone--left{ transform:rotate(-19deg) translate(20px, 2px); }
+  .clips-portal:hover .clips-portal__phone--right{ transform:rotate(19deg) translate(-20px, 2px); }
+  .clips-portal:hover .clips-portal__phone--center{ transform:translateY(-20px) scale(1.06); }
+
+  /* inner wrapper: handles the ambient float bounce, independent of the outer transform */
+  .clips-portal__float{
+    width:clamp(84px, 22vw, 132px);
+    aspect-ratio:9/19.5;
+    animation:float 6s ease-in-out infinite;
+  }
+  .clips-portal__phone--center .clips-portal__float{
+    width:clamp(96px, 25vw, 148px);
+  }
+  .clips-portal__phone--left .clips-portal__float{ animation-delay:.15s; }
+  .clips-portal__phone--right .clips-portal__float{ animation-delay:.3s; }
+
+  .clips-portal__frame{
+    width:100%;
+    height:100%;
+    background:var(--bg-1);
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:5px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.55);
+  }
+
+  .clips-portal__notch{
+    position:absolute;
+    top:8px;
+    left:50%;
+    transform:translateX(-50%);
+    width:16px;
+    height:4px;
+    border-radius:4px;
+    background:rgba(255,255,255,0.15);
+    z-index:3;
+  }
+
+  .clips-portal__screen{
+    position:relative;
+    width:100%;
+    height:100%;
+    border-radius:17px;
+    overflow:hidden;
+    background:var(--bg-2);
+  }
+
+  /* Placeholder media — REPLACE with your own <img> or <video>, see comment above <body> */
+  .clips-portal__media{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .clips-portal__media--placeholder{ display:flex; }
+  .clips-portal__media--a{ background:linear-gradient(160deg, #4338ca, #7c3aed); }
+  .clips-portal__media--b{ background:linear-gradient(160deg, #6d28d9, #db2777); }
+  .clips-portal__media--c{ background:linear-gradient(160deg, #4f46e5, #06b6d4); }
+
+  .clips-portal__play{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.18);
+    backdrop-filter:blur(2px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  /* ---------- threshold glow strip ---------- */
+  .clips-portal__threshold{
+    position:relative;
+    z-index:0;
+    width:80%;
+    max-width:420px;
+    height:26px;
+    margin-top:-14px;
+    background:radial-gradient(ellipse at center, rgba(139,92,246,0.55) 0%, rgba(99,102,241,0.0) 75%);
+    filter:blur(6px);
+  }
+
+  .clips-portal__floor{ width:100%; height:56px; }
+
+  @keyframes float{
+    0%, 100%{ transform:translateY(0); }
+    50%{ transform:translateY(-8px); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .clips-portal__float{ animation:none; }
+    .clips-portal__phone,
+    .clips-portal__cta,
+    .clips-portal__cta-arrow{ transition:none; }
+  }
+
+  @media (max-width:420px){
+    .clips-portal__phone--left{ transform:rotate(-10deg) translate(10px, 4px); }
+    .clips-portal__phone--right{ transform:rotate(10deg) translate(-10px, 4px); }
+    .clips-portal__phone--center{ transform:translateY(-10px) scale(1.02); }
+    .clips-portal:hover .clips-portal__phone--left{ transform:rotate(-14deg) translate(14px, 2px); }
+    .clips-portal:hover .clips-portal__phone--right{ transform:rotate(14deg) translate(-14px, 2px); }
+  }
+</style>
+</head>
+<body>
+
+<!--
+  HOW TO ADD YOUR OWN CLIPS
+  Each phone screen has a div.clips-portal__media--placeholder (the gradient block).
+  Replace that whole div with your own media, for example:
+
+    <img class="clips-portal__media" src="your-clip.gif" alt="AI generated clip preview">
+
+  or for video:
+
+    <video class="clips-portal__media" src="your-clip.mp4" autoplay muted loop playsinline></video>
+
+  Keep the surrounding .clips-portal__screen div — it clips corners and sizing for you.
+-->
+
+<a class="clips-portal" href="/ai-clips" aria-label="Open the AI Clips feed">
+
+  <div class="clips-portal__glow"></div>
+
+  <span class="clips-portal__badge">
+    <span class="clips-portal__badge-dot"></span>
+    New clips daily
+  </span>
+
+  <h2 class="clips-portal__title">Step inside<br><span class="clips-portal__title-accent">AI Clips</span></h2>
+  <p class="clips-portal__sub">Short videos, entirely made by AI.</p>
+
+  <span class="clips-portal__cta">
+    Open the feed
+    <span class="clips-portal__cta-arrow">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14M13 6l6 6-6 6"/>
+      </svg>
+    </span>
+  </span>
+
+  <div class="clips-portal__phones">
+
+    <div class="clips-portal__phone clips-portal__phone--left">
+      <div class="clips-portal__float">
+        <div class="clips-portal__frame">
+          <span class="clips-portal__notch"></span>
+          <div class="clips-portal__screen">
+            <div class="clips-portal__media clips-portal__media--placeholder clips-portal__media--a">
+              <span class="clips-portal__play">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="clips-portal__phone clips-portal__phone--center">
+      <div class="clips-portal__float">
+        <div class="clips-portal__frame">
+          <span class="clips-portal__notch"></span>
+          <div class="clips-portal__screen">
+            <div class="clips-portal__media clips-portal__media--placeholder clips-portal__media--b">
+              <span class="clips-portal__play">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="clips-portal__phone clips-portal__phone--right">
+      <div class="clips-portal__float">
+        <div class="clips-portal__frame">
+          <span class="clips-portal__notch"></span>
+          <div class="clips-portal__screen">
+            <div class="clips-portal__media clips-portal__media--placeholder clips-portal__media--c">
+              <span class="clips-portal__play">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="clips-portal__threshold"></div>
+  <div class="clips-portal__floor"></div>
+
+</a>
+
+</body>
+</html>
