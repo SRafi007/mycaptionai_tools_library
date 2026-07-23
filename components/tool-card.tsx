@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
-import { revalidatePath } from "next/cache";
+import { useState } from "react";
 import { Tool } from "@/types/tool";
-import { incrementToolUpvotes } from "@/lib/db/tools";
+import { upvoteToolAction } from "@/app/actions/upvote";
+import { showToast } from "@/components/ui/toast";
 import { ExternalLink } from "lucide-react";
 
 function getPricingBadgeClass(pricingType: Tool["pricing_type"]): string {
@@ -45,19 +48,39 @@ export default function ToolCard({
     showUpvoteButton = false,
     revalidatePaths = [],
 }: ToolCardProps) {
+    const [upvotes, setUpvotes] = useState(tool.upvotes || 0);
+    const [hasVoted, setHasVoted] = useState(false);
+    const [isUpvoting, setIsUpvoting] = useState(false);
+
     const hasVisualIcon = Boolean(tool.image_url || tool.icon_url);
     const visitUrl = tool.affiliate_url || tool.url;
     const visitRel = tool.affiliate_url ? "sponsored noopener noreferrer" : "noopener noreferrer";
     const hasDualActions = showUpvoteButton && showVisitButton && Boolean(visitUrl);
-    const pathsToRevalidate = revalidatePaths.filter((path, index, arr) => path.startsWith("/") && arr.indexOf(path) === index);
 
-    async function upvoteTool() {
-        "use server";
+    async function handleUpvote(e: React.MouseEvent) {
+        e.preventDefault();
+        e.stopPropagation();
 
-        await incrementToolUpvotes(tool.id);
-        revalidatePath(`/tools/${tool.slug}`);
-        for (const path of pathsToRevalidate) {
-            revalidatePath(path);
+        if (hasVoted || isUpvoting) return;
+
+        // Optimistic UI update
+        setUpvotes((prev) => prev + 1);
+        setHasVoted(true);
+        setIsUpvoting(true);
+        showToast(`Upvoted ${tool.name}!`, "success");
+
+        try {
+            const res = await upvoteToolAction(tool.id, tool.slug, revalidatePaths);
+            if (res.success && res.upvotes !== null) {
+                setUpvotes(res.upvotes);
+            }
+        } catch {
+            // Revert on error
+            setUpvotes((prev) => Math.max(0, prev - 1));
+            setHasVoted(false);
+            showToast("Failed to register upvote", "error");
+        } finally {
+            setIsUpvoting(false);
         }
     }
 
@@ -120,19 +143,23 @@ export default function ToolCard({
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <path d="M12 19V5M5 12l7-7 7 7" />
                         </svg>
-                        {tool.upvotes || 0}
+                        {upvotes}
                     </span>
                 </div>
                 <div className={`tool-card-actions${hasDualActions ? " tool-card-actions-dual" : ""}`}>
                     {showUpvoteButton && (
-                        <form action={upvoteTool}>
-                            <button type="submit" className="btn-outline btn-sm tool-upvote-btn">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                    <path d="M12 19V5M5 12l7-7 7 7" />
-                                </svg>
-                                Upvote
-                            </button>
-                        </form>
+                        <button
+                            type="button"
+                            onClick={handleUpvote}
+                            disabled={hasVoted || isUpvoting}
+                            className={`btn-outline btn-sm tool-upvote-btn ${hasVoted ? "voted" : ""}`}
+                            style={hasVoted ? { borderColor: "var(--brand)", color: "var(--brand)" } : undefined}
+                        >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill={hasVoted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5">
+                                <path d="M12 19V5M5 12l7-7 7 7" />
+                            </svg>
+                            {hasVoted ? "Voted" : "Upvote"}
+                        </button>
                     )}
                     {showVisitButton && visitUrl && (
                         <a href={visitUrl} target="_blank" rel={visitRel} className="btn-tag-style btn-secondary-tag btn-sm">

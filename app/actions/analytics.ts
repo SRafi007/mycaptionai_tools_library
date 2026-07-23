@@ -2,32 +2,19 @@
 
 import { headers } from "next/headers";
 import { createHash } from "crypto";
-import { trackEvent } from "@/lib/db/analytics";
+import {
+    upsertVisitor,
+    insertActivityLog,
+    insertSearchQueries,
+    isBotUserAgent,
+    extractUtmParams,
+} from "@/lib/db/analytics";
+import type { Activity } from "@/types/analytics";
 
-interface TrackBaseInput {
-    pathname: string;
-    query_string?: string;
-    visitor_id?: string;
-    session_id?: string;
-    referrer?: string;
-    language?: string;
-    timezone?: string;
-    page_title?: string;
-    screen?: string;
-}
-
-type TrackPageViewInput = TrackBaseInput;
-
-interface TrackUserActionInput extends TrackBaseInput {
-    action: string;
-    action_target?: string;
-    action_label?: string;
-    action_element?: string;
-}
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
 function detectDeviceType(userAgent: string): "desktop" | "mobile" | "tablet" | "bot" | "unknown" {
     const ua = userAgent.toLowerCase();
-
     if (!ua) return "unknown";
     if (/bot|crawler|spider|preview|slurp/.test(ua)) return "bot";
     if (/ipad|tablet/.test(ua)) return "tablet";
@@ -47,13 +34,26 @@ function hashValue(value: string | null | undefined, salt: string): string | nul
         .digest("hex");
 }
 
-function normalizeLanguage(inputLanguage: string | undefined, acceptLanguageHeader: string | null): string | null {
-    const fallback = acceptLanguageHeader?.split(",")[0]?.trim() || null;
-    if (!inputLanguage) return fallback;
-    return inputLanguage.trim() || fallback;
+// ─── Server-side batch processor ────────────────────────────────────────────
+
+interface ProcessBatchInput {
+    visitor_id: string;
+    session_id: string;
+    activities: Activity[];
+    referrer?: string;
+    language?: string;
+    timezone?: string;
+    screen?: string;
 }
 
-async function buildCommonEventFields(input: TrackBaseInput) {
+/**
+ * Processes a batch of activities from the server side.
+ * This is for any server-side tracking needs (e.g., SSR page tracking).
+ * The primary tracking path uses /api/track directly via sendBeacon.
+ */
+export async function processBatchedActivities(input: ProcessBatchInput): Promise<boolean> {
+    if (!input.visitor_id || !input.session_id || !input.activities.length) return false;
+
     const headerStore = await headers();
     const userAgent = headerStore.get("user-agent") || "";
     const forwardedFor = headerStore.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
@@ -62,11 +62,14 @@ async function buildCommonEventFields(input: TrackBaseInput) {
     const vercelCity = headerStore.get("x-vercel-ip-city");
     const refererHeader = headerStore.get("referer");
     const acceptLanguage = headerStore.get("accept-language");
+
     const deviceType = detectDeviceType(userAgent);
+    const hashSalt = process.env.ANALYTICS_HASH_SALT || process.env.SUPABASE_SERVICE_ROLE_KEY || "fallback-salt";
+    const uaHash = hashValue(userAgent, hashSalt);
+    const ipHash = hashValue(forwardedFor, hashSalt);
 
     const referrerValue = input.referrer || refererHeader || null;
     let referrerHost: string | null = null;
-
     try {
         if (referrerValue) {
             referrerHost = new URL(referrerValue).hostname || null;
@@ -75,61 +78,82 @@ async function buildCommonEventFields(input: TrackBaseInput) {
         referrerHost = null;
     }
 
-    const hashSalt = process.env.ANALYTICS_HASH_SALT || process.env.SUPABASE_SERVICE_ROLE_KEY || "fallback-salt";
-    const uaHash = hashValue(userAgent, hashSalt);
-    const ipHash = hashValue(forwardedFor, hashSalt);
+    const language = input.language || acceptLanguage?.split(",")[0]?.trim() || null;
+    const isBot = deviceType === "bot";
 
-    return {
-        path: normalizePath(input.pathname),
-        referer: referrerValue,
-        referrer_host: referrerHost,
+    // Derive session meta
+    const sorted = [...input.activities].sort((a, b) => a.ts - b.ts);
+    const pageViews = sorted.filter((a) => a.t === "pv");
+    const landingPage = pageViews[0]?.p ? normalizePath(pageViews[0].p) : normalizePath(sorted[0].p);
+    const exitPage = pageViews.length > 0
+        ? normalizePath(pageViews[pageViews.length - 1].p)
+        : normalizePath(sorted[sorted.length - 1].p);
+
+    // UTM from first page view
+    const firstPv = pageViews[0];
+    const utm = extractUtmParams(firstPv?.qs);
+
+    // Upsert visitor
+    const visitorOk = await upsertVisitor({
+        visitor_id: input.visitor_id,
+        user_agent_hash: uaHash,
+        ip_hash: ipHash,
         device_type: deviceType,
-        country: vercelCountry,
+        language,
+        timezone: input.timezone || null,
+        screen: input.screen || null,
         country_code: vercelCountry,
         region: vercelRegion,
         city: vercelCity,
-        language: normalizeLanguage(input.language, acceptLanguage),
-        session_id: input.session_id || null,
-        visitor_id: input.visitor_id || null,
-        is_bot: deviceType === "bot",
-        user_agent_hash: uaHash,
-        ip_hash: ipHash,
-        metadata: {
-            tz: input.timezone || null,
-            query_string: input.query_string || null,
-            page_title: input.page_title || null,
-            screen: input.screen || null,
-        },
-    };
-}
-
-export async function trackPageView(input: TrackPageViewInput) {
-    if (!input?.pathname) return false;
-
-    const commonFields = await buildCommonEventFields(input);
-
-    return trackEvent({
-        event_type: "page_view",
-        ...commonFields,
-        page_title: input.page_title || null,
+        referrer: referrerValue,
+        referrer_host: referrerHost,
+        utm_source: utm.utm_source,
+        utm_medium: utm.utm_medium,
+        utm_campaign: utm.utm_campaign,
+        landing_page: landingPage,
+        is_bot: isBot,
+        page_view_count: pageViews.length,
     });
-}
 
-export async function trackUserAction(input: TrackUserActionInput) {
-    if (!input?.pathname || !input?.action) return false;
+    if (!visitorOk) return false;
 
-    const commonFields = await buildCommonEventFields(input);
-
-    return trackEvent({
-        event_type: "user_action",
-        ...commonFields,
-        page_title: input.page_title || null,
-        action_name: input.action,
-        action_target: input.action_target || null,
-        metadata: {
-            ...commonFields.metadata,
-            action_label: input.action_label || null,
-            action_element: input.action_element || null,
-        },
+    // Insert activity log
+    const logOk = await insertActivityLog({
+        visitor_id: input.visitor_id,
+        session_id: input.session_id,
+        landing_page: landingPage,
+        exit_page: exitPage,
+        referrer: referrerValue,
+        referrer_host: referrerHost,
+        activities: input.activities,
+        activity_count: input.activities.length,
+        page_view_count: pageViews.length,
+        session_start: sorted.length > 0 ? new Date(sorted[0].ts).toISOString() : null,
+        session_end: sorted.length > 0 ? new Date(sorted[sorted.length - 1].ts).toISOString() : null,
+        duration_ms: sorted.length > 1 ? sorted[sorted.length - 1].ts - sorted[0].ts : 0,
+        utm_source: utm.utm_source,
+        utm_medium: utm.utm_medium,
+        utm_campaign: utm.utm_campaign,
+        utm_term: utm.utm_term,
+        utm_content: utm.utm_content,
+        is_bot: isBot,
     });
+
+    if (!logOk) return false;
+
+    // Extract and insert search queries
+    const searchQueries = input.activities
+        .filter((a) => a.t === "sr" && a.q)
+        .map((a) => ({
+            visitor_id: input.visitor_id,
+            session_id: input.session_id,
+            query: a.q!.trim().slice(0, 500),
+            path: a.p || null,
+        }));
+
+    if (searchQueries.length > 0) {
+        await insertSearchQueries(searchQueries);
+    }
+
+    return true;
 }

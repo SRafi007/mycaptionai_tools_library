@@ -10,9 +10,33 @@ interface Suggestion {
     pricing_type: string | null;
 }
 
+/**
+ * Highlights matching search query text inside a suggestion string.
+ */
+function HighlightMatch({ text, match }: { text: string; match: string }) {
+    if (!match.trim()) return <span>{text}</span>;
+
+    const regex = new RegExp(`(${match.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+    const parts = text.split(regex);
+
+    return (
+        <span>
+            {parts.map((part, idx) =>
+                regex.test(part) ? (
+                    <strong key={idx} style={{ color: "var(--brand)", fontWeight: 700 }}>
+                        {part}
+                    </strong>
+                ) : (
+                    <span key={idx}>{part}</span>
+                )
+            )}
+        </span>
+    );
+}
+
 export default function SearchBar({
     defaultValue = "",
-    placeholder = "Search...",
+    placeholder = "Search AI tools...",
 }: {
     defaultValue?: string;
     placeholder?: string;
@@ -26,12 +50,12 @@ export default function SearchBar({
     const inputRef = useRef<HTMLInputElement>(null);
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Keyboard shortcut: press / or Ctrl+K to focus
+    // Keyboard shortcut: press / or Ctrl+K to focus search input
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
             const isK = e.key === "k" || e.key === "K";
             const isCtrl = e.ctrlKey || e.metaKey;
-            
+
             if ((e.key === "/" || (isCtrl && isK)) && document.activeElement?.tagName !== "INPUT") {
                 e.preventDefault();
                 inputRef.current?.focus();
@@ -61,12 +85,19 @@ export default function SearchBar({
             } catch {
                 setSuggestions([]);
             }
-        }, 300);
+        }, 250);
     }, []);
 
     function handleChange(value: string) {
         setQuery(value);
         fetchSuggestions(value);
+    }
+
+    function handleClear() {
+        setQuery("");
+        setSuggestions([]);
+        setShowSuggestions(false);
+        inputRef.current?.focus();
     }
 
     function handleSubmit(e: React.FormEvent) {
@@ -101,23 +132,54 @@ export default function SearchBar({
             <form
                 onSubmit={handleSubmit}
                 className="search-bar-form-inspiration"
+                data-analytics-search="true"
+                role="search"
             >
                 <div className={`search-input-container-inspiration ${focused ? "search-container-focused" : ""}`}>
                     <input
                         ref={inputRef}
-                        type="text"
+                        type="search"
+                        name="q"
                         value={query}
                         onChange={(e) => handleChange(e.target.value)}
-                        onFocus={() => { setFocused(true); if (suggestions.length > 0) setShowSuggestions(true); }}
-                        onBlur={() => { setFocused(false); setTimeout(() => setShowSuggestions(false), 200); }}
+                        onFocus={() => {
+                            setFocused(true);
+                            if (suggestions.length > 0) setShowSuggestions(true);
+                        }}
+                        onBlur={() => {
+                            setFocused(false);
+                            setTimeout(() => setShowSuggestions(false), 200);
+                        }}
                         onKeyDown={handleKeyDown}
                         placeholder={placeholder}
                         className="search-input-inspiration"
                         autoComplete="off"
                     />
-                    <kbd className="search-kbd-inspiration">Ctrl + K</kbd>
+
+                    {query ? (
+                        <button
+                            type="button"
+                            onClick={handleClear}
+                            aria-label="Clear search query"
+                            style={{
+                                background: "none",
+                                border: "none",
+                                color: "var(--text-muted)",
+                                cursor: "pointer",
+                                padding: "0 8px",
+                                fontSize: "16px",
+                                lineHeight: 1,
+                                display: "flex",
+                                alignItems: "center",
+                            }}
+                        >
+                            ✕
+                        </button>
+                    ) : (
+                        <kbd className="search-kbd-inspiration">Ctrl + K</kbd>
+                    )}
                 </div>
-                
+
                 <button type="submit" className="search-submit-btn-inspiration" aria-label="Search">
                     <svg
                         width="18"
@@ -144,7 +206,9 @@ export default function SearchBar({
                             onMouseEnter={() => setSelectedIdx(i)}
                             onClick={() => setShowSuggestions(false)}
                         >
-                            <span className="search-suggestion-name">{s.name}</span>
+                            <span className="search-suggestion-name">
+                                <HighlightMatch text={s.name} match={query} />
+                            </span>
                             {s.pricing_type && (
                                 <span className="search-suggestion-badge">{s.pricing_type}</span>
                             )}

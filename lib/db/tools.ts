@@ -301,8 +301,8 @@ export async function getSearchSuggestions(query: string, limit: number = 5): Pr
 // ─── Log Search Query ───
 async function logSearch(query: string, resultsCount: number) {
     try {
-        await supabase.from("search_logs").insert({
-            query,
+        await supabase.from("search_queries").insert({
+            query: query.trim().slice(0, 500),
             results_count: resultsCount,
         });
     } catch {
@@ -360,8 +360,19 @@ export async function getAllToolSlugs(): Promise<string[]> {
     return (data || []).map((t) => t.slug);
 }
 
-// ─── Increment Tool Upvotes ───
+// ─── Increment Tool Upvotes (Atomic via RPC) ───
 export async function incrementToolUpvotes(toolId: string): Promise<number | null> {
+    // 1. Try atomic PostgreSQL function first
+    const { data: rpcData, error: rpcError } = await supabase.rpc(
+        "increment_tool_upvotes",
+        { tool_id: toolId }
+    );
+
+    if (!rpcError && typeof rpcData === "number") {
+        return rpcData;
+    }
+
+    // 2. Fallback: manual fetch + update if RPC is missing
     const { data, error } = await supabase
         .from("tools")
         .select("upvotes")

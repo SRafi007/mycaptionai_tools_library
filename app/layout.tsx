@@ -4,6 +4,7 @@ import { Space_Grotesk } from "next/font/google";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import PageViewTracker from "@/components/analytics/page-view-tracker";
+import { ToastContainer } from "@/components/ui/toast";
 import { SITE_NAME, SITE_URL, absoluteUrl, DEFAULT_OG_IMAGE_PATH } from "@/lib/seo";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import "./globals.css";
@@ -110,6 +111,7 @@ export default function RootLayout({
           </main>
           <Footer />
         </AuthProvider>
+        <ToastContainer />
         <PageViewTracker />
       </body>
     </html>

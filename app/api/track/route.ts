@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "crypto";
-import { trackEvent, isBotUserAgent, extractUtmParams } from "@/lib/db/analytics";
+import {
+    upsertVisitor,
+    insertActivityLog,
+    insertSearchQueries,
+    isBotUserAgent,
+    extractUtmParams,
+} from "@/lib/db/analytics";
+import type { Activity, FlushPayload } from "@/types/analytics";
 
 export const dynamic = "force-dynamic";
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
 function hashValue(value: string | null | undefined, salt: string): string | null {
     if (!value) return null;
@@ -25,15 +34,87 @@ function detectDeviceType(userAgent: string, isBot: boolean): "desktop" | "mobil
     return "desktop";
 }
 
+/**
+ * Derives session timing and page paths from the activities array.
+ */
+function deriveSessionMeta(activities: Activity[]) {
+    if (!activities.length) {
+        return {
+            landing_page: null,
+            exit_page: null,
+            session_start: null,
+            session_end: null,
+            duration_ms: null,
+            page_view_count: 0,
+        };
+    }
+
+    // Sort by timestamp ascending
+    const sorted = [...activities].sort((a, b) => a.ts - b.ts);
+
+    // Find page views for landing/exit
+    const pageViews = sorted.filter((a) => a.t === "pv");
+    const landingPage = pageViews.length > 0
+        ? normalizePath(pageViews[0].p)
+        : normalizePath(sorted[0].p);
+    const exitPage = pageViews.length > 0
+        ? normalizePath(pageViews[pageViews.length - 1].p)
+        : normalizePath(sorted[sorted.length - 1].p);
+
+    const sessionStartMs = sorted[0].ts;
+    const sessionEndMs = sorted[sorted.length - 1].ts;
+
+    return {
+        landing_page: landingPage,
+        exit_page: exitPage,
+        session_start: new Date(sessionStartMs).toISOString(),
+        session_end: new Date(sessionEndMs).toISOString(),
+        duration_ms: sessionEndMs - sessionStartMs,
+        page_view_count: pageViews.length,
+    };
+}
+
+/**
+ * Extracts search queries from activities for the search_queries table.
+ */
+function extractSearchQueries(
+    activities: Activity[],
+    visitorId: string | null,
+    sessionId: string | null,
+) {
+    return activities
+        .filter((a) => a.t === "sr" && a.q)
+        .map((a) => ({
+            visitor_id: visitorId,
+            session_id: sessionId,
+            query: a.q!.trim().slice(0, 500),
+            path: a.p || null,
+        }));
+}
+
+// ─── POST handler ───────────────────────────────────────────────────────────
+
 export async function POST(request: NextRequest) {
     try {
-        let payload: any;
+        // ── 1. Parse payload ──
+        let payload: FlushPayload;
         try {
             payload = await request.json();
         } catch {
             return new NextResponse(null, { status: 400 });
         }
 
+        // Validate required fields
+        if (!payload.visitor_id || !payload.session_id || !Array.isArray(payload.activities)) {
+            return new NextResponse(null, { status: 400 });
+        }
+
+        // Skip empty flushes
+        if (payload.activities.length === 0) {
+            return new NextResponse(null, { status: 204 });
+        }
+
+        // ── 2. Extract server-side context ──
         const headers = request.headers;
         const userAgent = headers.get("user-agent") || "";
         const forwardedFor = headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null;
@@ -43,21 +124,20 @@ export async function POST(request: NextRequest) {
         const refererHeader = headers.get("referer");
         const acceptLanguage = headers.get("accept-language");
 
-        // ─── 1. Bot Detection Heuristics ───
+        // ── 3. Bot detection ──
         const uaIsBot = isBotUserAgent(userAgent);
         const clientSaysIsBot = payload.is_webdriver === true || payload.is_headless === true;
-        
-        // Suspicious client signal: standard browser should send accept-language header
         const missingAcceptLanguage = !acceptLanguage && !uaIsBot;
         const suspiciousHeaders = missingAcceptLanguage && userAgent.length < 30;
-
         const isBot = uaIsBot || clientSaysIsBot || suspiciousHeaders;
 
-        // ─── 2. UTM Parameters Extraction ───
-        const queryString = payload.query_string || "";
-        const utm = extractUtmParams(queryString);
+        // ── 4. Hash sensitive values ──
+        const hashSalt = process.env.ANALYTICS_HASH_SALT || process.env.SUPABASE_SERVICE_ROLE_KEY || "fallback-salt";
+        const uaHash = hashValue(userAgent, hashSalt);
+        const ipHash = hashValue(forwardedFor, hashSalt);
+        const deviceType = detectDeviceType(userAgent, isBot);
 
-        // ─── 3. Geolocation & Referrer Formatting ───
+        // ── 5. Referrer ──
         const referrerValue = payload.referrer || refererHeader || null;
         let referrerHost: string | null = null;
         try {
@@ -68,53 +148,84 @@ export async function POST(request: NextRequest) {
             referrerHost = null;
         }
 
-        const hashSalt = process.env.ANALYTICS_HASH_SALT || process.env.SUPABASE_SERVICE_ROLE_KEY || "fallback-salt";
-        const uaHash = hashValue(userAgent, hashSalt);
-        const ipHash = hashValue(forwardedFor, hashSalt);
-        const deviceType = detectDeviceType(userAgent, isBot);
+        // ── 6. UTM from the first page view's query string ──
+        const firstPageView = payload.activities.find((a) => a.t === "pv");
+        const queryString = firstPageView?.qs || "";
+        const utm = extractUtmParams(queryString);
 
-        // Formulate DB record
-        const eventData = {
-            event_type: payload.event_type || "page_view",
-            path: normalizePath(payload.pathname),
-            referer: referrerValue,
-            referrer_host: referrerHost,
+        // ── 7. Language ──
+        const language = payload.language || acceptLanguage?.split(",")[0]?.trim() || null;
+
+        // ── 8. Derive session metadata ──
+        const sessionMeta = deriveSessionMeta(payload.activities);
+
+        // ── 9. Upsert visitor ──
+        const visitorOk = await upsertVisitor({
+            visitor_id: payload.visitor_id,
+            user_agent_hash: uaHash,
+            ip_hash: ipHash,
             device_type: deviceType,
-            country: vercelCountry,
+            language,
+            timezone: payload.timezone || null,
+            screen: payload.screen || null,
             country_code: vercelCountry,
             region: vercelRegion,
             city: vercelCity,
-            language: payload.language || acceptLanguage?.split(",")[0]?.trim() || null,
-            session_id: payload.session_id || null,
-            visitor_id: payload.visitor_id || null,
+            referrer: referrerValue,
+            referrer_host: referrerHost,
+            utm_source: utm.utm_source,
+            utm_medium: utm.utm_medium,
+            utm_campaign: utm.utm_campaign,
+            landing_page: sessionMeta.landing_page,
             is_bot: isBot,
-            user_agent_hash: uaHash,
-            ip_hash: ipHash,
-            page_title: payload.page_title || null,
-            action_name: payload.action_name || null,
-            action_target: payload.action_target || null,
+            page_view_count: sessionMeta.page_view_count,
+        });
+
+        if (!visitorOk) {
+            console.error("Failed to upsert visitor:", payload.visitor_id);
+            return new NextResponse(null, { status: 500 });
+        }
+
+        // ── 10. Insert activity log ──
+        const logOk = await insertActivityLog({
+            visitor_id: payload.visitor_id,
+            session_id: payload.session_id,
+            landing_page: sessionMeta.landing_page,
+            exit_page: sessionMeta.exit_page,
+            referrer: referrerValue,
+            referrer_host: referrerHost,
+            activities: payload.activities,
+            activity_count: payload.activities.length,
+            page_view_count: sessionMeta.page_view_count,
+            session_start: sessionMeta.session_start,
+            session_end: sessionMeta.session_end,
+            duration_ms: sessionMeta.duration_ms,
             utm_source: utm.utm_source,
             utm_medium: utm.utm_medium,
             utm_campaign: utm.utm_campaign,
             utm_term: utm.utm_term,
             utm_content: utm.utm_content,
-            metadata: {
-                tz: payload.timezone || null,
-                query_string: queryString || null,
-                screen: payload.screen || null,
-                action_label: payload.action_label || null,
-                action_element: payload.action_element || null,
-                is_webdriver: payload.is_webdriver || false,
-                is_headless: payload.is_headless || false,
-            },
-        };
+            is_bot: isBot,
+        });
 
-        const success = await trackEvent(eventData);
-        if (!success) {
+        if (!logOk) {
+            console.error("Failed to insert activity log for visitor:", payload.visitor_id);
             return new NextResponse(null, { status: 500 });
         }
 
-        // Return 204 No Content for high-performance tracking
+        // ── 11. Extract and insert search queries ──
+        const searchQueries = extractSearchQueries(
+            payload.activities,
+            payload.visitor_id,
+            payload.session_id,
+        );
+
+        if (searchQueries.length > 0) {
+            await insertSearchQueries(searchQueries);
+            // Non-critical: don't fail the whole request if search query insert fails
+        }
+
+        // Return 204 No Content
         return new NextResponse(null, { status: 204 });
     } catch (err) {
         console.error("Critical error in analytics tracking endpoint:", err);

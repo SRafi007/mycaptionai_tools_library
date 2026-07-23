@@ -9,6 +9,42 @@ export default function robots(): MetadataRoute.Robots {
                 allow: "/",
                 disallow: ["/admin/", "/api/"],
             },
+            // AI Search Engines & LLM Crawlers (GEO / AEO)
+            {
+                userAgent: "GPTBot",
+                allow: "/",
+                disallow: ["/admin/", "/api/"],
+            },
+            {
+                userAgent: "ChatGPT-User",
+                allow: "/",
+                disallow: ["/admin/", "/api/"],
+            },
+            {
+                userAgent: "ClaudeBot",
+                allow: "/",
+                disallow: ["/admin/", "/api/"],
+            },
+            {
+                userAgent: "PerplexityBot",
+                allow: "/",
+                disallow: ["/admin/", "/api/"],
+            },
+            {
+                userAgent: "Google-Extended",
+                allow: "/",
+                disallow: ["/admin/", "/api/"],
+            },
+            {
+                userAgent: "Applebot-Extended",
+                allow: "/",
+                disallow: ["/admin/", "/api/"],
+            },
+            {
+                userAgent: "Bytespider",
+                allow: "/",
+                disallow: ["/admin/", "/api/"],
+            },
         ],
         host: SITE_URL,
         sitemap: [

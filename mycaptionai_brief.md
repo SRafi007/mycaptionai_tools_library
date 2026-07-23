@@ -191,11 +191,23 @@ Form data sent via the contact page.
 Developer submission entries of AI tools awaiting approval.
 * **Fields**: `id` (UUID), `tool_name`, `official_url`, `submitter_email`, `submitted_by`, `relationship_to_company`, `description`, `note`, `company_contact`, `added` (Boolean), `abuse` (Boolean), `reviewed` (Boolean), `admin_notes`.
 
-#### 13. `analytics`
-Activity streams tracking clicks, pages, and search logs.
-* **Fields**: `id` (UUID), `user_id` (FK to auth.users), `event_type`, `tool_id` (FK to tools), `query`, `path`, `referer`, `device_type`, `country`, `metadata` (JSONB), `occurred_at`, `session_id`, `visitor_id`, `referrer_host`, `user_agent_hash`, `ip_hash`, `country_code`, `region`, `city`, `language`, `page_title`, `action_name`, `action_target`.
+#### 13. `visitors`
+Unique visitor identity and first-touch attribution.
+* **Fields**: `id` (UUID), `visitor_id` (Text, Unique — localStorage UUID), `first_seen_at`, `last_seen_at`, `total_sessions`, `total_pageviews`, `user_agent_hash`, `ip_hash`, `device_type`, `language`, `timezone`, `screen`, `country_code`, `region`, `city`, `first_referrer`, `first_referrer_host`, `first_utm_source`, `first_utm_medium`, `first_utm_campaign`, `first_landing_page`, `is_bot`.
 
-#### 14. `site_settings`
+#### 14. `activity_logs`
+Batched session activity log — one row per session flush with a JSONB activities array.
+* **Fields**: `id` (UUID), `visitor_id` (FK to visitors), `session_id` (UUID), `landing_page`, `exit_page`, `referrer`, `referrer_host`, `activities` (JSONB array), `activity_count`, `page_view_count`, `session_start`, `session_end`, `duration_ms`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, `is_bot`.
+
+#### 15. `page_stats`
+Per-page view/click aggregates, auto-updated via PostgreSQL trigger on `activity_logs`.
+* **Fields**: `path` (Text, Primary Key), `total_views`, `total_clicks`, `unique_visitors`, `first_viewed_at`, `last_viewed_at`.
+
+#### 16. `search_queries`
+First-class search query log for discovery and trending.
+* **Fields**: `id` (UUID), `visitor_id`, `session_id`, `query` (Text), `path`, `results_count`.
+
+#### 17. `site_settings`
 KeyValue configs controlling landing metrics dynamically.
 * **Fields**: `key` (Text, Primary Key), `value` (JSONB).
 

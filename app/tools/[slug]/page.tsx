@@ -14,6 +14,7 @@ import BackToTop from "@/components/back-to-top";
 import ToolDetailVisual from "@/components/tool-detail-visual";
 import StickyToolBar from "@/components/sticky-tool-bar";
 import ToolPreviewImage from "@/components/tool-preview-image";
+import DirectAnswerCard from "@/components/direct-answer-card";
 import Link from "next/link";
 import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH, localCanonicalUrl } from "@/lib/seo";
 
@@ -336,6 +337,23 @@ export default async function ToolDetailPage({ params }: PageProps) {
                         <div className="tool-stat-label">Last updated</div>
                         <div className="tool-stat-value">{lastUpdatedStr}</div>
                     </div>
+                </div>
+
+                <div style={{ marginTop: "24px" }}>
+                    <DirectAnswerCard
+                        title={`What is ${tool.name}?`}
+                        summary={`${tool.name} is a ${pricingLabel.toLowerCase()} AI tool ${
+                            primaryCategory ? `categorized under ${primaryCategory.name}` : "for AI workflows"
+                        }${tool.publisher ? ` published by ${tool.publisher}` : ""}. It is designed for ${
+                            useCaseList.length > 0 ? useCaseList.slice(0, 3).join(", ") : "AI productivity"
+                        }, with a rating score of ${(tool.rating_score || 0).toFixed(1)}/5.`}
+                        badgeLabel="Quick Answer"
+                        highlights={[
+                            { label: "Pricing Model", value: pricingLabel },
+                            { label: "Category", value: primaryCategory?.name || "AI Tool" },
+                            { label: "Rating", value: `${(tool.rating_score || 0).toFixed(1)} / 5.0` },
+                        ]}
+                    />
                 </div>
 
                 <nav className="tool-quicknav" aria-label="Jump to section">

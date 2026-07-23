@@ -30,17 +30,44 @@ Granular descriptors for tools (many-to-many).
 ### 4. `tool_categories` & `tool_tags`
 Join tables handling the many-to-many relationships.
 
-### 5. `analytics`
-Tracks user behavior and visits.
-- **event_type**: 'page_view', etc.
-- **metadata**: JSONB for flexible data storage (browser, device, country, etc.)
-- **user_id**: References `auth.users` if logged in.
-- **ip_address**: Stored for abuse prevention/geo-location (handle with care regarding privacy).
+### 5. `visitors`
+Identifies unique visitors with fingerprint data and first-touch attribution.
+- **visitor_id**: Text (Unique, from localStorage UUID)
+- **first_seen_at / last_seen_at**: Timestamps for lifecycle tracking
+- **total_sessions / total_pageviews**: Aggregated counters
+- **user_agent_hash / ip_hash**: Privacy-safe hashed identifiers
+- **device_type / language / timezone / screen**: Environment fingerprint
+- **country_code / region / city**: Geo from Vercel headers
+- **first_referrer / first_utm_***: First-touch attribution (never overwritten)
+- **is_bot**: Boolean flag
+
+### 6. `activity_logs`
+One row per session flush — all activities stored as a JSONB array.
+- **visitor_id**: References `visitors(visitor_id)`
+- **session_id**: UUID (from sessionStorage)
+- **landing_page / exit_page**: Derived from activities
+- **activities**: JSONB array of activity objects (page views, clicks, searches, form submits)
+- **activity_count / page_view_count**: Denormalized counts
+- **session_start / session_end / duration_ms**: Timing derived from activity timestamps
+- **utm_***: UTM parameters for this session
+- **is_bot**: Boolean flag
+
+### 7. `page_stats`
+Per-page aggregates auto-updated via a PostgreSQL trigger on `activity_logs`.
+- **path**: Text (Primary Key)
+- **total_views / total_clicks / unique_visitors**: Aggregate counters
+- **first_viewed_at / last_viewed_at**: Lifecycle timestamps
+
+### 8. `search_queries`
+First-class search query log for discovery and trending analysis.
+- **visitor_id / session_id**: Link to visitor and session
+- **query**: The search query text
+- **path**: Page where the search was performed
+- **results_count**: Optional result count
 
 ## Security (RLS)
 
 - **Public Access**: All content tables (`tools`, `categories`, `tags`) are readable by `anon` (public).
 - **Write Access**: Only `service_role` (Admin) can modify content.
-- **Analytics**:
-    - **Insert**: Publicly open (anyone can log a visit).
-    - **Select**: Restricted to Admins only.
+- **Analytics** (`visitors`, `activity_logs`, `page_stats`, `search_queries`):
+    - All operations restricted to `service_role` only (read + write).

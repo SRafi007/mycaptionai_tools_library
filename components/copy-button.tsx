@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { showToast } from "@/components/ui/toast";
 
 interface CopyButtonProps {
   textToCopy: string;
@@ -23,9 +24,11 @@ export default function CopyButton({
     try {
       await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
+      showToast("Copied to clipboard!", "info");
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy text: ", err);
+      showToast("Failed to copy text", "error");
     }
   };
 
