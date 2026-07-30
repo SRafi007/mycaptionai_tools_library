@@ -22,6 +22,7 @@ import HomePulseStrip from "@/components/home-pulse-strip";
 import HomeResourceHub from "@/components/home-resource-hub";
 import { getHomepageNews, getHomepageRepos } from "@/lib/db/resources";
 import HomeClipsDoor from "@/components/home-clips-door";
+import OurToolsSection from "@/components/our-tools-section";
 
 export const revalidate = 21600; // Cache for 6 hours
 
@@ -244,6 +245,8 @@ export default async function HomePage() {
       <HomeResourceHub news={homepageNews} repos={homepageRepos} />
 
       <HomeClipsDoor />
+
+      <OurToolsSection />
 
       {(ecosystems.length > 0 || playbooks.length > 0) && (
         <section className="section-padding ecosystem-section">

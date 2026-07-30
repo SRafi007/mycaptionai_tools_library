@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { AIClip, AIClipsResponse } from "@/types/ai-clip";
 import YoutubeReelPlayer from "./youtube-reel-player";
+import AIClipsSkeleton from "./ai-clips-skeleton";
 
 // Dynamic Lucide icon selection based on clip tags and category
 function getClipIcon(clip: AIClip) {
@@ -449,15 +450,9 @@ export default function AIClipsLayout() {
     };
 
     if (isLoading && clips.length === 0) {
-        return (
-            <div className="clips-root">
-                <div className="clips-loader">
-                    <div className="clips-spinner" />
-                    <p>Loading AI Clips Feed...</p>
-                </div>
-            </div>
-        );
+        return <AIClipsSkeleton />;
     }
+
 
     if (clips.length === 0) {
         return (

@@ -10,6 +10,7 @@ import UserAvatarMenu from "@/components/auth/user-avatar-menu";
 
 const navLinks = [
     { href: "/ai-tools", label: "AI Tools" },
+    { href: "/our-tools", label: "Our Tools" },
     { href: "/ai-clips", label: "AI Clips" },
     { href: "/prompts", label: "Prompts" },
     { href: "/playbooks", label: "Playbooks" },

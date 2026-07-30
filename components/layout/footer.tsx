@@ -5,6 +5,7 @@ const columns = [
     {
         title: "Discover",
         links: [
+            { href: "/our-tools", label: "Our Tools" },
             { href: "/ai-tools", label: "Browse All" },
             { href: "/top-rated", label: "Top Rated" },
             { href: "/search", label: "Search" },

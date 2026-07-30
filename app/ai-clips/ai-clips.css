@@ -938,3 +938,74 @@ body.clips-page-body .site-footer {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
 }
+
+/* ---------- Skeleton Loading Animation Styles ---------- */
+@keyframes clipsSkeletonPulse {
+  0% {
+    background-color: var(--bg-surface, #161925);
+    opacity: 0.6;
+  }
+  50% {
+    background-color: #232738;
+    opacity: 1;
+  }
+  100% {
+    background-color: var(--bg-surface, #161925);
+    opacity: 0.6;
+  }
+}
+
+.clips-skeleton-pulse {
+  animation: clipsSkeletonPulse 1.6s ease-in-out infinite;
+  background-color: var(--bg-surface, #161925);
+}
+
+.clips-skeleton-player {
+  position: relative;
+  background: var(--bg-secondary, #12141f);
+  border: 1px solid var(--border-subtle, #232636);
+  pointer-events: none;
+}
+
+.clips-skeleton-badge {
+  position: absolute;
+  top: 22px;
+  right: 14px;
+  width: 65px;
+  height: 20px;
+  border-radius: 6px;
+}
+
+.clips-skeleton-center-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+
+.clips-skeleton-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 40px 16px 18px;
+  background: linear-gradient(to top, rgba(10, 12, 20, 0.95) 20%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.clips-skeleton-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.clips-skeleton-text-line {
+  height: 12px;
+  border-radius: 4px;
+}
+

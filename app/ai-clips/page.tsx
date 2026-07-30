@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
 import AIClipsLayout from "@/components/ai-clips/ai-clips-layout";
+import AIClipsSkeleton from "@/components/ai-clips/ai-clips-skeleton";
 import { absoluteUrl } from "@/lib/seo";
 import "./ai-clips.css";
 
@@ -14,17 +15,9 @@ export const metadata: Metadata = {
 
 export default function AIClipsPage() {
     return (
-        <Suspense 
-            fallback={
-                <div className="clips-root">
-                    <div className="clips-loader">
-                        <div className="clips-spinner" />
-                        <p>Loading AI Clips Feed...</p>
-                    </div>
-                </div>
-            }
-        >
+        <Suspense fallback={<AIClipsSkeleton />}>
             <AIClipsLayout />
         </Suspense>
     );
 }
+
