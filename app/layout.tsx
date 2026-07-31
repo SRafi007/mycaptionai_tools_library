@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-page-custom-font */
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Space_Grotesk } from "next/font/google";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -75,9 +76,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-  }: Readonly<{
-    children: React.ReactNode;
-  }>) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -100,7 +101,14 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <head />
+      <head>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9962854078236913"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body className={`${spaceGrotesk.variable}`}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
