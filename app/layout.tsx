@@ -104,9 +104,9 @@ export default function RootLayout({
       <head>
         <Script
           async
+          strategy="afterInteractive"
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9962854078236913"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
         />
       </head>
       <body className={`${spaceGrotesk.variable}`}>
