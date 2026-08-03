@@ -83,8 +83,8 @@ export async function getHomepageRepos(): Promise<GithubRepo[]> {
     .eq("status", "published")
     .eq("is_archived", false)
     .eq("is_fork", false)
-    .order("total_score", { ascending: false })
-    .order("stars_count", { ascending: false })
+    .order("created_at_github", { ascending: false })
+    .order("pushed_at_github", { ascending: false })
     .limit(20);
 
   if (error) {
@@ -119,6 +119,26 @@ export async function getHomepageRepos(): Promise<GithubRepo[]> {
     ownerCount[owner] = (ownerCount[owner] || 0) + 1;
     for (const cat of categories) {
       categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+    }
+  }
+
+  // Fallback: if diversity filter yielded < 4 repos, fill remaining by pushed_at_github descending
+  if (selected.length < 4) {
+    const { data: fallbackData } = await supabase
+      .from("ai_resource_github_repos")
+      .select(REPO_LIST_FIELDS)
+      .eq("status", "published")
+      .eq("is_archived", false)
+      .eq("is_fork", false)
+      .order("pushed_at_github", { ascending: false })
+      .limit(20);
+
+    for (const repo of (fallbackData as unknown as GithubRepo[]) || []) {
+      if (selected.length >= 4) break;
+
+      if (selected.some((s) => s.id === repo.id)) continue;
+
+      selected.push(repo);
     }
   }
 

@@ -1,5 +1,7 @@
 import Parser from "rss-parser";
 import crypto from "node:crypto";
+import { Readability } from "@mozilla/readability";
+import { JSDOM } from "jsdom";
 import { supabaseAdmin } from "./supabase-admin";
 import { makeSlug } from "./slugify";
 import { scoreNews } from "./scoring";
@@ -12,6 +14,58 @@ function hashContent(input: string) {
 
 function stripHtml(input: string) {
   return input.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+async function fetchArticleContent(url: string) {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (compatible; MyCaptionAIBot/1.0; +https://www.mycaptionai.com)",
+      },
+    });
+
+    if (!response.ok) {
+      return {
+        text: null,
+        wordCount: 0,
+        status: "failed",
+      };
+    }
+
+    const html = await response.text();
+
+    const dom = new JSDOM(html, {
+      url,
+    });
+
+    const reader = new Readability(dom.window.document);
+    const article = reader.parse();
+
+    if (!article || !article.textContent) {
+      return {
+        text: null,
+        wordCount: 0,
+        status: "failed",
+      };
+    }
+
+    const text = stripHtml(article.textContent);
+
+    return {
+      text,
+      wordCount: text.split(/\s+/).filter(Boolean).length,
+      status: "completed",
+    };
+  } catch (error) {
+    console.error("Failed to fetch article:", url);
+
+    return {
+      text: null,
+      wordCount: 0,
+      status: "failed",
+    };
+  }
 }
 
 function extractTags(title: string, excerpt?: string | null) {
@@ -106,6 +160,36 @@ export async function syncAiNews() {
 
         const publishedAt = item.isoDate || item.pubDate || null;
 
+        const { data: existing, error: existingError } = await supabaseAdmin
+          .from("ai_resource_news")
+          .select("id, original_content, content_fetch_status, content_fetched_at, content_word_count")
+          .eq("original_url", originalUrl)
+          .maybeSingle();
+
+        if (existingError) {
+          totalFailed++;
+          console.error("News lookup failed:", title, existingError.message);
+          continue;
+        }
+
+        let article: {
+          text: string | null;
+          wordCount: number;
+          status: string;
+          fetchedAt?: string | null;
+        };
+
+        if (!existing || !existing.original_content) {
+          article = await fetchArticleContent(originalUrl);
+        } else {
+          article = {
+            text: existing.original_content,
+            wordCount: existing.content_word_count ?? 0,
+            status: existing.content_fetch_status ?? "completed",
+            fetchedAt: existing.content_fetched_at,
+          };
+        }
+
         const { topicTags, companyTags } = extractTags(title, excerpt);
 
         const scores = scoreNews({
@@ -130,6 +214,15 @@ export async function syncAiNews() {
           summary: excerpt,
           why_it_matters: null,
           image_url: null,
+          original_content: article.text,
+          content_fetch_status: article.status,
+          content_fetched_at:
+            article.fetchedAt !== undefined
+              ? article.fetchedAt
+              : article.status === "completed"
+                ? new Date().toISOString()
+                : null,
+          content_word_count: article.wordCount,
           content_hash: contentHash,
           company_tags: companyTags,
           topic_tags: topicTags,
@@ -144,18 +237,6 @@ export async function syncAiNews() {
           seo_title: `${title} | AI News | MyCaptionAI`.slice(0, 70),
           seo_description: `Read a short AI news summary from ${source.name}, including key topics and why it matters.`.slice(0, 160),
         };
-
-        const { data: existing, error: existingError } = await supabaseAdmin
-          .from("ai_resource_news")
-          .select("id")
-          .eq("original_url", originalUrl)
-          .maybeSingle();
-
-        if (existingError) {
-          totalFailed++;
-          console.error("News lookup failed:", title, existingError.message);
-          continue;
-        }
 
         const { error } = await supabaseAdmin
           .from("ai_resource_news")
