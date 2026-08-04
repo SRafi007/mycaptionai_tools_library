@@ -6,6 +6,7 @@ import { getNewsBySlug, getAllNewsSlugs, getRelatedNews } from "@/lib/db/resourc
 import Breadcrumbs from "@/components/breadcrumbs";
 import BackToTop from "@/components/back-to-top";
 import { SITE_NAME, absoluteUrl, DEFAULT_OG_IMAGE_PATH, localCanonicalUrl } from "@/lib/seo";
+import { renderMarkdown } from "@/lib/markdown";
 
 export const revalidate = 3600; // Cache for 1 hour
 
@@ -103,6 +104,8 @@ export default async function NewsDetailPage({ params }: NewsPageProps) {
     },
   };
 
+  const hasGeneratedContent = Boolean(item.generated_content && item.generated_content.trim());
+
   return (
     <>
       <script
@@ -113,7 +116,6 @@ export default async function NewsDetailPage({ params }: NewsPageProps) {
         {/* Breadcrumbs */}
         <Breadcrumbs
           items={[
-            { label: "Resources", href: "/resources" },
             { label: "AI News", href: "/resources/ai-news" },
             { label: item.title },
           ]}
@@ -125,7 +127,9 @@ export default async function NewsDetailPage({ params }: NewsPageProps) {
             <ArrowLeft size={13} /> Back to News Feed
           </Link>
 
-          <h1 className="resource-detail-title">{item.title}</h1>
+          {!hasGeneratedContent && (
+            <h1 className="resource-detail-title">{item.title}</h1>
+          )}
 
           <div className="resource-meta-row">
             <span className="prompt-card-tag">{item.source_name}</span>
@@ -152,16 +156,23 @@ export default async function NewsDetailPage({ params }: NewsPageProps) {
               </div>
             )}
 
-            {item.why_it_matters && (
+            {!hasGeneratedContent && item.why_it_matters && (
               <div className="news-why-matters">
                 <h3 className="why-matters-title">Why It Matters</h3>
                 <p className="why-matters-content">{item.why_it_matters}</p>
               </div>
             )}
 
-            <div className="news-body-section">
-              <p>{item.summary || item.excerpt || "No summary details available."}</p>
-            </div>
+            {hasGeneratedContent ? (
+              <div
+                className="news-body-section news-generated-content"
+                dangerouslySetInnerHTML={{ __html: renderMarkdown(item.generated_content || "") }}
+              />
+            ) : (
+              <div className="news-body-section">
+                <p>{item.summary || item.excerpt || "No summary details available."}</p>
+              </div>
+            )}
 
             <div className="resource-action-row">
               <a

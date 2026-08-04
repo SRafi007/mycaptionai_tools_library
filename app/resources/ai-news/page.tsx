@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { Newspaper, Calendar, ArrowUpRight, ArrowLeft } from "lucide-react";
+import { Newspaper, Calendar, ArrowUpRight } from "lucide-react";
 import { getNewsPaginated } from "@/lib/db/resources";
 import { absoluteUrl } from "@/lib/seo";
 
@@ -97,14 +97,11 @@ export default async function NewsListingPage(props: PageProps) {
       {/* Hero Header */}
       <section className="listing-hero-section dot-grid">
         <div className="container-main">
-          <Link href="/resources" className="back-link">
-            <ArrowLeft size={13} /> Back to Hub
-          </Link>
           <div className="listing-hero-content">
             <div className="hub-hero-pill">news feed</div>
             <h1 className="listing-title">Latest AI News</h1>
             <p className="listing-desc">
-              Curated official updates and announcements from the leading AI companies.
+              Curated official updates and announcements from leading AI companies and research teams.
             </p>
           </div>
         </div>

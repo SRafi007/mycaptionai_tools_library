@@ -10,6 +10,7 @@ export interface AiNews {
   excerpt?: string | null;
   summary?: string | null;
   why_it_matters?: string | null;
+  generated_content?: string | null;
   image_url?: string | null;
   content_hash?: string;
   company_tags?: string[];

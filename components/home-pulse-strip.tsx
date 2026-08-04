@@ -81,9 +81,14 @@ export default function HomePulseStrip({ news, repos }: HomePulseStripProps) {
               Fresh AI updates, open-source projects, and developer resources.
             </p>
           </div>
-          <Link href="/resources" className="pulse-view-all-link">
-            Hub Dashboard &rarr;
-          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <Link href="/resources/ai-news" className="pulse-view-all-link">
+              AI News &rarr;
+            </Link>
+            <Link href="/resources/github-repos" className="pulse-view-all-link">
+              Trendy Repos &rarr;
+            </Link>
+          </div>
         </div>
 
         {/* Pulse Grid / Horizontal Scroll */}

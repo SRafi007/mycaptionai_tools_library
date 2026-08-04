@@ -15,7 +15,8 @@ const navLinks = [
     { href: "/prompts", label: "Prompts" },
     { href: "/playbooks", label: "Playbooks" },
     { href: "/ecosystems", label: "Ecosystems" },
-    { href: "/resources", label: "Resources" },
+    { href: "/resources/ai-news", label: "AI News" },
+    { href: "/resources/github-repos", label: "Trendy Repos" },
     { href: "/blog", label: "Blog" },
 ];
 

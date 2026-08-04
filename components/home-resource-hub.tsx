@@ -108,12 +108,17 @@ export default function HomeResourceHub({ news, repos }: HomeResourceHubProps) {
         <header className="resource-hub-header" style={{ marginBottom: "32px" }}>
           <div>
             <h2 className="section-title" style={{ margin: 0 }}>
-              AI Resource Hub
+              Latest AI News & Trendy Repos
             </h2>
           </div>
-          <Link href="/resources" className="view-all">
-            View all resources &rarr;
-          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
+            <Link href="/resources/ai-news" className="view-all">
+              AI News &rarr;
+            </Link>
+            <Link href="/resources/github-repos" className="view-all">
+              Trendy Repos &rarr;
+            </Link>
+          </div>
         </header>
 
         {/* 2-Column Desktop Grid */}

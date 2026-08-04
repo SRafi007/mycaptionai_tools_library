@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { Star, GitFork, Calendar, BookOpen, ArrowLeft } from "lucide-react";
+import { Star, GitFork, Calendar, BookOpen } from "lucide-react";
 import { Github } from "@/components/icons/github";
 import { getReposPaginated } from "@/lib/db/resources";
 import { absoluteUrl } from "@/lib/seo";
@@ -16,7 +16,7 @@ interface PageProps {
 }
 
 export const metadata: Metadata = {
-  title: "Trending open-source AI Projects on GitHub | MyCaptionAI",
+  title: "Trendy AI Repositories & Open-source GitHub Projects | MyCaptionAI",
   description: "Explore top open-source AI repos, MCP servers, agents, LLMs, and libraries sorted by stars, forks, and trend scores.",
   alternates: {
     canonical: absoluteUrl("/resources/github-repos"),
@@ -103,14 +103,11 @@ export default async function GithubReposListingPage(props: PageProps) {
       {/* Hero Header */}
       <section className="listing-hero-section dot-grid">
         <div className="container-main">
-          <Link href="/resources" className="back-link">
-            <ArrowLeft size={13} /> Back to Hub
-          </Link>
           <div className="listing-hero-content">
             <div className="hub-hero-pill">open-source</div>
-            <h1 className="listing-title">Trending GitHub AI Repos</h1>
+            <h1 className="listing-title">Trendy AI Repositories</h1>
             <p className="listing-desc">
-              Discover top open-source AI projects, MCP servers, libraries, and tools.
+              Discover top open-source AI projects, MCP servers, libraries, and tools on GitHub.
             </p>
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { AiNews } from "@/types/resources";
 
@@ -113,7 +114,7 @@ export default function AINewsFeed({ news }: AINewsFeedProps) {
         headline: item.title || "",
         body: item.excerpt || item.summary || "",
         tags: tags.length > 0 ? tags : ["ai", "news"],
-        url: item.original_url || `/resources/ai-news/${item.slug || ""}`,
+        url: item.slug ? `/resources/ai-news/${item.slug}` : item.original_url || "#",
       };
     });
   }, [news]);
@@ -313,7 +314,9 @@ export default function AINewsFeed({ news }: AINewsFeedProps) {
 
             {/* Headline */}
             <h3 className="ai-wire-headline" style={{ color: "var(--text-primary)" }}>
-              {item.headline}
+              <Link href={item.url} style={{ color: "inherit", textDecoration: "none" }}>
+                {item.headline}
+              </Link>
             </h3>
 
             {/* Snippet body */}
@@ -329,16 +332,14 @@ export default function AINewsFeed({ news }: AINewsFeedProps) {
                 ))}
               </div>
 
-              <a
+              <Link
                 href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="ai-wire-read"
                 style={{ color: item.accent }}
               >
                 <span>Read</span>
                 <ArrowUpRight size={15} strokeWidth={2.5} />
-              </a>
+              </Link>
             </div>
           </article>
 

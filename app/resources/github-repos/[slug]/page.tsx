@@ -116,8 +116,7 @@ export default async function RepoDetailPage({ params }: RepoPageProps) {
         {/* Breadcrumbs */}
         <Breadcrumbs
           items={[
-            { label: "Resources", href: "/resources" },
-            { label: "GitHub Repos", href: "/resources/github-repos" },
+            { label: "Trendy Repos", href: "/resources/github-repos" },
             { label: `${repo.owner}/${repo.repo_name}` },
           ]}
           currentPath={`/resources/github-repos/${repo.slug}`}
