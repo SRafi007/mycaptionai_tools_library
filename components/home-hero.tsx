@@ -22,7 +22,6 @@ const parentGroupEmojis: Record<string, string> = {
   "AI Business Tools": "📈",
   "Automation Tools": "⚡",
   "AI Art Generators": "🖼️",
-  "Misc AI Tools": "🏷️",
 };
 
 export default function HomeHero({
@@ -32,12 +31,14 @@ export default function HomeHero({
   sponsoredTool
 }: HomeHeroProps) {
 
-  // Group categories by parent_group and sum their tool counts
+  // Group categories by parent_group and sum their tool counts (exclude misc)
   const groupsMap = new Map<string, number>();
   allCategories.forEach((cat) => {
     if (!cat.parent_group) return;
-    const current = groupsMap.get(cat.parent_group) || 0;
-    groupsMap.set(cat.parent_group, current + (cat.tool_count || 0));
+    const groupName = cat.parent_group.trim();
+    if (groupName.toLowerCase().includes("misc")) return;
+    const current = groupsMap.get(groupName) || 0;
+    groupsMap.set(groupName, current + (cat.tool_count || 0));
   });
 
   const parentGroups = Array.from(groupsMap.entries())

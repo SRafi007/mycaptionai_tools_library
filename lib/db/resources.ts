@@ -3,11 +3,11 @@ import { AiNews, GithubRepo } from "@/types/resources";
 
 const supabase = supabaseAdmin;
 
-export const NEWS_LIST_FIELDS = "id, source_id, title, slug, original_url, canonical_url, source_name, author, excerpt, image_url, company_tags, topic_tags, published_at, freshness_score, importance_score, quality_score, total_score, status, review_status";
+export const NEWS_LIST_FIELDS = "id, source_id, title, slug, original_url, canonical_url, source_name, author, excerpt, summary, generated_content, image_url, company_tags, topic_tags, published_at, freshness_score, importance_score, quality_score, total_score, status, review_status";
 
 export const REPO_LIST_FIELDS = "id, source_id, github_id, owner, repo_name, full_name, slug, description, html_url, clone_url, homepage_url, primary_language, license_name, topics, category_tags, stars_count, forks_count, watchers_count, open_issues_count, created_at_github, updated_at_github, pushed_at_github, trend_score, quality_score, total_score, is_archived, is_fork, status, review_status";
 
-// ─── Homepage News (with diversity filtering) ───
+// ─── Homepage News (with diversity filtering & non-empty generated_content) ───
 export async function getHomepageNews(): Promise<AiNews[]> {
   const fourteenDaysAgo = new Date();
   fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
@@ -16,6 +16,8 @@ export async function getHomepageNews(): Promise<AiNews[]> {
     .from("ai_resource_news")
     .select(NEWS_LIST_FIELDS)
     .eq("status", "published")
+    .not("generated_content", "is", null)
+    .neq("generated_content", "")
     .gte("published_at", fourteenDaysAgo.toISOString())
     .order("published_at", { ascending: false })
     .order("total_score", { ascending: false })
@@ -32,6 +34,7 @@ export async function getHomepageNews(): Promise<AiNews[]> {
 
   for (const item of (data as unknown as AiNews[]) || []) {
     if (selected.length >= 4) break;
+    if (!item.generated_content || !item.generated_content.trim()) continue;
 
     const source = item.source_name;
     const titleKey = `${item.title.toLowerCase().trim()}|${source.toLowerCase().trim()}`;
@@ -46,18 +49,21 @@ export async function getHomepageNews(): Promise<AiNews[]> {
     titles.add(titleKey);
   }
 
-  // Fallback: if not enough items in last 14 days, grab overall highest-scoring published news
+  // Fallback: if not enough items in last 14 days, grab overall highest-scoring published news with generated_content
   if (selected.length < 4) {
     const { data: fallbackData } = await supabase
       .from("ai_resource_news")
       .select(NEWS_LIST_FIELDS)
       .eq("status", "published")
+      .not("generated_content", "is", null)
+      .neq("generated_content", "")
       .order("published_at", { ascending: false })
       .order("total_score", { ascending: false })
       .limit(20);
 
     for (const item of (fallbackData as unknown as AiNews[]) || []) {
       if (selected.length >= 4) break;
+      if (!item.generated_content || !item.generated_content.trim()) continue;
 
       const source = item.source_name;
       const titleKey = `${item.title.toLowerCase().trim()}|${source.toLowerCase().trim()}`;
