@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 interface ContactSubmissionInput {
   name: string;
@@ -12,9 +12,10 @@ interface ContactSubmissionInput {
  * Inserts a new contact submission into the database
  */
 export async function createContactSubmission(input: ContactSubmissionInput) {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
+  // Contact forms are submitted through a validated server action. Use the
+  // server-only service-role client so an anonymous visitor is not required to
+  // have direct INSERT access to this internal table.
+  const { data, error } = await supabaseAdmin
     .from("contact_submissions")
     .insert([
       {
